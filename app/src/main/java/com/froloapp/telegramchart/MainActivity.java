@@ -1,0 +1,88 @@
+package com.froloapp.telegramchart;
+
+import android.content.res.AssetManager;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+
+
+import com.froloapp.telegramchart.widget.chartview.ChartData;
+import com.froloapp.telegramchart.widget.chartview.ChartSlider;
+import com.froloapp.telegramchart.widget.chartview.ChartView;
+import com.froloapp.telegramchart.widget.chartview.SimpleChartAdapter;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+public class MainActivity extends AppCompatActivity {
+
+    private ChartView chartView;
+    private ChartSlider chartSlider;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        chartView = findViewById(R.id.chartView);
+        chartSlider = findViewById(R.id.chartSlider);
+        loadChartData();
+    }
+
+    private void loadChartData() {
+        AssetManager assets = getAssets();
+        try {
+            InputStream is = assets.open("chart.json");
+            final int bufferSize = 1024;
+            final char[] buffer = new char[bufferSize];
+            final StringBuilder out = new StringBuilder();
+            Reader in = new InputStreamReader(is, "UTF-8");
+            for (; ; ) {
+                int rsz = in.read(buffer, 0, buffer.length);
+                if (rsz < 0)
+                    break;
+                out.append(buffer, 0, rsz);
+            }
+            String json = out.toString();
+            JSONArray array = new JSONArray(json);
+
+            Set<Long> axesSet = new LinkedHashSet<>();
+            List<ChartData> charts = new ArrayList<>();
+
+            for (int k = 0; k < array.length(); k++) {
+                JSONArray dataArray = array.getJSONArray(k);
+                Map<Long, Integer> map = new LinkedHashMap<>();
+                for (int i = 0; i < dataArray.length(); i++) {
+                    JSONObject obj = dataArray.getJSONObject(i);
+                    long timestamp = obj.getLong("timestamp");
+                    int value = obj.getInt("value");
+                    axesSet.add(timestamp);
+                    map.put(timestamp, value);
+                    //SimpleTimedAdapter.Timestamp t = new SimpleTimedAdapter.Timestamp(timestamp, )
+                }
+                ChartData chart = new SimpleChartAdapter.SimpleData(map);
+                charts.add(chart);
+            }
+
+            List<Long> axes = new ArrayList<>(axesSet);
+            SimpleChartAdapter adapter = new SimpleChartAdapter(axes, charts);
+            long startTimestamp = axes.get(0);
+            long endTimestamp = axes.get(axes.size() - 1);
+            chartView.setAdapter(adapter);
+            chartView.setStartTimestamp(startTimestamp);
+            chartView.setEndTimestamp(endTimestamp);
+
+            chartSlider.setStamps(0.1f, 0.3f);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+}

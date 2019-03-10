@@ -1,0 +1,62 @@
+[
+  [
+    {
+      "timestamp": 1,
+      "value": 750
+    },
+    {
+      "timestamp": 2,
+      "value": 850
+    },
+    {
+      "timestamp": 3,
+      "value": 970
+    },
+    {
+      "timestamp": 4,
+      "value": 1125
+    },
+    {
+      "timestamp": 5,
+      "value": 375
+    },
+    {
+      "timestamp": 6,
+      "value": 270
+    },
+    {
+      "timestamp": 7,
+      "value": 555
+    }
+  ],
+  [
+    {
+      "timestamp": 1,
+      "value": 350
+    },
+    {
+      "timestamp": 2,
+      "value": 370
+    },
+    {
+      "timestamp": 3,
+      "value": 570
+    },
+    {
+      "timestamp": 4,
+      "value": 1500
+    },
+    {
+      "timestamp": 5,
+      "value": 105
+    },
+    {
+      "timestamp": 6,
+      "value": 73
+    },
+    {
+      "timestamp": 7,
+      "value": 371
+    }
+  ]
+]
