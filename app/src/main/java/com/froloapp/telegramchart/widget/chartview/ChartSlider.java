@@ -42,8 +42,8 @@ public class ChartSlider extends View {
 
     private int scrollState = SCROLL_STATE_IDLE;
     private float xDragPos = 0f;
-    // If a finger touches a border in a place +- this radius then the order must be dragged
-    private float borderTouchR;
+    // If a finger touches a border in a place +- this threshold then the border must be under drag
+    private float touchBorderThreshold;
 
     private int overlayColor = Color.parseColor("#1791bbf2");
     private int frameColor = Color.parseColor("#39346eba");
@@ -70,7 +70,7 @@ public class ChartSlider extends View {
 
     private void init(Context context, AttributeSet attrs) {
         paint.setStrokeWidth(Utils.dpToPx(DEFAULT_FRAME_STROKE_WIDTH_IN_DP, context));
-        borderTouchR = Utils.dpToPx(10f, context);
+        touchBorderThreshold = Utils.dpToPx(10f, context);
     }
 
     private void log(String msg) {
@@ -112,18 +112,18 @@ public class ChartSlider extends View {
 
     private boolean isFrameLeftBorderTouched(float x) {
         float startStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * startXPosition;
-        return x > startStampPos - borderTouchR && x < startStampPos + borderTouchR;
+        return x > startStampPos - touchBorderThreshold && x < startStampPos + touchBorderThreshold;
     }
 
     private boolean isFrameRightBorderTouched(float x) {
         float endStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * stopXPosition;
-        return x > endStampPos - borderTouchR && x < endStampPos + borderTouchR;
+        return x > endStampPos - touchBorderThreshold && x < endStampPos + touchBorderThreshold;
     }
 
     private boolean isFrameTouched(float x) {
         float startStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * startXPosition;
         float endStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * stopXPosition;
-        return x > startStampPos + borderTouchR && x < endStampPos - borderTouchR;
+        return x > startStampPos + touchBorderThreshold && x < endStampPos - touchBorderThreshold;
     }
 
     @Override

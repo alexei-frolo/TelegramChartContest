@@ -1,6 +1,7 @@
 package com.froloapp.telegramchart.widget.chartview;
 
 import android.animation.ValueAnimator;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -9,6 +10,7 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
@@ -30,6 +32,7 @@ public class ChartView extends View implements ChartUI {
     private static final int DEFAULT_HEIGHT_IN_DP = 100;
     private static final int TIMESTAMP_BAR_HEIGHT_IN_DP = 20;
     private static final int DEFAULT_TEXT_HEIGHT_IN_SP = 15;
+    private static final int TOUCH_STAMP_THRESHOLD_IN_DP = 10;
 
     // paint tools
     private final Paint axisPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -38,6 +41,13 @@ public class ChartView extends View implements ChartUI {
     private final Rect stampTextBounds = new Rect(); // here we store bounds for stamp text height
     private final Path bufferPath = new Path(); // buffer path to avoid allocating to many paths for multiple charts
     private float axisStrokeWidth;
+
+    // touch
+    private float touchStampThreshold;
+    private float lastTouchedDownX = 0f;
+    private float lastTouchedDownY = 0f;
+    private ChartData clickedChart;
+    private long clickedStamp;
 
     // Adapter
     private ChartAdapter adapter;
@@ -94,6 +104,9 @@ public class ChartView extends View implements ChartUI {
     }
 
     private void init(Context context, AttributeSet attrs) {
+        // touch
+        touchStampThreshold = Utils.dpToPx(TOUCH_STAMP_THRESHOLD_IN_DP, context);
+
         // axis paint
         axisStrokeWidth = Utils.dpToPx(1f, context);
         axisPaint.setStrokeWidth(axisStrokeWidth);
@@ -130,12 +143,6 @@ public class ChartView extends View implements ChartUI {
 
     private void log(String msg) {
         Log.d("ChartView", msg);
-    }
-
-    private int getXCoor(long timestamp, long startTimestamp, long stopTimestamp) {
-        int contentWidth = getMeasuredWidth() - getPaddingLeft() - getPaddingRight();
-        float xRelative = ((float) (timestamp - startTimestamp)) / (stopTimestamp - startTimestamp);
-        return (int) (getPaddingLeft() + xRelative * contentWidth);
     }
 
     private int getXCoor(float p) {
@@ -327,5 +334,46 @@ public class ChartView extends View implements ChartUI {
     @Override
     public void hide(ChartData chart) {
         // hiding a chart here
+    }
+
+    /* *********************************
+     ********* TOUCH CALLBACKS *********
+     **********************************/
+
+    @SuppressLint("ClickableViewAccessibility")
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        int action = event.getAction();
+        switch (action) {
+            case MotionEvent.ACTION_DOWN: {
+                lastTouchedDownX = event.getX();
+                lastTouchedDownY = event.getY();
+                return true;
+            }
+            case MotionEvent.ACTION_MOVE: {
+                float x = event.getX();
+                float y = event.getY();
+                if (Math.abs(lastTouchedDownX - x) > TOUCH_STAMP_THRESHOLD_IN_DP
+                        || Math.abs(lastTouchedDownY - y) > TOUCH_STAMP_THRESHOLD_IN_DP)
+                    return false;
+                break;
+            }
+            case MotionEvent.ACTION_UP: {
+                float x = event.getX();
+                float y = event.getY();
+                if (Math.abs(lastTouchedDownX - x) < TOUCH_STAMP_THRESHOLD_IN_DP
+                    && Math.abs(lastTouchedDownY - y) < TOUCH_STAMP_THRESHOLD_IN_DP) {
+                    log("Clicked at (" + x + ", " + y + ")");
+                    // handle click here
+                    handleClick(x, y);
+                }
+                break;
+            }
+        }
+        return super.onTouchEvent(event);
+    }
+
+    private void handleClick(float x, float y) {
+
     }
 }
