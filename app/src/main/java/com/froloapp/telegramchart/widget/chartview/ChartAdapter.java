@@ -5,6 +5,15 @@ public interface ChartAdapter {
     int getChartCount();
     ChartData getChart(int index);
 
+    long getMinTimestamp();
+    long getMaxTimestamp();
+
+    long[] getTimestamps(float fromXPosition, float toXPosition);
+
+    boolean hasPreviousTimestamp(float beforeTimestampPosition);
+    long getPreviousTimestamp(float previousTimestampPosition);
+    float getPreviousTimestampPosition(float previousTimestampPosition);
+
     boolean hasNextTimestamp(float afterTimestampPosition);
     long getNextTimestamp(float afterTimestampPosition);
     float getNextTimestampPosition(float afterTimestampPosition);

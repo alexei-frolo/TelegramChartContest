@@ -69,7 +69,7 @@ public class ChartSlider extends View {
 
     private void init(Context context, AttributeSet attrs) {
         paint.setStrokeWidth(Utils.dpToPx(DEFAULT_FRAME_STROKE_WIDTH_IN_DP, context));
-        borderTouchR = Utils.dpToPx(5f, context);
+        borderTouchR = Utils.dpToPx(10f, context);
     }
 
     private void log(String msg) {
