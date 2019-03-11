@@ -15,4 +15,11 @@ public final class Utils {
     public static float pxToDp(float px, Context context){
         return px / ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT);
     }
+
+    public static float checkPercentage(float p) {
+        if (p < 0f || p > 1f) {
+            throw new IllegalArgumentException("Invalid percentage: " + p);
+        }
+        return p;
+    }
 }

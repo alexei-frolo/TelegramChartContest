@@ -82,8 +82,7 @@ public class MainActivity extends AppCompatActivity implements ChartSlider.OnScr
             List<Long> axes = new ArrayList<>(axesSet);
             adapter = new SimpleChartAdapter(axes, charts);
             chartView.setAdapter(adapter);
-            chartView.setStartTimestampRel(0.3f);
-            chartView.setEndTimestampRel(0.7f);
+            chartView.setXPositions(0.3f, 0.7f);
 
             chartSlider.setStamps(0.1f, 0.3f);
             chartSlider.setOnScrollListener(this);
@@ -95,7 +94,6 @@ public class MainActivity extends AppCompatActivity implements ChartSlider.OnScr
     @Override
     public void onScroll(ChartSlider slider, float startStampRel, float endStampRel) {
         log("Scrolled: startStampRel=" + startStampRel + ", endStampRel=" + endStampRel);
-        chartView.setStartTimestampRel(startStampRel);
-        chartView.setEndTimestampRel(endStampRel);
+        chartView.setXPositions(startStampRel, endStampRel);
     }
 }

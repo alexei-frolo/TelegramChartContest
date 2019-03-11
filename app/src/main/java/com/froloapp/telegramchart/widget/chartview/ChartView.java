@@ -20,7 +20,7 @@ import com.froloapp.telegramchart.widget.Utils;
  * In the foreground layer, the charts are drawn;
  * P.S. Rel = relative (e.g. percentage)
  */
-public class ChartView extends View {
+public class ChartView extends View implements ChartUI {
     // static
     private static final int DEFAULT_WIDTH_IN_DP = 200;
     private static final int DEFAULT_HEIGHT_IN_DP = 100;
@@ -37,22 +37,13 @@ public class ChartView extends View {
     // Adapter
     private ChartAdapter adapter;
 
-    private float startTimestampRel;
-    private float endTimestampRel;
+    // current start and stop positions on X Axis in percentage(from 0 to 1)
+    private float startXPercentage;
+    private float stopXPercentage;
 
-    private int minValue;
-    private int maxValue;
-
-    // Ghost background
-//    private float ghostAlpha = 0f;
-//
-//    private List<String> yGhostAxes = new ArrayList<>();
-//    private float yGhostAxisStep = 0f;
-//
-//    private List<String> xGhostAxes = new ArrayList<>();
-//    private float xGhostAxisStep = 0f;
-
-    // Phantom background
+    // current min and max value on Y axis
+    private int minYValue;
+    private int maxYValue;
 
     // Background (Axes)
     private float axisAlpha = 1f;
@@ -89,75 +80,31 @@ public class ChartView extends View {
         chartPaint.setStrokeWidth(Utils.dpToPx(2f, context));
     }
 
+
+    /* *********************************
+     ********** HELPER METHODS *********
+     ***********************************/
+
     private void log(String msg) {
         Log.d("ChartView", msg);
     }
 
-    /**
-     * Helper methods
-     */
-    private float checkTimestampRel(float timestampRel) {
-        if (timestampRel < 0f || timestampRel > 1f)
-            throw new IllegalArgumentException("Percentage value cannot be lower than 0 or bigger than 1. The given value is " + timestampRel);
-        return timestampRel;
+    private int getXCoor(long timestamp, long startTimestamp, long stopTimestamp) {
+        int contentWidth = getMeasuredWidth() - getPaddingLeft() - getPaddingRight();
+        float xRelative = ((float) (timestamp - startTimestamp)) / (stopTimestamp - startTimestamp);
+        return (int) (getPaddingLeft() + xRelative * contentWidth);
     }
 
-    private int getXCoor(float timestampRel, float startTimestampRel, float endTimestampRel) {
+    private int getXCoor(float p) {
         int contentWidth = getMeasuredWidth() - getPaddingLeft() - getPaddingRight();
-        float xRelative = ((float) (timestampRel - startTimestampRel)) / (endTimestampRel - startTimestampRel);
-        return (int) (getPaddingLeft() + xRelative * contentWidth);
+        float xRelative = ((float) (p - startXPercentage)) / (stopXPercentage - startXPercentage);
+        return (int) (getPaddingLeft() + p * contentWidth);
     }
 
     private int getYCoor(int value, int minValue, int maxValue) {
         int contentHeight = getMeasuredHeight() - getPaddingTop() - getPaddingBottom() - timestampBarHeight;
         float yRelative = ((float) value) / (maxValue - minValue);
         return (int) (getPaddingLeft() + yRelative * contentHeight);
-    }
-
-    public void setAdapter(ChartAdapter adapter) {
-        this.adapter = adapter;
-        resolveChartState();
-        invalidate();
-    }
-
-    public float getStartTimestampRel() {
-        return startTimestampRel;
-    }
-
-    public void setStartTimestampRel(float timestampRel) {
-        if (startTimestampRel != timestampRel) {
-            this.startTimestampRel = checkTimestampRel(timestampRel);
-            if (resolveChartState()) {
-                invalidate();
-            }
-        }
-    }
-
-    public void setEndTimestampRel(float timestampRel) {
-        if (endTimestampRel != timestampRel) {
-            this.endTimestampRel = checkTimestampRel(timestampRel);
-            if (resolveChartState()) {
-                invalidate();
-            }
-        }
-    }
-
-    public float getEndTimestampRel() {
-        return endTimestampRel;
-    }
-
-    public long getMinTimestamp() {
-        ChartAdapter adapter = this.adapter;
-        if (adapter != null) {
-            return adapter.getMinXAxis();
-        } else return 0;
-    }
-
-    public long getMaxTimestamp() {
-        ChartAdapter adapter = this.adapter;
-        if (adapter != null) {
-            return adapter.getMaxXAxis();
-        } else return 0;
     }
 
     @Override
@@ -176,16 +123,20 @@ public class ChartView extends View {
         yAxisStep = ((float) (getMeasuredHeight() - getPaddingTop() - getPaddingBottom())) / yAxisBarCount;
         ChartAdapter adapter = this.adapter;
         if (adapter != null) {
-            int minValue = adapter.getMinValue(startTimestampRel, endTimestampRel);
-            int maxValue = adapter.getMaxValue(startTimestampRel, endTimestampRel);
-            if (minValue != this.minValue || maxValue != this.maxValue) {
-                this.maxValue = maxValue;
-                this.minValue = minValue;
+            int minValue = adapter.getMinValue(startXPercentage, stopXPercentage);
+            int maxValue = adapter.getMaxValue(startXPercentage, stopXPercentage);
+            if (minValue != this.minYValue || maxValue != this.maxYValue) {
+                this.maxYValue = maxValue;
+                this.minYValue = minValue;
                 return true;
             }
         }
         return false;
     }
+
+    /* *******************************
+     ******** DRAWING METHODS ********
+     ****************************** */
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -193,10 +144,6 @@ public class ChartView extends View {
         drawBackground(canvas);
         drawForeground(canvas);
     }
-
-    /* *******************************
-     ******** DRAWING METHODS ********
-     ****************************** */
 
     /**
      * Draws phantom y axis bars and phantom x axis stamps;
@@ -227,25 +174,29 @@ public class ChartView extends View {
      */
     private void drawForeground(Canvas canvas) {
         log("Drawing foreground layer");
-        //int minValue = adapter.getMinValue(startTimestampRel, endTimestampRel);
-        //int maxValue = adapter.getMaxValue(startTimestampRel, endTimestampRel);
+        //int minYValue = adapter.getMinValue(startXPercentage, stopXPercentage);
+        //int maxYValue = adapter.getMaxValue(startXPercentage, stopXPercentage);
+        long minXAxis = adapter.getMinXAxis();
+        long maxXAxis = adapter.getMaxXAxis();
+        long diffXAxis = maxXAxis - minXAxis;
+
         for (int i = 0; i < adapter.getChartCount(); i++) {
             ChartData data = adapter.getChart(i);
-            long timestamp = adapter.getNextAxis(startTimestampRel);
-            float timestampRel = adapter.getNextAxisRel(startTimestampRel);
+            long timestamp = adapter.getNextAxis(startXPercentage);
+            float timestampRel = adapter.getNextAxisRel(startXPercentage);
             int value = data.getValue(timestamp);
 
             bufferPath.reset();
-            int xCoor = getXCoor(timestampRel, startTimestampRel, endTimestampRel);
-            int yCoor = getYCoor(value, minValue, maxValue);
+            int xCoor = getXCoor(timestampRel);
+            int yCoor = getYCoor(value, minYValue, maxYValue);
             bufferPath.moveTo(xCoor, yCoor);
 
             while (adapter.hasNextAxis(timestamp)) {
                 timestamp = adapter.getNextAxis(timestamp);
                 timestampRel = adapter.getNextAxisRel(timestampRel);
                 value = data.getValue(timestamp);
-                xCoor = getXCoor(timestampRel, startTimestampRel, endTimestampRel);
-                yCoor= getYCoor(value, minValue, maxValue);
+                xCoor = getXCoor(timestampRel);
+                yCoor= getYCoor(value, minYValue, maxYValue);
                 bufferPath.lineTo(xCoor, yCoor);
             }
 
@@ -253,5 +204,54 @@ public class ChartView extends View {
             chartPaint.setStyle(Paint.Style.STROKE);
             canvas.drawPath(bufferPath, chartPaint);
         }
+    }
+
+    /* *********************************
+     ********* PUBLIC INTERFACE ********
+     **********************************/
+
+    @Override
+    public void setAdapter(ChartAdapter adapter) {
+        this.adapter = adapter;
+        resolveChartState();
+        invalidate();
+    }
+
+    @Override
+    public void setStartXPosition(float p) {
+        if (startXPercentage != p) {
+            this.startXPercentage = p;
+            resolveChartState();
+            invalidate();
+        }
+    }
+
+    @Override
+    public void setStopXPosition(float p) {
+        if (stopXPercentage != p) {
+            this.stopXPercentage = p;
+            resolveChartState();
+            invalidate();
+        }
+    }
+
+    @Override
+    public void setXPositions(float start, float stop) {
+        if (this.startXPercentage != start || this.stopXPercentage != stop) {
+            this.startXPercentage = start;
+            this.stopXPercentage = stop;
+            resolveChartState();
+            invalidate();
+        }
+    }
+
+    @Override
+    public void show(ChartData chart) {
+        // showing a chart here
+    }
+
+    @Override
+    public void hide(ChartData chart) {
+        // hiding a chart here
     }
 }
