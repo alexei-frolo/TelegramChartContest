@@ -78,7 +78,7 @@ public class ChartView extends View implements ChartUI {
         axisPaint.setTextSize(textSize);
 
         // chart paint
-        chartPaint.setStrokeWidth(Utils.dpToPx(2f, context));
+        chartPaint.setStrokeWidth(Utils.dpToPx(1.5f, context));
     }
 
 
@@ -105,7 +105,7 @@ public class ChartView extends View implements ChartUI {
     private int getYCoor(int value, int minValue, int maxValue) {
         int contentHeight = getMeasuredHeight() - getPaddingTop() - getPaddingBottom();
         float yRelative = ((float) (value - minValue)) / (maxValue - minValue);
-        return (int) (getMeasuredHeight() - getTop() - yRelative * contentHeight);
+        return (int) (getMeasuredHeight() - getPaddingTop() - yRelative * contentHeight);
     }
 
     @Override
