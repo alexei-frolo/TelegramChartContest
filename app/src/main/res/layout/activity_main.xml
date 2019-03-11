@@ -7,17 +7,39 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical"
+    android:padding="10dp"
     tools:context=".MainActivity">
 
     <com.froloapp.telegramchart.widget.chartview.ChartView
-        android:layout_margin="10dp"
         android:background="#f1f1f1"
         android:id="@+id/chartView"
         android:layout_width="match_parent"
         android:layout_height="210dp"/>
 
+    <LinearLayout
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <CheckBox
+            android:text="First"
+            android:id="@+id/checkboxFirst"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:ignore="HardcodedText" />
+        <View
+            android:layout_width="20dp"
+            android:layout_height="1px"/>
+        <CheckBox
+            android:text="Second"
+            android:id="@+id/checkboxSecond"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:ignore="HardcodedText" />
+    </LinearLayout>
+
     <com.froloapp.telegramchart.widget.chartview.ChartSlider
-        android:layout_margin="10dp"
         android:background="#f1f1f1"
         android:id="@+id/chartSlider"
         android:layout_width="match_parent"

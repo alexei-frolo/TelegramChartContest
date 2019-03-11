@@ -138,10 +138,10 @@ public class ChartView extends View implements ChartUI {
         int minValue = adapter.getMinYValue(startXPercentage, stopXPercentage);
         int maxValue = adapter.getMaxXValue(startXPercentage, stopXPercentage);
         if (minValue != this.minYValue || maxValue != this.maxYValue) {
-            this.maxYValue = maxValue;
-            this.minYValue = minValue;
+            //this.maxYValue = maxValue;
+            //this.minYValue = minValue;
             // do phantom magic here
-            //invalidate();
+            invalidate();
         }
     }
 

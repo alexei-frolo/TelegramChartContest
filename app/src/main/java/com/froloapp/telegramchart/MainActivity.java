@@ -5,6 +5,8 @@ import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 
 
 import com.froloapp.telegramchart.widget.chartview.ChartAdapter;
@@ -31,6 +33,11 @@ public class MainActivity extends AppCompatActivity implements ChartSlider.OnScr
     private ChartView chartView;
     private ChartAdapter adapter;
     private ChartSlider chartSlider;
+    private CheckBox checkboxFirst;
+    private CheckBox checkboxSecond;
+
+    private ChartData firstChart;
+    private ChartData secondChart;
 
     private void log(String msg) {
         Log.d("MainActivity", msg);
@@ -42,6 +49,25 @@ public class MainActivity extends AppCompatActivity implements ChartSlider.OnScr
         setContentView(R.layout.activity_main);
         chartView = findViewById(R.id.chartView);
         chartSlider = findViewById(R.id.chartSlider);
+        checkboxFirst = findViewById(R.id.checkboxFirst);
+        checkboxSecond = findViewById(R.id.checkboxSecond);
+
+        checkboxFirst.setChecked(true);
+        checkboxFirst.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) chartView.show(firstChart);
+                else chartView.hide(firstChart);
+            }
+        });
+
+        checkboxSecond.setChecked(true);
+        checkboxSecond.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) chartView.show(secondChart);
+                else chartView.hide(secondChart);
+            }
+        });
+
         loadChartData();
     }
 
@@ -77,10 +103,18 @@ public class MainActivity extends AppCompatActivity implements ChartSlider.OnScr
                     //SimpleTimedAdapter.Timestamp t = new SimpleTimedAdapter.Timestamp(timestamp, )
                 }
                 int color;
-                if (k == 0) color = Color.RED;
-                else color = Color.BLUE;
+                if (k == 0) {
+                    color = Color.RED;
+                } else {
+                    color = Color.BLUE;
+                }
                 ChartData chart = new SimpleChartAdapter.SimpleData(map, color);
                 charts.add(chart);
+                if (k == 0) {
+                    firstChart = chart;
+                } else {
+                    secondChart = chart;
+                }
             }
 
             List<Long> axes = new ArrayList<>(axesSet);
