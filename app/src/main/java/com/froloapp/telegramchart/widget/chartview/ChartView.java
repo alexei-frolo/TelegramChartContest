@@ -1,5 +1,6 @@
 package com.froloapp.telegramchart.widget.chartview;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -9,6 +10,8 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Interpolator;
 
 import com.froloapp.telegramchart.widget.Utils;
 
@@ -44,8 +47,8 @@ public class ChartView extends View implements ChartUI {
     private float stopXPercentage;
 
     // current min and max value on Y axis
-    private int minYValue;
-    private int maxYValue;
+    private float minYValue;
+    private float maxYValue;
 
     // Background (Axes)
     private float axisAlpha = 1f;
@@ -57,6 +60,25 @@ public class ChartView extends View implements ChartUI {
     // x axes
     private int xAxisStampCount = 5;
     private float xAxisStep = 0f;
+
+    // Animators
+    private ValueAnimator minValueAnimator;
+    private ValueAnimator maxValueAnimator;
+
+    // Animator update listener
+    private final ValueAnimator.AnimatorUpdateListener minYValueUpdateListener = new ValueAnimator.AnimatorUpdateListener() {
+        @Override public void onAnimationUpdate(ValueAnimator animation) {
+            ChartView.this.minYValue = (float) animation.getAnimatedValue();
+            invalidate();
+        }
+    };
+    private final ValueAnimator.AnimatorUpdateListener maxYValueUpdateListener = new ValueAnimator.AnimatorUpdateListener() {
+        @Override public void onAnimationUpdate(ValueAnimator animation) {
+            ChartView.this.maxYValue = (float) animation.getAnimatedValue();
+            invalidate();
+        }
+    };
+    private final Interpolator yValueInterpolator = new AccelerateDecelerateInterpolator();
 
     public ChartView(Context context) {
         this(context, null);
@@ -90,6 +112,17 @@ public class ChartView extends View implements ChartUI {
         chartPaint.setStrokeWidth(Utils.dpToPx(1.5f, context));
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        // We need to cancel all animations here
+
+        ValueAnimator a1 = minValueAnimator;
+        if (a1 != null) a1.cancel();
+
+        ValueAnimator a2 = maxValueAnimator;
+        if (a2 != null) a2.cancel();
+    }
 
     /* *********************************
      ********** HELPER METHODS *********
@@ -111,9 +144,9 @@ public class ChartView extends View implements ChartUI {
         return (int) (getPaddingLeft() + xRelative * contentWidth);
     }
 
-    private int getYCoor(int value, int minValue, int maxValue) {
+    private int getYCoor(float value, float minValue, float maxValue) {
         int contentHeight = getMeasuredHeight() - getPaddingTop() - getPaddingBottom();
-        float yRelative = ((float) (value - minValue)) / (maxValue - minValue);
+        float yRelative = (value - minValue) / (maxValue - minValue);
         return (int) (getMeasuredHeight() - getPaddingTop() - yRelative * contentHeight);
     }
 
@@ -137,11 +170,27 @@ public class ChartView extends View implements ChartUI {
     private void checkIfMinOrMaxValueChanged() {
         int minValue = adapter.getMinYValue(startXPercentage, stopXPercentage);
         int maxValue = adapter.getMaxXValue(startXPercentage, stopXPercentage);
-        if (minValue != this.minYValue || maxValue != this.maxYValue) {
-            //this.maxYValue = maxValue;
-            //this.minYValue = minValue;
-            // do phantom magic here
-            invalidate();
+        // check min value
+        if (minValue != this.minYValue) {
+            ValueAnimator oldAnimator = minValueAnimator;
+            if (oldAnimator != null) oldAnimator.cancel();
+
+            ValueAnimator newAnimator = ValueAnimator.ofFloat(this.minYValue, minValue);
+            newAnimator.addUpdateListener(minYValueUpdateListener);
+            newAnimator.setInterpolator(yValueInterpolator);
+            minValueAnimator = newAnimator;
+            newAnimator.start();
+        }
+        // check max value
+        if (maxValue != this.maxYValue) {
+            ValueAnimator oldAnimator = maxValueAnimator;
+            if (oldAnimator != null) oldAnimator.cancel();
+
+            ValueAnimator newAnimator = ValueAnimator.ofFloat(this.maxYValue, maxValue);
+            newAnimator.addUpdateListener(maxYValueUpdateListener);
+            newAnimator.setInterpolator(yValueInterpolator);
+            maxValueAnimator = newAnimator;
+            newAnimator.start();
         }
     }
 
