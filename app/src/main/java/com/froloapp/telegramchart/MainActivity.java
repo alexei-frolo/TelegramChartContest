@@ -1,6 +1,7 @@
 package com.froloapp.telegramchart;
 
 import android.content.res.AssetManager;
+import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -75,7 +76,10 @@ public class MainActivity extends AppCompatActivity implements ChartSlider.OnScr
                     map.put(timestamp, value);
                     //SimpleTimedAdapter.Timestamp t = new SimpleTimedAdapter.Timestamp(timestamp, )
                 }
-                ChartData chart = new SimpleChartAdapter.SimpleData(map);
+                int color;
+                if (k == 0) color = Color.RED;
+                else color = Color.BLUE;
+                ChartData chart = new SimpleChartAdapter.SimpleData(map, color);
                 charts.add(chart);
             }
 

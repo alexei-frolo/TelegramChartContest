@@ -202,7 +202,7 @@ public class ChartView extends View implements ChartUI {
                 bufferPath.lineTo(xCoor, yCoor);
             }
 
-            chartPaint.setColor(Color.DKGRAY);
+            chartPaint.setColor(data.getColor());
             chartPaint.setStyle(Paint.Style.STROKE);
             canvas.drawPath(bufferPath, chartPaint);
         }

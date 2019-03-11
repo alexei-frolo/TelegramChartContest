@@ -20,9 +20,15 @@ public class SimpleChartAdapter implements ChartAdapter {
 
     public static class SimpleData implements ChartData {
         private Map<Long, Integer> data;
+        private int color;
 
-        public SimpleData(Map<Long, Integer> data) {
+        public SimpleData(Map<Long, Integer> data, int color) {
             this.data = data;
+            this.color = color;
+        }
+
+        @Override public int getColor() {
+            return color;
         }
 
         @Override public int getValue(long x) {
