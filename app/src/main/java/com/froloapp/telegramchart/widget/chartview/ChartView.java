@@ -124,25 +124,25 @@ public class ChartView extends View implements ChartUI {
         final int measuredWidth = resolveSizeAndState(defWidth, widthMeasureSpec, 0);
         final int measuredHeight = resolveSizeAndState(defHeight, heightMeasureSpec, 0);
         setMeasuredDimension(measuredWidth, measuredHeight);
+        // update important values here
         yAxisStep = ((float) (measuredHeight - getPaddingTop() - getPaddingBottom())) / yAxisBarCount;
-        resolveChartState();
+        minYValue = adapter.getMinYValue(startXPercentage, stopXPercentage);
+        maxYValue = adapter.getMaxXValue(startXPercentage, stopXPercentage);
     }
 
-    // return true if it needs to be invalidated, false - otherwise
-    private boolean resolveChartState() {
-        ChartAdapter adapter = this.adapter;
-        if (adapter != null) {
-            //int minValue = adapter.getMinYValue(startXPercentage, stopXPercentage);
-            //int maxValue = adapter.getMaxXValue(startXPercentage, stopXPercentage);
-            int minValue = adapter.getMinYValue(0, 1);
-            int maxValue = adapter.getMaxXValue(0, 1);
-            if (minValue != this.minYValue || maxValue != this.maxYValue) {
-                this.maxYValue = maxValue;
-                this.minYValue = minValue;
-                return true;
-            }
+    /**
+     * Checks if min or max value on Y axis has changed;
+     * If so then it does phantom magic with current Y axis bars;
+     */
+    private void checkIfMinOrMaxValueChanged() {
+        int minValue = adapter.getMinYValue(startXPercentage, stopXPercentage);
+        int maxValue = adapter.getMaxXValue(startXPercentage, stopXPercentage);
+        if (minValue != this.minYValue || maxValue != this.maxYValue) {
+            this.maxYValue = maxValue;
+            this.minYValue = minValue;
+            // do phantom magic here
+            //invalidate();
         }
-        return false;
     }
 
     /* *******************************
@@ -239,16 +239,14 @@ public class ChartView extends View implements ChartUI {
     @Override
     public void setAdapter(ChartAdapter adapter) {
         this.adapter = adapter;
-        resolveChartState();
-        invalidate();
+        checkIfMinOrMaxValueChanged();
     }
 
     @Override
     public void setStartXPosition(float p) {
         if (startXPercentage != p) {
             this.startXPercentage = p;
-            resolveChartState();
-            invalidate();
+            checkIfMinOrMaxValueChanged();
         }
     }
 
@@ -256,8 +254,7 @@ public class ChartView extends View implements ChartUI {
     public void setStopXPosition(float p) {
         if (stopXPercentage != p) {
             this.stopXPercentage = p;
-            resolveChartState();
-            invalidate();
+            checkIfMinOrMaxValueChanged();
         }
     }
 
@@ -266,8 +263,7 @@ public class ChartView extends View implements ChartUI {
         if (this.startXPercentage != start || this.stopXPercentage != stop) {
             this.startXPercentage = start;
             this.stopXPercentage = stop;
-            resolveChartState();
-            invalidate();
+            checkIfMinOrMaxValueChanged();
         }
     }
 
