@@ -161,6 +161,7 @@ public class ChartView extends View implements ChartUI {
         yAxisStep = ((float) (measuredHeight - getPaddingTop() - getPaddingBottom())) / yAxisBarCount;
         minYValue = adapter.getMinYValue(startXPercentage, stopXPercentage);
         maxYValue = adapter.getMaxXValue(startXPercentage, stopXPercentage);
+        log("View measured");
     }
 
     /**
@@ -172,6 +173,7 @@ public class ChartView extends View implements ChartUI {
         int maxValue = adapter.getMaxXValue(startXPercentage, stopXPercentage);
         // check min value
         if (minValue != this.minYValue) {
+            log("Min Y value changed. Starting animator");
             ValueAnimator oldAnimator = minValueAnimator;
             if (oldAnimator != null) oldAnimator.cancel();
 
@@ -183,6 +185,7 @@ public class ChartView extends View implements ChartUI {
         }
         // check max value
         if (maxValue != this.maxYValue) {
+            log("Max Y value changed. Starting animator");
             ValueAnimator oldAnimator = maxValueAnimator;
             if (oldAnimator != null) oldAnimator.cancel();
 
