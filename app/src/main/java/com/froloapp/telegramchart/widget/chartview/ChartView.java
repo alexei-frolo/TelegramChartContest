@@ -184,7 +184,7 @@ public class ChartView extends View implements ChartUI {
         float xCoor = getXCoor(timestampRel);
         String text = String.valueOf(timestamp);
         axisTextPaint.getTextBounds(text, 0, text.length(), stampTextBounds);
-        final float yCoor = getMeasuredHeight() - getPaddingTop() - stampTextBounds.height();
+        final float yCoor = getMeasuredHeight() - getPaddingTop() - stampTextBounds.height() / 2;
         canvas.drawText(text, xCoor, yCoor, axisTextPaint);
         while (adapter.hasNextTimestamp(timestamp)) {
             timestamp = adapter.getNextTimestamp(timestamp);
