@@ -32,7 +32,6 @@ public class ChartView extends View implements ChartUI {
     private final Path bufferPath = new Path(); // buffer path to avoid allocating to many paths for multiple charts
     private int axisColor = Color.GRAY; // color for y axis bars and x axis stamps
     private float textSize = 15f;
-    private int timestampBarHeight;
 
     // Adapter
     private ChartAdapter adapter;
@@ -98,13 +97,14 @@ public class ChartView extends View implements ChartUI {
     private int getXCoor(float p) {
         int contentWidth = getMeasuredWidth() - getPaddingLeft() - getPaddingRight();
         float xRelative = ((float) (p - startXPercentage)) / (stopXPercentage - startXPercentage);
-        return (int) (getPaddingLeft() + p * contentWidth);
+        return (int) (getPaddingLeft() + xRelative * contentWidth);
     }
 
     private int getYCoor(int value, int minValue, int maxValue) {
-        int contentHeight = getMeasuredHeight() - getPaddingTop() - getPaddingBottom() - timestampBarHeight;
-        float yRelative = ((float) value) / (maxValue - minValue);
-        return (int) (getPaddingLeft() + yRelative * contentHeight);
+        int contentHeight = getMeasuredHeight() - getPaddingTop() - getPaddingBottom();
+        float yRelativeReversed = ((float) value) / (maxValue - minValue);
+        float yRelative = -yRelativeReversed;
+        return (int) (getTop() + yRelative * contentHeight);
     }
 
     @Override
@@ -114,7 +114,6 @@ public class ChartView extends View implements ChartUI {
         final int measuredWidth = resolveSizeAndState(defWidth, widthMeasureSpec, 0);
         final int measuredHeight = resolveSizeAndState(defHeight, heightMeasureSpec, 0);
         setMeasuredDimension(measuredWidth, measuredHeight);
-        timestampBarHeight = TIMESTAMP_BAR_HEIGHT_IN_DP;
         resolveChartState();
     }
 
@@ -123,8 +122,8 @@ public class ChartView extends View implements ChartUI {
         yAxisStep = ((float) (getMeasuredHeight() - getPaddingTop() - getPaddingBottom())) / yAxisBarCount;
         ChartAdapter adapter = this.adapter;
         if (adapter != null) {
-            int minValue = adapter.getMinValue(startXPercentage, stopXPercentage);
-            int maxValue = adapter.getMaxValue(startXPercentage, stopXPercentage);
+            int minValue = adapter.getMinYValue(startXPercentage, stopXPercentage);
+            int maxValue = adapter.getMaxXValue(startXPercentage, stopXPercentage);
             if (minValue != this.minYValue || maxValue != this.maxYValue) {
                 this.maxYValue = maxValue;
                 this.minYValue = minValue;
@@ -176,8 +175,8 @@ public class ChartView extends View implements ChartUI {
         log("Drawing foreground layer");
         for (int i = 0; i < adapter.getChartCount(); i++) {
             ChartData data = adapter.getChart(i);
-            long timestamp = adapter.getNextAxis(startXPercentage);
-            float timestampRel = adapter.getNextAxisRel(startXPercentage);
+            long timestamp = adapter.getNextTimestamp(startXPercentage);
+            float timestampRel = adapter.getNextTimestampPosition(startXPercentage);
             int value = data.getValue(timestamp);
 
             bufferPath.reset();
@@ -185,9 +184,9 @@ public class ChartView extends View implements ChartUI {
             int yCoor = getYCoor(value, minYValue, maxYValue);
             bufferPath.moveTo(xCoor, yCoor);
 
-            while (adapter.hasNextAxis(timestamp)) {
-                timestamp = adapter.getNextAxis(timestamp);
-                timestampRel = adapter.getNextAxisRel(timestampRel);
+            while (adapter.hasNextTimestamp(timestamp)) {
+                timestamp = adapter.getNextTimestamp(timestamp);
+                timestampRel = adapter.getNextTimestampPosition(timestampRel);
                 value = data.getValue(timestamp);
                 xCoor = getXCoor(timestampRel);
                 yCoor= getYCoor(value, minYValue, maxYValue);

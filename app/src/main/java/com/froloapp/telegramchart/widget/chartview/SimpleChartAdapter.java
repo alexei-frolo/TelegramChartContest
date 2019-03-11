@@ -35,29 +35,19 @@ public class SimpleChartAdapter implements ChartAdapter {
     }
 
     @Override
-    public long getMinXAxis() {
-        return mixXAxis;
-    }
-
-    @Override
-    public long getMaxXAxis() {
-        return maxXAxis;
-    }
-
-    @Override
-    public boolean hasNextAxis(long afterXAxis) {
+    public boolean hasNextTimestamp(long afterXAxis) {
         int index = axes.indexOf(afterXAxis);
         return index >= 0 && index < axes.size() - 1;
     }
 
     @Override
-    public long getNextAxis(long afterXAxis) {
+    public long getNextTimestamp(long afterXAxis) {
         int index = axes.indexOf(afterXAxis);
         return axes.get(index + 1);
     }
 
     @Override
-    public int getMinValue(float fromXAxisRel, float toXAxisRel) {
+    public int getMinYValue(float fromXAxisRel, float toXAxisRel) {
         long startAxis = axes.get(0);
         long endAxis = axes.get(axes.size() - 1);
         long fromXAxis = (long) (startAxis + (endAxis - startAxis) * fromXAxisRel);
@@ -82,7 +72,7 @@ public class SimpleChartAdapter implements ChartAdapter {
     }
 
     @Override
-    public int getMaxValue(float fromXAxisRel, float toXAxisRel) {
+    public int getMaxXValue(float fromXAxisRel, float toXAxisRel) {
         long startAxis = axes.get(0);
         long endAxis = axes.get(axes.size() - 1);
         long fromXAxis = (long) (startAxis + (endAxis - startAxis) * fromXAxisRel);
@@ -107,12 +97,12 @@ public class SimpleChartAdapter implements ChartAdapter {
     }
 
     @Override
-    public boolean hasAxisAfter(float timestampRel) {
+    public boolean hasNextTimestamp(float timestampRel) {
         return timestampRel < 1f;
     }
 
     @Override
-    public long getNextAxis(float timestampRel) {
+    public long getNextTimestamp(float timestampRel) {
         long minAxis = axes.get(0);
         long maxAxis = axes.get(axes.size() - 1);
         long desiredAxis = (minAxis + (long) ((maxAxis - minAxis) * timestampRel)) + 1;
@@ -124,7 +114,7 @@ public class SimpleChartAdapter implements ChartAdapter {
     }
 
     @Override
-    public float getNextAxisRel(float timestampRel) {
+    public float getNextTimestampPosition(float timestampRel) {
         long minAxis = axes.get(0);
         long maxAxis = axes.get(axes.size() - 1);
         long desiredAxis = (minAxis + (long) ((maxAxis - minAxis) * timestampRel)) + 1;

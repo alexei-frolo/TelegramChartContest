@@ -2,19 +2,16 @@ package com.froloapp.telegramchart.widget.chartview;
 
 
 public interface ChartAdapter {
-    long getMinXAxis();
-    long getMaxXAxis();
-
-    boolean hasNextAxis(long afterXAxis);
-    long getNextAxis(long afterXAxis);
-
-    int getMinValue(float fromXAxisRel, float toXAxisRel);
-    int getMaxValue(float fromXAxisRel, float toXAxisRel);
-
-    boolean hasAxisAfter(float timestampRel);
-    long getNextAxis(float timestampRel);
-    float getNextAxisRel(float timestampRel);
-
     int getChartCount();
     ChartData getChart(int index);
+
+    boolean hasNextTimestamp(float afterTimestampPosition);
+    long getNextTimestamp(float afterTimestampPosition);
+    float getNextTimestampPosition(float afterTimestampPosition);
+
+    boolean hasNextTimestamp(long afterTimestamp);
+    long getNextTimestamp(long afterTimestamp);
+
+    int getMinYValue(float fromTimestampPosition, float toTimestampPosition);
+    int getMaxXValue(float fromTimestampPosition, float toTimestampPosition);
 }

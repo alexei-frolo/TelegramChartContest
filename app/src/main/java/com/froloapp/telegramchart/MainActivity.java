@@ -82,9 +82,9 @@ public class MainActivity extends AppCompatActivity implements ChartSlider.OnScr
             List<Long> axes = new ArrayList<>(axesSet);
             adapter = new SimpleChartAdapter(axes, charts);
             chartView.setAdapter(adapter);
-            chartView.setXPositions(0.3f, 0.7f);
+            chartView.setXPositions(0f, 1f);
 
-            chartSlider.setStamps(0.1f, 0.3f);
+            chartSlider.setStamps(0f, 1f);
             chartSlider.setOnScrollListener(this);
         } catch (Exception e) {
             throw new RuntimeException(e);
