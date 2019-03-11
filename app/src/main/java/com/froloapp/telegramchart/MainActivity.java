@@ -3,8 +3,10 @@ package com.froloapp.telegramchart;
 import android.content.res.AssetManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 
 
+import com.froloapp.telegramchart.widget.chartview.ChartAdapter;
 import com.froloapp.telegramchart.widget.chartview.ChartData;
 import com.froloapp.telegramchart.widget.chartview.ChartSlider;
 import com.froloapp.telegramchart.widget.chartview.ChartView;
@@ -23,10 +25,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ChartSlider.OnScrollListener {
 
     private ChartView chartView;
+    private ChartAdapter adapter;
     private ChartSlider chartSlider;
+
+    private void log(String msg) {
+        Log.d("MainActivity", msg);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,16 +80,22 @@ public class MainActivity extends AppCompatActivity {
             }
 
             List<Long> axes = new ArrayList<>(axesSet);
-            SimpleChartAdapter adapter = new SimpleChartAdapter(axes, charts);
-            long startTimestamp = axes.get(0);
-            long endTimestamp = axes.get(axes.size() - 1);
+            adapter = new SimpleChartAdapter(axes, charts);
             chartView.setAdapter(adapter);
-            chartView.setStartTimestamp(startTimestamp);
-            chartView.setEndTimestamp(endTimestamp);
+            chartView.setStartTimestampRel(0.3f);
+            chartView.setEndTimestampRel(0.7f);
 
             chartSlider.setStamps(0.1f, 0.3f);
+            chartSlider.setOnScrollListener(this);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public void onScroll(ChartSlider slider, float startStampRel, float endStampRel) {
+        log("Scrolled: startStampRel=" + startStampRel + ", endStampRel=" + endStampRel);
+        chartView.setStartTimestampRel(startStampRel);
+        chartView.setEndTimestampRel(endStampRel);
     }
 }

@@ -46,10 +46,12 @@ public class SimpleChartAdapter implements ChartAdapter {
 
     @Override
     public int getMinValue(long fromXAxis, long toXAxis) {
-        int fromXAxisIndex = axes.indexOf(fromXAxis);
         int min = Integer.MAX_VALUE;
-        for (int i = fromXAxisIndex; i < axes.size(); i++) {
+        for (int i = 0; i < axes.size(); i++) {
             long axis = axes.get(i);
+            if (axis < fromXAxis) {
+                continue;
+            }
             if (axis > toXAxis) {
                 break;
             }
@@ -65,10 +67,12 @@ public class SimpleChartAdapter implements ChartAdapter {
 
     @Override
     public int getMaxValue(long fromXAxis, long toXAxis) {
-        int fromXAxisIndex = axes.indexOf(fromXAxis);
         int max = Integer.MIN_VALUE;
-        for (int i = fromXAxisIndex; i < axes.size(); i++) {
+        for (int i = 0; i < axes.size(); i++) {
             long axis = axes.get(i);
+            if (axis < fromXAxis) {
+                continue;
+            }
             if (axis > toXAxis) {
                 break;
             }
@@ -92,6 +96,85 @@ public class SimpleChartAdapter implements ChartAdapter {
     public long getNextAxis(long afterXAxis) {
         int index = axes.indexOf(afterXAxis);
         return axes.get(index + 1);
+    }
+
+    @Override
+    public int getMinValue(float fromXAxisRel, float toXAxisRel) {
+        long startAxis = axes.get(0);
+        long endAxis = axes.get(axes.size() - 1);
+        long fromXAxis = (long) (startAxis + (endAxis - startAxis) * fromXAxisRel);
+        long toXAxis = (long) (startAxis + (endAxis - startAxis) * toXAxisRel);
+        int min = Integer.MAX_VALUE;
+        for (int i = 0; i < axes.size(); i++) {
+            long axis = axes.get(i);
+            if (axis < fromXAxis) {
+                continue;
+            }
+            if (axis > toXAxis) {
+                break;
+            }
+            for (ChartData data : charts) {
+                int value = data.getValue(axis);
+                if (value < min) {
+                    min = value;
+                }
+            }
+        }
+        return min;
+    }
+
+    @Override
+    public int getMaxValue(float fromXAxisRel, float toXAxisRel) {
+        long startAxis = axes.get(0);
+        long endAxis = axes.get(axes.size() - 1);
+        long fromXAxis = (long) (startAxis + (endAxis - startAxis) * fromXAxisRel);
+        long toXAxis = (long) (startAxis + (endAxis - startAxis) * toXAxisRel);
+        int max = Integer.MIN_VALUE;
+        for (int i = 0; i < axes.size(); i++) {
+            long axis = axes.get(i);
+            if (axis < fromXAxis) {
+                continue;
+            }
+            if (axis > toXAxis) {
+                break;
+            }
+            for (ChartData data : charts) {
+                int value = data.getValue(axis);
+                if (value > max) {
+                    max = value;
+                }
+            }
+        }
+        return max;
+    }
+
+    @Override
+    public boolean hasAxisAfter(float timestampRel) {
+        return timestampRel < 1f;
+    }
+
+    @Override
+    public long getNextAxis(float timestampRel) {
+        long minAxis = axes.get(0);
+        long maxAxis = axes.get(axes.size() - 1);
+        long desiredAxis = (minAxis + (long) ((maxAxis - minAxis) * timestampRel)) + 1;
+        for (long axis : axes) {
+            if (axis >= desiredAxis)
+                return axis;
+        }
+        throw new IllegalArgumentException("Invalid timestamp rel: " + timestampRel);
+    }
+
+    @Override
+    public float getNextAxisRel(float timestampRel) {
+        long minAxis = axes.get(0);
+        long maxAxis = axes.get(axes.size() - 1);
+        long desiredAxis = (minAxis + (long) ((maxAxis - minAxis) * timestampRel)) + 1;
+        for (long axis : axes) {
+            if (axis >= desiredAxis)
+                return ((float) (axis - minAxis)) / (maxAxis - minAxis);
+        }
+        throw new IllegalArgumentException("Invalid timestamp rel: " + timestampRel);
     }
 
     @Override

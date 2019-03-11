@@ -41,6 +41,8 @@ public class ChartSlider extends View {
 
     private int scrollState = SCROLL_STATE_IDLE;
     private float xDragPos = 0f;
+    // If a finder touches a border in a place +- this radius then the order must be dragged
+    private float borderTouchR;
 
     private int overlayColor = Color.parseColor("#1791bbf2");
     private int frameColor = Color.parseColor("#39346eba");
@@ -48,6 +50,9 @@ public class ChartSlider extends View {
 
     private float startStampRel = 0f;
     private float endStampRel = 0f;
+
+    // SCROLL LISTENER
+    private OnScrollListener listener;
 
     public ChartSlider(Context context) {
         this(context, null);
@@ -64,14 +69,26 @@ public class ChartSlider extends View {
 
     private void init(Context context, AttributeSet attrs) {
         paint.setStrokeWidth(Utils.dpToPx(DEFAULT_FRAME_STROKE_WIDTH_IN_DP, context));
+        borderTouchR = Utils.dpToPx(5f, context);
     }
 
     private void log(String msg) {
         Log.d("ChartSlider", msg);
     }
 
-    public static interface OnScrollListener {
-        void onScroll(ChartSlider slider);
+    public interface OnScrollListener {
+        void onScroll(ChartSlider slider, float startStampRel, float endStampRel);
+    }
+
+    public void setOnScrollListener(OnScrollListener listener) {
+        this.listener = listener;
+    }
+
+    private void dispatchScrolled(float startStampRel, float endStampRel) {
+        OnScrollListener l = listener;
+        if (l != null) {
+            l.onScroll(this, startStampRel, endStampRel);
+        }
     }
 
     public void setStamps(float startStampRel, float endStampRel) {
@@ -94,18 +111,18 @@ public class ChartSlider extends View {
 
     private boolean isFrameLeftBorderTouched(float x) {
         float startStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * startStampRel;
-        return x > startStampPos - 5 && x < startStampPos + 5;
+        return x > startStampPos - borderTouchR && x < startStampPos + borderTouchR;
     }
 
     private boolean isFrameRightBorderTouched(float x) {
         float endStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * endStampRel;
-        return x > endStampPos - 5 && x < endStampPos + 5;
+        return x > endStampPos - borderTouchR && x < endStampPos + borderTouchR;
     }
 
     private boolean isFrameTouched(float x) {
         float startStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * startStampRel;
         float endStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * endStampRel;
-        return x > startStampPos + 5 && x < endStampPos - 5;
+        return x > startStampPos + borderTouchR && x < endStampPos - borderTouchR;
     }
 
     @Override
@@ -161,6 +178,7 @@ public class ChartSlider extends View {
                     startStampRel = checkRel(startStampRel + frameScrollRel);
                     xDragPos = x;
                     log("Left border dragged");
+                    dispatchScrolled(startStampRel, endStampRel);
                     invalidate();
                     return true;
                 } else if (scrollState == SCROLL_STATE_RIGHT_BORDER_DRAGGING) {
@@ -169,6 +187,7 @@ public class ChartSlider extends View {
                     endStampRel = checkRel(endStampRel + frameScrollRel);
                     xDragPos = x;
                     log("Right border dragged");
+                    dispatchScrolled(startStampRel, endStampRel);
                     invalidate();
                     return true;
                 } else if (scrollState == SCROLL_STATE_FRAME_DRAGGING) {
@@ -183,6 +202,7 @@ public class ChartSlider extends View {
                     endStampRel = checkRel(endStampRel + frameScrollRel);
                     xDragPos = x;
                     log("Frame dragged");
+                    dispatchScrolled(startStampRel, endStampRel);
                     invalidate();
                     return true;
                 }
