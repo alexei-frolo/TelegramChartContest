@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements ChartSlider.OnScr
             chartView.setAdapter(adapter);
             chartView.setXPositions(0f, 1f);
 
-            chartSlider.setStamps(0f, 1f);
+            chartSlider.setPositions(0f, 1f);
             chartSlider.setOnScrollListener(this);
         } catch (Exception e) {
             throw new RuntimeException(e);

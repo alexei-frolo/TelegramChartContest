@@ -1,5 +1,6 @@
 package com.froloapp.telegramchart.widget.chartview;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -41,15 +42,15 @@ public class ChartSlider extends View {
 
     private int scrollState = SCROLL_STATE_IDLE;
     private float xDragPos = 0f;
-    // If a finder touches a border in a place +- this radius then the order must be dragged
+    // If a finger touches a border in a place +- this radius then the order must be dragged
     private float borderTouchR;
 
     private int overlayColor = Color.parseColor("#1791bbf2");
     private int frameColor = Color.parseColor("#39346eba");
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
-    private float startStampRel = 0f;
-    private float endStampRel = 0f;
+    private float startXPosition = 0f;
+    private float stopXPosition = 0f;
 
     // SCROLL LISTENER
     private OnScrollListener listener;
@@ -84,20 +85,20 @@ public class ChartSlider extends View {
         this.listener = listener;
     }
 
-    private void dispatchScrolled(float startStampRel, float endStampRel) {
+    private void dispatchScrolled(float startXPosition, float stopXPosition) {
         OnScrollListener l = listener;
         if (l != null) {
-            l.onScroll(this, startStampRel, endStampRel);
+            l.onScroll(this, startXPosition, stopXPosition);
         }
     }
 
-    public void setStamps(float startStampRel, float endStampRel) {
-        this.startStampRel = startStampRel;
-        this.endStampRel = endStampRel;
+    public void setPositions(float startXPosition, float stopXPosition) {
+        this.startXPosition = startXPosition;
+        this.stopXPosition = stopXPosition;
         invalidate();
     }
 
-    private float checkRel(float value) {
+    private float checkPosition(float value) {
         if (value < 0)
             return 0;
         if (value > 1)
@@ -110,18 +111,18 @@ public class ChartSlider extends View {
     }
 
     private boolean isFrameLeftBorderTouched(float x) {
-        float startStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * startStampRel;
+        float startStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * startXPosition;
         return x > startStampPos - borderTouchR && x < startStampPos + borderTouchR;
     }
 
     private boolean isFrameRightBorderTouched(float x) {
-        float endStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * endStampRel;
+        float endStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * stopXPosition;
         return x > endStampPos - borderTouchR && x < endStampPos + borderTouchR;
     }
 
     private boolean isFrameTouched(float x) {
-        float startStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * startStampRel;
-        float endStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * endStampRel;
+        float startStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * startXPosition;
+        float endStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * stopXPosition;
         return x > startStampPos + borderTouchR && x < endStampPos - borderTouchR;
     }
 
@@ -141,14 +142,15 @@ public class ChartSlider extends View {
 
         paint.setColor(overlayColor);
         paint.setStyle(Paint.Style.FILL);
-        canvas.drawRect(0, 0, width * startStampRel, height, paint);
-        canvas.drawRect(width * endStampRel, 0, width, height, paint);
+        canvas.drawRect(0, 0, width * startXPosition, height, paint);
+        canvas.drawRect(width * stopXPosition, 0, width, height, paint);
 
         paint.setColor(frameColor);
         paint.setStyle(Paint.Style.STROKE);
-        canvas.drawRect(width * startStampRel, 0, width * endStampRel, height, paint);
+        canvas.drawRect(width * startXPosition, 0, width * stopXPosition, height, paint);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         int action = event.getAction();
@@ -175,34 +177,34 @@ public class ChartSlider extends View {
                 if (scrollState == SCROLL_STATE_LEFT_BORDER_DRAGGING) {
                     float x = event.getX();
                     float frameScrollRel = (x - xDragPos) / getViewContentWith();
-                    startStampRel = checkRel(startStampRel + frameScrollRel);
+                    startXPosition = checkPosition(startXPosition + frameScrollRel);
                     xDragPos = x;
                     log("Left border dragged");
-                    dispatchScrolled(startStampRel, endStampRel);
+                    dispatchScrolled(startXPosition, stopXPosition);
                     invalidate();
                     return true;
                 } else if (scrollState == SCROLL_STATE_RIGHT_BORDER_DRAGGING) {
                     float x = event.getX();
                     float frameScrollRel = (x - xDragPos) / getViewContentWith();
-                    endStampRel = checkRel(endStampRel + frameScrollRel);
+                    stopXPosition = checkPosition(stopXPosition + frameScrollRel);
                     xDragPos = x;
                     log("Right border dragged");
-                    dispatchScrolled(startStampRel, endStampRel);
+                    dispatchScrolled(startXPosition, stopXPosition);
                     invalidate();
                     return true;
                 } else if (scrollState == SCROLL_STATE_FRAME_DRAGGING) {
                     float x = event.getX();
                     float frameScrollRel = (x - xDragPos) / getViewContentWith();
                     if (frameScrollRel > 0) {
-                        frameScrollRel = Math.min(1 - endStampRel, frameScrollRel);
+                        frameScrollRel = Math.min(1 - stopXPosition, frameScrollRel);
                     } else {
-                        frameScrollRel = -Math.min(startStampRel, -frameScrollRel);
+                        frameScrollRel = -Math.min(startXPosition, -frameScrollRel);
                     }
-                    startStampRel = checkRel(startStampRel + frameScrollRel);
-                    endStampRel = checkRel(endStampRel + frameScrollRel);
+                    startXPosition = checkPosition(startXPosition + frameScrollRel);
+                    stopXPosition = checkPosition(stopXPosition + frameScrollRel);
                     xDragPos = x;
                     log("Frame dragged");
-                    dispatchScrolled(startStampRel, endStampRel);
+                    dispatchScrolled(startXPosition, stopXPosition);
                     invalidate();
                     return true;
                 }
