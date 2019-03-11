@@ -299,6 +299,7 @@ public class ChartView extends View implements ChartUI {
     public void setAdapter(ChartAdapter adapter) {
         this.adapter = adapter;
         checkIfMinOrMaxValueChanged();
+        invalidate();
     }
 
     @Override
@@ -306,6 +307,7 @@ public class ChartView extends View implements ChartUI {
         if (startXPercentage != p) {
             this.startXPercentage = p;
             checkIfMinOrMaxValueChanged();
+            invalidate();
         }
     }
 
@@ -314,6 +316,7 @@ public class ChartView extends View implements ChartUI {
         if (stopXPercentage != p) {
             this.stopXPercentage = p;
             checkIfMinOrMaxValueChanged();
+            invalidate();
         }
     }
 
@@ -323,6 +326,7 @@ public class ChartView extends View implements ChartUI {
             this.startXPercentage = start;
             this.stopXPercentage = stop;
             checkIfMinOrMaxValueChanged();
+            invalidate();
         }
     }
 
