@@ -45,48 +45,6 @@ public class SimpleChartAdapter implements ChartAdapter {
     }
 
     @Override
-    public int getMinValue(long fromXAxis, long toXAxis) {
-        int min = Integer.MAX_VALUE;
-        for (int i = 0; i < axes.size(); i++) {
-            long axis = axes.get(i);
-            if (axis < fromXAxis) {
-                continue;
-            }
-            if (axis > toXAxis) {
-                break;
-            }
-            for (ChartData data : charts) {
-                int value = data.getValue(axis);
-                if (value < min) {
-                    min = value;
-                }
-            }
-        }
-        return min;
-    }
-
-    @Override
-    public int getMaxValue(long fromXAxis, long toXAxis) {
-        int max = Integer.MIN_VALUE;
-        for (int i = 0; i < axes.size(); i++) {
-            long axis = axes.get(i);
-            if (axis < fromXAxis) {
-                continue;
-            }
-            if (axis > toXAxis) {
-                break;
-            }
-            for (ChartData data : charts) {
-                int value = data.getValue(axis);
-                if (value > max) {
-                    max = value;
-                }
-            }
-        }
-        return max;
-    }
-
-    @Override
     public boolean hasNextAxis(long afterXAxis) {
         int index = axes.indexOf(afterXAxis);
         return index >= 0 && index < axes.size() - 1;

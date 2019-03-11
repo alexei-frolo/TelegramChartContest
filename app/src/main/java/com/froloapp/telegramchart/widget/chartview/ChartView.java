@@ -174,12 +174,6 @@ public class ChartView extends View implements ChartUI {
      */
     private void drawForeground(Canvas canvas) {
         log("Drawing foreground layer");
-        //int minYValue = adapter.getMinValue(startXPercentage, stopXPercentage);
-        //int maxYValue = adapter.getMaxValue(startXPercentage, stopXPercentage);
-        long minXAxis = adapter.getMinXAxis();
-        long maxXAxis = adapter.getMaxXAxis();
-        long diffXAxis = maxXAxis - minXAxis;
-
         for (int i = 0; i < adapter.getChartCount(); i++) {
             ChartData data = adapter.getChart(i);
             long timestamp = adapter.getNextAxis(startXPercentage);
