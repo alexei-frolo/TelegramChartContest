@@ -3,6 +3,7 @@ package com.froloapp.telegramchart.widget;
 
 import android.content.Context;
 import android.util.DisplayMetrics;
+import android.util.TypedValue;
 
 public final class Utils {
     private Utils() {
@@ -14,6 +15,10 @@ public final class Utils {
 
     public static float pxToDp(float px, Context context){
         return px / ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT);
+    }
+
+    public static int spToPx(float sp, Context context) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, context.getResources().getDisplayMetrics());
     }
 
     public static float checkPercentage(float p) {

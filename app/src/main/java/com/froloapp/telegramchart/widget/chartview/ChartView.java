@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -25,14 +26,15 @@ public class ChartView extends View implements ChartUI {
     private static final int DEFAULT_WIDTH_IN_DP = 200;
     private static final int DEFAULT_HEIGHT_IN_DP = 100;
     private static final int TIMESTAMP_BAR_HEIGHT_IN_DP = 20;
+    private static final int DEFAULT_TEXT_HEIGHT_IN_SP = 15;
 
     // paint tools
     private final Paint axisPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint axisTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint chartPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Rect stampTextBounds = new Rect(); // here we store bounds for stamp text height
     private final Path bufferPath = new Path(); // buffer path to avoid allocating to many paths for multiple charts
-    private int axisColor = Color.GRAY; // color for y axis bars and x axis stamps
     private float axisStrokeWidth;
-    private float textSize = 15f;
 
     // Adapter
     private ChartAdapter adapter;
@@ -74,8 +76,15 @@ public class ChartView extends View implements ChartUI {
         axisStrokeWidth = Utils.dpToPx(1f, context);
         axisPaint.setStrokeWidth(axisStrokeWidth);
         axisPaint.setStyle(Paint.Style.STROKE);
-        axisPaint.setColor(axisColor);
-        axisPaint.setTextSize(textSize);
+        // color for y axis bars and x axis stamps
+        axisPaint.setColor(Color.GRAY);
+
+        // axis text paint
+        float textSize = Utils.spToPx(DEFAULT_TEXT_HEIGHT_IN_SP, context);
+        axisTextPaint.setStyle(Paint.Style.FILL);
+        axisTextPaint.setStrokeWidth(axisStrokeWidth);
+        axisTextPaint.setColor(Color.GRAY);
+        axisTextPaint.setTextSize(textSize);
 
         // chart paint
         chartPaint.setStrokeWidth(Utils.dpToPx(1.5f, context));
@@ -167,6 +176,21 @@ public class ChartView extends View implements ChartUI {
         for (int i = 0; i < yAxisBarCount; i++) {
             float y = getMeasuredHeight() - getPaddingBottom() - i * yAxisStep - (axisStrokeWidth / 2 + 1);
             canvas.drawLine(startX, y, stopX, y, axisPaint);
+        }
+
+        // drawing timestamp texts
+        long timestamp = adapter.getMinTimestamp();
+        float timestampRel = 0f;
+        float xCoor = getXCoor(timestampRel);
+        String text = String.valueOf(timestamp);
+        axisTextPaint.getTextBounds(text, 0, text.length(), stampTextBounds);
+        final float yCoor = getMeasuredHeight() - getPaddingTop() - stampTextBounds.height();
+        canvas.drawText(text, xCoor, yCoor, axisTextPaint);
+        while (adapter.hasNextTimestamp(timestamp)) {
+            timestamp = adapter.getNextTimestamp(timestamp);
+            timestampRel = adapter.getNextTimestampPosition(timestampRel);
+            xCoor = getXCoor(timestampRel);
+            canvas.drawText(String.valueOf(timestamp), xCoor, yCoor, axisTextPaint);
         }
     }
 
