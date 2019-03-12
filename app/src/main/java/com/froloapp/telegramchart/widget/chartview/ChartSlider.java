@@ -50,7 +50,7 @@ public class ChartSlider extends View {
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     private float startXPosition = 0f;
-    private float stopXPosition = 0f;
+    private float stopXPosition = 1f;
 
     // SCROLL LISTENER
     private OnScrollListener listener;
