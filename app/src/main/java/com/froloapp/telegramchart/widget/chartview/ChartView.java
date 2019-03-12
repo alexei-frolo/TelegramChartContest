@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 
+import com.froloapp.telegramchart.BuildConfig;
 import com.froloapp.telegramchart.widget.Utils;
 
 
@@ -145,7 +146,9 @@ public class ChartView extends View implements ChartUI {
      ***********************************/
 
     private void log(String msg) {
-        Log.d("ChartView", msg);
+        if (BuildConfig.DEBUG) {
+            Log.d("ChartView", msg);
+        }
     }
 
     private int getXCoor(float p) {

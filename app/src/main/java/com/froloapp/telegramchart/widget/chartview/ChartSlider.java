@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.froloapp.telegramchart.BuildConfig;
 import com.froloapp.telegramchart.widget.Utils;
 
 public class ChartSlider extends View {
@@ -74,7 +75,9 @@ public class ChartSlider extends View {
     }
 
     private void log(String msg) {
-        Log.d("ChartSlider", msg);
+        if (BuildConfig.DEBUG) {
+            Log.d("ChartSlider", msg);
+        }
     }
 
     public interface OnScrollListener {

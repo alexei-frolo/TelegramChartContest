@@ -40,7 +40,9 @@ public class MainActivity extends Activity implements ChartSlider.OnScrollListen
     private ChartData secondChart;
 
     private void log(String msg) {
-        Log.d("MainActivity", msg);
+        if (BuildConfig.DEBUG) {
+            Log.d("MainActivity", msg);
+        }
     }
 
     @Override
