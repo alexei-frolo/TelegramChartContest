@@ -1,8 +1,8 @@
 package com.froloapp.telegramchart;
 
+import android.app.Activity;
 import android.content.res.AssetManager;
 import android.graphics.Color;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.CheckBox;
@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class MainActivity extends AppCompatActivity implements ChartSlider.OnScrollListener {
+public class MainActivity extends Activity implements ChartSlider.OnScrollListener {
 
     private ChartView chartView;
     private ChartAdapter adapter;
