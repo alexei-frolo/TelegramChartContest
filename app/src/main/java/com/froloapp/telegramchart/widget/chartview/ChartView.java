@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
+import android.support.v4.view.animation.FastOutLinearInInterpolator;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -33,6 +34,7 @@ public class ChartView extends View implements ChartUI {
     private static final int TIMESTAMP_BAR_HEIGHT_IN_DP = 20;
     private static final int DEFAULT_TEXT_HEIGHT_IN_SP = 15;
     private static final int TOUCH_STAMP_THRESHOLD_IN_DP = 10;
+    private static final long ANIM_DURATION = 200L;
 
     // paint tools
     private final Paint axisPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -59,6 +61,8 @@ public class ChartView extends View implements ChartUI {
     // current min and max value on Y axis
     private float minYValue;
     private float maxYValue;
+    // multiply min and max Y axis value by this coefficient
+    private float yValueCoefficient = 1f;
 
     // Background (Axes)
     private float axisAlpha = 1f;
@@ -187,6 +191,7 @@ public class ChartView extends View implements ChartUI {
             ValueAnimator newAnimator = ValueAnimator.ofFloat(this.minYValue, minValue);
             newAnimator.addUpdateListener(minYValueUpdateListener);
             newAnimator.setInterpolator(yValueInterpolator);
+            newAnimator.setDuration(ANIM_DURATION);
             minValueAnimator = newAnimator;
             newAnimator.start();
         }
@@ -199,6 +204,7 @@ public class ChartView extends View implements ChartUI {
             ValueAnimator newAnimator = ValueAnimator.ofFloat(this.maxYValue, maxValue);
             newAnimator.addUpdateListener(maxYValueUpdateListener);
             newAnimator.setInterpolator(yValueInterpolator);
+            newAnimator.setDuration(ANIM_DURATION);
             maxValueAnimator = newAnimator;
             newAnimator.start();
         }
