@@ -33,7 +33,7 @@ public class ChartView extends View implements ChartUI {
     private static final int DEFAULT_HEIGHT_IN_DP = 100;
     private static final int TIMESTAMP_BAR_HEIGHT_IN_DP = 20;
     private static final int DEFAULT_TEXT_HEIGHT_IN_SP = 15;
-    private static final int TOUCH_STAMP_THRESHOLD_IN_DP = 10;
+    private static final int TOUCH_STAMP_THRESHOLD_IN_DP = 5;
     private static final long ANIM_DURATION = 200L;
 
     // paint tools
@@ -365,16 +365,16 @@ public class ChartView extends View implements ChartUI {
             case MotionEvent.ACTION_MOVE: {
                 float x = event.getX();
                 float y = event.getY();
-                if (Math.abs(lastTouchedDownX - x) > TOUCH_STAMP_THRESHOLD_IN_DP
-                        || Math.abs(lastTouchedDownY - y) > TOUCH_STAMP_THRESHOLD_IN_DP)
+                if (Math.abs(lastTouchedDownX - x) > touchStampThreshold
+                        || Math.abs(lastTouchedDownY - y) > touchStampThreshold)
                     return false;
                 break;
             }
             case MotionEvent.ACTION_UP: {
                 float x = event.getX();
                 float y = event.getY();
-                if (Math.abs(lastTouchedDownX - x) < TOUCH_STAMP_THRESHOLD_IN_DP
-                    && Math.abs(lastTouchedDownY - y) < TOUCH_STAMP_THRESHOLD_IN_DP) {
+                if (Math.abs(lastTouchedDownX - x) < touchStampThreshold
+                    && Math.abs(lastTouchedDownY - y) < touchStampThreshold) {
                     log("Clicked at (" + x + ", " + y + ")");
                     // handle click here
                     handleClick(x, y);
