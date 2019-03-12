@@ -126,6 +126,11 @@ public class ChartSlider extends View {
         return x > startStampPos + touchBorderThreshold && x < endStampPos - touchBorderThreshold;
     }
 
+    private boolean canCompressFrame(float startXPosition, float stopXPosition) {
+        //return true;
+        return stopXPosition - startXPosition > 0.2f; // just fifth part. Change it if you need
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final int defWidth = (int) Utils.dpToPx(DEFAULT_WIDTH_IN_DP, getContext());
@@ -177,20 +182,26 @@ public class ChartSlider extends View {
                 if (scrollState == SCROLL_STATE_LEFT_BORDER_DRAGGING) {
                     float x = event.getX();
                     float frameScrollRel = (x - xDragPos) / getViewContentWith();
-                    startXPosition = checkPosition(startXPosition + frameScrollRel);
                     xDragPos = x;
-                    log("Left border dragged");
-                    dispatchScrolled(startXPosition, stopXPosition);
-                    invalidate();
+                    float newStartXPosition = checkPosition(startXPosition + frameScrollRel);
+                    if (canCompressFrame(newStartXPosition, stopXPosition)) {
+                        startXPosition = newStartXPosition;
+                        log("Left border dragged");
+                        dispatchScrolled(startXPosition, stopXPosition);
+                        invalidate();
+                    }
                     return true;
                 } else if (scrollState == SCROLL_STATE_RIGHT_BORDER_DRAGGING) {
                     float x = event.getX();
                     float frameScrollRel = (x - xDragPos) / getViewContentWith();
-                    stopXPosition = checkPosition(stopXPosition + frameScrollRel);
                     xDragPos = x;
-                    log("Right border dragged");
-                    dispatchScrolled(startXPosition, stopXPosition);
-                    invalidate();
+                    float newStopXPosition = checkPosition(stopXPosition + frameScrollRel);
+                    if (canCompressFrame(startXPosition, newStopXPosition)) {
+                        stopXPosition = newStopXPosition;
+                        log("Right border dragged");
+                        dispatchScrolled(startXPosition, stopXPosition);
+                        invalidate();
+                    }
                     return true;
                 } else if (scrollState == SCROLL_STATE_FRAME_DRAGGING) {
                     float x = event.getX();
