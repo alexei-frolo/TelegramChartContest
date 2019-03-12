@@ -2,7 +2,6 @@ package com.froloapp.telegramchart;
 
 import android.app.Activity;
 import android.content.res.AssetManager;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,25 +9,12 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.Toast;
 
-
 import com.froloapp.telegramchart.widget.chartview.ChartAdapter;
 import com.froloapp.telegramchart.widget.chartview.ChartData;
 import com.froloapp.telegramchart.widget.chartview.ChartSlider;
 import com.froloapp.telegramchart.widget.chartview.ChartView;
-import com.froloapp.telegramchart.widget.chartview.SimpleChartAdapter;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class MainActivity extends Activity implements ChartSlider.OnScrollListener {
 
