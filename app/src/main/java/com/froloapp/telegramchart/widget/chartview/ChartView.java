@@ -269,6 +269,8 @@ public class ChartView extends View implements ChartUI {
         log("Drawing foreground layer");
         for (int i = 0; i < adapter.getChartCount(); i++) {
             ChartData data = adapter.getChart(i);
+            if (!adapter.isVisible(data))
+                continue;
 //            long timestamp = adapter.getNextTimestamp(startXPercentage);
 //            float timestampRel = adapter.getNextTimestampPosition(startXPercentage);
             long timestamp = adapter.getMinTimestamp();
@@ -341,11 +343,23 @@ public class ChartView extends View implements ChartUI {
     @Override
     public void show(ChartData chart) {
         // showing a chart here
+        ChartAdapter adapter = this.adapter;
+        if (adapter != null) {
+            adapter.setVisible(chart, true);
+            checkIfMinOrMaxValueChanged();
+            invalidate();
+        }
     }
 
     @Override
     public void hide(ChartData chart) {
         // hiding a chart here
+        ChartAdapter adapter = this.adapter;
+        if (adapter != null) {
+            adapter.setVisible(chart, false);
+            checkIfMinOrMaxValueChanged();
+            invalidate();
+        }
     }
 
     /* *********************************

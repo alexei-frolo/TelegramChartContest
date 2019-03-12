@@ -4,6 +4,8 @@ package com.froloapp.telegramchart.widget.chartview;
 public interface ChartAdapter {
     int getChartCount();
     ChartData getChart(int index);
+    boolean isVisible(ChartData chart);
+    void setVisible(ChartData chart, boolean visible);
 
     long getMinTimestamp();
     long getMaxTimestamp();

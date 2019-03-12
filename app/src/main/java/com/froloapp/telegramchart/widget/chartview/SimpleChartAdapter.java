@@ -1,6 +1,7 @@
 package com.froloapp.telegramchart.widget.chartview;
 
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -10,14 +11,26 @@ public class SimpleChartAdapter implements ChartAdapter {
     private long mixXAxis;
     private long maxXAxis;
 
-    private List<ChartData> charts;
+    private List<ChartHolder> chartHolders;
+
+    private static class ChartHolder {
+        final ChartData data;
+        boolean visible;
+        ChartHolder(ChartData data, boolean visible) {
+            this.data = data;
+            this.visible = visible;
+        }
+    }
 
     public SimpleChartAdapter(List<Long> axes, List<ChartData> charts) {
         this.axes = axes;
         Collections.sort(axes); // default sort
         this.mixXAxis = axes.get(0);
         this.maxXAxis = axes.get(axes.size() - 1);
-        this.charts = charts;
+        this.chartHolders = new ArrayList<>(charts.size());
+        for (ChartData data : charts) {
+            chartHolders.add(new ChartHolder(data, true));
+        }
     }
 
     public static class SimpleData implements ChartData {
@@ -83,8 +96,10 @@ public class SimpleChartAdapter implements ChartAdapter {
                     // check if the next axis is in bounds
                     long nextAxis = axes.get(i + 1);
                     if (nextAxis < fromXAxis) {
-                        for (ChartData data : charts) {
-                            int value = data.getValue(axis);
+                        for (ChartHolder holder : chartHolders) {
+                            if (!holder.visible) continue;
+
+                            int value = holder.data.getValue(axis);
                             if (value < min) {
                                 min = value;
                             }
@@ -94,16 +109,20 @@ public class SimpleChartAdapter implements ChartAdapter {
                 continue;
             }
             if (axis > toXAxis) {
-                for (ChartData data : charts) {
-                    int value = data.getValue(axis);
+                for (ChartHolder holder : chartHolders) {
+                    if (!holder.visible) continue;
+
+                    int value = holder.data.getValue(axis);
                     if (value < min) {
                         min = value;
                     }
                 }
                 break;
             }
-            for (ChartData data : charts) {
-                int value = data.getValue(axis);
+            for (ChartHolder holder : chartHolders) {
+                if (!holder.visible) continue;
+
+                int value = holder.data.getValue(axis);
                 if (value < min) {
                     min = value;
                 }
@@ -126,8 +145,10 @@ public class SimpleChartAdapter implements ChartAdapter {
                     // check if the next axis is in bounds
                     long nextAxis = axes.get(i + 1);
                     if (nextAxis < fromXAxis) {
-                        for (ChartData data : charts) {
-                            int value = data.getValue(axis);
+                        for (ChartHolder holder : chartHolders) {
+                            if (!holder.visible) continue;
+
+                            int value = holder.data.getValue(axis);
                             if (value > max) {
                                 max = value;
                             }
@@ -137,16 +158,20 @@ public class SimpleChartAdapter implements ChartAdapter {
                 continue;
             }
             if (axis > toXAxis) {
-                for (ChartData data : charts) {
-                    int value = data.getValue(axis);
+                for (ChartHolder holder : chartHolders) {
+                    if (!holder.visible) continue;
+
+                    int value = holder.data.getValue(axis);
                     if (value > max) {
                         max = value;
                     }
                 }
                 break;
             }
-            for (ChartData data : charts) {
-                int value = data.getValue(axis);
+            for (ChartHolder holder : chartHolders) {
+                if (!holder.visible) continue;
+
+                int value = holder.data.getValue(axis);
                 if (value > max) {
                     max = value;
                 }
@@ -217,11 +242,32 @@ public class SimpleChartAdapter implements ChartAdapter {
 
     @Override
     public int getChartCount() {
-        return charts.size();
+        return chartHolders.size();
     }
 
     @Override
     public ChartData getChart(int index) {
-        return charts.get(index);
+        return chartHolders.get(index).data;
+    }
+
+    @Override
+    public boolean isVisible(ChartData chart) {
+        for (int i = 0; i < chartHolders.size(); i++) {
+            ChartHolder holder = chartHolders.get(i);
+            if (holder.data.equals(chart)) {
+                return holder.visible;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public void setVisible(ChartData chart, boolean visible) {
+        for (int i = 0; i < chartHolders.size(); i++) {
+            ChartHolder holder = chartHolders.get(i);
+            if (holder.data.equals(chart)) {
+                holder.visible = visible;
+            }
+        }
     }
 }
