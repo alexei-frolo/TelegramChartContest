@@ -3,10 +3,12 @@ package com.froloapp.telegramchart;
 import android.app.Activity;
 import android.content.res.AssetManager;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.Toast;
 
 
 import com.froloapp.telegramchart.widget.chartview.ChartAdapter;
@@ -39,6 +41,8 @@ public class MainActivity extends Activity implements ChartSlider.OnScrollListen
     private ChartData firstChart;
     private ChartData secondChart;
 
+    private JsonParserTask jsonParserTask;
+
     private void log(String msg) {
         if (BuildConfig.DEBUG) {
             Log.d("MainActivity", msg);
@@ -70,64 +74,40 @@ public class MainActivity extends Activity implements ChartSlider.OnScrollListen
             }
         });
 
-        loadChartData();
+        loadCharts();
     }
 
-    private void loadChartData() {
+    private void loadCharts() {
+        AsyncTask task = jsonParserTask;
+        if (task != null) task.cancel(true);
+
+        JsonParserTask newTask = new JsonParserTask(new JsonParserTask.Callback() {
+            @Override public void onStart() {
+                // show progress here
+            }
+            @Override public void onError(Throwable error) {
+                Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+            }
+            @Override public void onResult(ChartAdapter adapter) {
+                firstChart = adapter.getChart(0);
+                secondChart = adapter.getChart(1);
+
+                chartView.setAdapter(adapter);
+                chartView.setXPositions(0f, 1f);
+
+                chartSlider.setPositions(0f, 1f);
+                chartSlider.setOnScrollListener(MainActivity.this);
+            }
+            @Override
+            public void onCancelled() {
+            }
+        });
+        jsonParserTask = newTask;
         AssetManager assets = getAssets();
         try {
             InputStream is = assets.open("chart.json");
-            final int bufferSize = 1024;
-            final char[] buffer = new char[bufferSize];
-            final StringBuilder out = new StringBuilder();
-            Reader in = new InputStreamReader(is, "UTF-8");
-            for (; ; ) {
-                int rsz = in.read(buffer, 0, buffer.length);
-                if (rsz < 0)
-                    break;
-                out.append(buffer, 0, rsz);
-            }
-            String json = out.toString();
-            JSONArray array = new JSONArray(json);
-
-            Set<Long> axesSet = new LinkedHashSet<>();
-            List<ChartData> charts = new ArrayList<>();
-
-            for (int k = 0; k < array.length(); k++) {
-                JSONArray dataArray = array.getJSONArray(k);
-                Map<Long, Integer> map = new LinkedHashMap<>();
-                for (int i = 0; i < dataArray.length(); i++) {
-                    JSONObject obj = dataArray.getJSONObject(i);
-                    long timestamp = obj.getLong("timestamp");
-                    int value = obj.getInt("value");
-                    axesSet.add(timestamp);
-                    map.put(timestamp, value);
-                    //SimpleTimedAdapter.Timestamp t = new SimpleTimedAdapter.Timestamp(timestamp, )
-                }
-                int color;
-                if (k == 0) {
-                    color = Color.RED;
-                } else {
-                    color = Color.BLUE;
-                }
-                ChartData chart = new SimpleChartAdapter.SimpleData(map, color);
-                charts.add(chart);
-                if (k == 0) {
-                    firstChart = chart;
-                } else {
-                    secondChart = chart;
-                }
-            }
-
-            List<Long> axes = new ArrayList<>(axesSet);
-            adapter = new SimpleChartAdapter(axes, charts);
-            chartView.setAdapter(adapter);
-            chartView.setXPositions(0f, 1f);
-
-            chartSlider.setPositions(0f, 1f);
-            chartSlider.setOnScrollListener(this);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            newTask.execute(is);
+        } catch (Throwable ignored) {
         }
     }
 
