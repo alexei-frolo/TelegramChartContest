@@ -1,6 +1,7 @@
 package com.froloapp.telegramchart.widget.chartview;
 
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +14,7 @@ public class SimpleChartAdapter implements ChartAdapter {
 
     public SimpleChartAdapter(List<Long> axes, List<ChartData> charts) {
         this.axes = axes;
+        Collections.sort(axes); // default sort
         this.mixXAxis = axes.get(0);
         this.maxXAxis = axes.get(axes.size() - 1);
         this.charts = charts;
@@ -77,9 +79,27 @@ public class SimpleChartAdapter implements ChartAdapter {
         for (int i = 0; i < axes.size(); i++) {
             long axis = axes.get(i);
             if (axis < fromXAxis) {
+                if (i < axes.size() - 1) {
+                    // check if the next axis is in bounds
+                    long nextAxis = axes.get(i + 1);
+                    if (nextAxis < fromXAxis) {
+                        for (ChartData data : charts) {
+                            int value = data.getValue(axis);
+                            if (value < min) {
+                                min = value;
+                            }
+                        }
+                    }
+                }
                 continue;
             }
             if (axis > toXAxis) {
+                for (ChartData data : charts) {
+                    int value = data.getValue(axis);
+                    if (value < min) {
+                        min = value;
+                    }
+                }
                 break;
             }
             for (ChartData data : charts) {
@@ -102,9 +122,27 @@ public class SimpleChartAdapter implements ChartAdapter {
         for (int i = 0; i < axes.size(); i++) {
             long axis = axes.get(i);
             if (axis < fromXAxis) {
+                if (i < axes.size() - 1) {
+                    // check if the next axis is in bounds
+                    long nextAxis = axes.get(i + 1);
+                    if (nextAxis < fromXAxis) {
+                        for (ChartData data : charts) {
+                            int value = data.getValue(axis);
+                            if (value > max) {
+                                max = value;
+                            }
+                        }
+                    }
+                }
                 continue;
             }
             if (axis > toXAxis) {
+                for (ChartData data : charts) {
+                    int value = data.getValue(axis);
+                    if (value > max) {
+                        max = value;
+                    }
+                }
                 break;
             }
             for (ChartData data : charts) {
