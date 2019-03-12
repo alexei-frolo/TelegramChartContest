@@ -1,5 +1,8 @@
 package com.froloapp.telegramchart.widget.chartview;
 
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -10,6 +13,7 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Property;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -94,6 +98,20 @@ public class ChartView extends View implements ChartUI {
     };
     private final Interpolator yValueInterpolator = new AccelerateDecelerateInterpolator();
 
+    // Faded in/out chart
+    private ChartData fadedChart = null;
+    private float fadedChartAlpha = 0f;
+    private ObjectAnimator fadedChartAnimator;
+    private final Property<ChartView, Float> FADED_CHART_ALPHA = new Property<ChartView, Float>(float.class, "fadedChartAlpha") {
+        @Override public Float get(ChartView object) {
+            return object.fadedChartAlpha;
+        }
+        @Override public void set(ChartView object, Float value) {
+            object.fadedChartAlpha = value;
+            invalidate();
+        }
+    };
+
     public ChartView(Context context) {
         this(context, null);
     }
@@ -139,6 +157,9 @@ public class ChartView extends View implements ChartUI {
 
         ValueAnimator a2 = maxValueAnimator;
         if (a2 != null) a2.cancel();
+
+        ValueAnimator a3 = fadedChartAnimator;
+        if (a3 != null) a3.cancel();
     }
 
     /* *********************************
@@ -212,6 +233,64 @@ public class ChartView extends View implements ChartUI {
         }
     }
 
+    private void animateFadedInChart(ChartData chart) {
+        Animator oldAnimator = this.fadedChartAnimator;
+        if (oldAnimator != null) oldAnimator.cancel();
+
+        fadedChart = chart;
+        fadedChartAlpha = 0f;
+        PropertyValuesHolder holder = PropertyValuesHolder.ofFloat(FADED_CHART_ALPHA, 1f);
+        ObjectAnimator animator = ObjectAnimator.ofPropertyValuesHolder(this, holder);
+        animator.setDuration(ANIM_DURATION);
+        animator.setInterpolator(yValueInterpolator);
+        animator.addListener(new Animator.AnimatorListener() {
+            @Override public void onAnimationStart(Animator animation) { }
+            @Override public void onAnimationEnd(Animator animation) {
+                finish();
+            }
+            @Override public void onAnimationCancel(Animator animation) {
+                finish();
+            }
+            @Override public void onAnimationRepeat(Animator animation) { }
+            void finish() {
+                fadedChart = null;
+                fadedChartAlpha = 1f;
+                invalidate();
+            }
+        });
+        this.fadedChartAnimator = animator;
+        animator.start();
+    }
+
+    private void animateFadedOutChart(ChartData chart) {
+        Animator oldAnimator = this.fadedChartAnimator;
+        if (oldAnimator != null) oldAnimator.cancel();
+
+        fadedChart = chart;
+        fadedChartAlpha = 1f;
+        PropertyValuesHolder holder = PropertyValuesHolder.ofFloat(FADED_CHART_ALPHA, 0f);
+        ObjectAnimator animator = ObjectAnimator.ofPropertyValuesHolder(this, holder);
+        animator.setDuration(ANIM_DURATION);
+        animator.setInterpolator(yValueInterpolator);
+        animator.addListener(new Animator.AnimatorListener() {
+            @Override public void onAnimationStart(Animator animation) { }
+            @Override public void onAnimationEnd(Animator animation) {
+                finish();
+            }
+            @Override public void onAnimationCancel(Animator animation) {
+                finish();
+            }
+            @Override public void onAnimationRepeat(Animator animation) { }
+            void finish() {
+                fadedChart = null;
+                fadedChartAlpha = 0f;
+                invalidate();
+            }
+        });
+        this.fadedChartAnimator = animator;
+        animator.start();
+    }
+
     /* *******************************
      ******** DRAWING METHODS ********
      ****************************** */
@@ -269,8 +348,10 @@ public class ChartView extends View implements ChartUI {
         log("Drawing foreground layer");
         for (int i = 0; i < adapter.getChartCount(); i++) {
             ChartData data = adapter.getChart(i);
-            if (!adapter.isVisible(data))
-                continue;
+            if (!adapter.isVisible(data)) {
+                if (fadedChart == null || !fadedChart.equals(data))
+                    continue;
+            }
 //            long timestamp = adapter.getNextTimestamp(startXPercentage);
 //            float timestampRel = adapter.getNextTimestampPosition(startXPercentage);
             long timestamp = adapter.getMinTimestamp();
@@ -296,6 +377,9 @@ public class ChartView extends View implements ChartUI {
             }
 
             chartPaint.setColor(data.getColor());
+            if (fadedChart != null && fadedChart.equals(data)) {
+                chartPaint.setAlpha((int) (fadedChartAlpha * 255));
+            } else chartPaint.setAlpha(255);
             chartPaint.setStyle(Paint.Style.STROKE);
             canvas.drawPath(bufferPath, chartPaint);
         }
@@ -347,6 +431,7 @@ public class ChartView extends View implements ChartUI {
         if (adapter != null) {
             adapter.setVisible(chart, true);
             checkIfMinOrMaxValueChanged();
+            animateFadedInChart(chart);
             invalidate();
         }
     }
@@ -358,6 +443,7 @@ public class ChartView extends View implements ChartUI {
         if (adapter != null) {
             adapter.setVisible(chart, false);
             checkIfMinOrMaxValueChanged();
+            animateFadedOutChart(chart);
             invalidate();
         }
     }
