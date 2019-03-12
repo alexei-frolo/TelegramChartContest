@@ -63,6 +63,13 @@ public class MainActivity extends Activity implements ChartSlider.OnScrollListen
         loadCharts();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        AsyncTask task = jsonParserTask;
+        if (task != null) task.cancel(true);
+    }
+
     private void loadCharts() {
         AsyncTask task = jsonParserTask;
         if (task != null) task.cancel(true);
