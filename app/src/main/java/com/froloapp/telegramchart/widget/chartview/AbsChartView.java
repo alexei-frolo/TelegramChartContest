@@ -115,17 +115,17 @@ public class AbsChartView extends View implements ChartUI {
         }
     }
 
-    protected ChartAdapter getAdapter() {
+    /*package-private*/ ChartAdapter getAdapter() {
         return adapter;
     }
 
-    protected int getXCoor(float p) {
+    /*package-private*/ int getXCoor(float p) {
         int contentWidth = getMeasuredWidth() - getPaddingLeft() - getPaddingRight();
         float xRelative = ((float) (p - startXPercentage)) / (stopXPercentage - startXPercentage);
         return (int) (getPaddingLeft() + xRelative * contentWidth);
     }
 
-    protected int getYCoor(float value, float minValue, float maxValue) {
+    /*package-private*/ int getYCoor(float value, float minValue, float maxValue) {
         int contentHeight = getMeasuredHeight() - getPaddingTop() - getPaddingBottom();
         float yRelative = (value - minValue) / (maxValue - minValue);
         return (int) (getMeasuredHeight() - getPaddingTop() - yRelative * contentHeight);
