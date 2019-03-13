@@ -31,11 +31,8 @@ import com.froloapp.telegramchart.widget.Utils;
  * In the foreground layer, the charts are drawn;
  * P.S. Rel = relative (e.g. percentage)
  */
-public class ChartView extends AbsChartView implements ChartUI {
+public class ChartView extends AbsChartView {
     // static
-    private static final int DEFAULT_WIDTH_IN_DP = 200;
-    private static final int DEFAULT_HEIGHT_IN_DP = 100;
-    private static final int TIMESTAMP_BAR_HEIGHT_IN_DP = 20;
     private static final int DEFAULT_TEXT_HEIGHT_IN_SP = 15;
     private static final int TOUCH_STAMP_THRESHOLD_IN_DP = 5;
     private static final long ANIM_DURATION = 200L;
@@ -43,9 +40,7 @@ public class ChartView extends AbsChartView implements ChartUI {
     // paint tools
     private final Paint axisPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint axisTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final Paint chartPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Rect stampTextBounds = new Rect(); // here we store bounds for stamp text height
-    private final Path bufferPath = new Path(); // buffer path to avoid allocating to many paths for multiple charts
     private float axisStrokeWidth;
 
     // touch
