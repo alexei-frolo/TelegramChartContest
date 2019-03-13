@@ -186,29 +186,29 @@ public class SimpleChartAdapter implements ChartAdapter {
     }
 
     @Override
-    public long getPreviousTimestamp(float previousTimestampPosition) {
+    public long getPreviousTimestamp(float beforeTimestampPosition) {
         long minAxis = axes.get(0);
         long maxAxis = axes.get(axes.size() - 1);
-        long desiredAxis = (minAxis + (long) ((maxAxis - minAxis) * previousTimestampPosition)) + 1;
+        long desiredAxis = (minAxis + (long) ((maxAxis - minAxis) * beforeTimestampPosition)) + 1;
         for (int i = axes.size() - 1; i >=0; i--) {
             long axis = axes.get(i);
             if (axis <= desiredAxis)
                 return axis;
         }
-        throw new IllegalArgumentException("Invalid timestamp rel: " + previousTimestampPosition);
+        throw new IllegalArgumentException("Invalid timestamp rel: " + beforeTimestampPosition);
     }
 
     @Override
-    public float getPreviousTimestampPosition(float previousTimestampPosition) {
+    public float getPreviousTimestampPosition(float beforeTimestampPosition) {
         long minAxis = axes.get(0);
         long maxAxis = axes.get(axes.size() - 1);
-        long desiredAxis = (minAxis + (long) ((maxAxis - minAxis) * previousTimestampPosition)) + 1;
+        long desiredAxis = (minAxis + (long) ((maxAxis - minAxis) * beforeTimestampPosition)) + 1;
         for (int i = axes.size() - 1; i >=0; i--) {
             long axis = axes.get(i);
             if (axis <= desiredAxis)
                 return ((float) (axis - minAxis)) / (maxAxis - minAxis);
         }
-        throw new IllegalArgumentException("Invalid timestamp rel: " + previousTimestampPosition);
+        throw new IllegalArgumentException("Invalid timestamp rel: " + beforeTimestampPosition);
     }
 
     @Override

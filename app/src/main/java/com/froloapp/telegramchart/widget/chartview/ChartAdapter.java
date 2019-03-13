@@ -13,8 +13,8 @@ public interface ChartAdapter {
     long[] getTimestamps(float fromXPosition, float toXPosition);
 
     boolean hasPreviousTimestamp(float beforeTimestampPosition);
-    long getPreviousTimestamp(float previousTimestampPosition);
-    float getPreviousTimestampPosition(float previousTimestampPosition);
+    long getPreviousTimestamp(float beforeTimestampPosition);
+    float getPreviousTimestampPosition(float beforeTimestampPosition);
 
     boolean hasNextTimestamp(float afterTimestampPosition);
     long getNextTimestamp(float afterTimestampPosition);
