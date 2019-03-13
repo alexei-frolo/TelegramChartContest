@@ -263,7 +263,11 @@ public class AbsChartView extends View implements ChartUI {
     }
 
     /**
-     * Draws line charts;
+     * Draws charts;
+     * For optimization, the logic of rendering is next:
+     * 1) Find the previous timestamp that goes before {@link AbsChartView#startXPercentage} value;
+     * 2) Create a path of Y values for each chart until reached timestamp that goes after {@link AbsChartView#stopXPercentage} value;
+     * 3) Draw each path on canvas using appropriate colors;
      * @param canvas canvas
      */
     protected void drawCharts(Canvas canvas) {
@@ -278,8 +282,8 @@ public class AbsChartView extends View implements ChartUI {
                 if (fadedChart == null || !fadedChart.equals(data))
                     continue;
             }
-//            long timestamp = adapter.getNextTimestamp(startXPercentage);
-//            float timestampRel = adapter.getNextTimestampPosition(startXPercentage);
+
+            // Find the first timestamp;
             long timestamp = adapter.getPreviousTimestamp(startXPercentage);
             float timestampPosX = adapter.getPreviousTimestampPosition(startXPercentage);
 
@@ -291,8 +295,6 @@ public class AbsChartView extends View implements ChartUI {
             bufferPath.moveTo(xCoor, yCoor);
 
             while (adapter.hasNextTimestamp(timestamp)) {
-//                timestamp = adapter.getNextTimestamp(timestamp);
-//                timestampRel = adapter.getNextTimestampPosition(timestampRel);
                 timestamp = adapter.getNextTimestamp(timestamp);
                 timestampPosX = adapter.getNextTimestampPosition(timestampPosX);
 
@@ -301,8 +303,8 @@ public class AbsChartView extends View implements ChartUI {
                 yCoor = getYCoor(value, minYValue, maxYValue);
                 bufferPath.lineTo(xCoor, yCoor);
 
-//                if (timestampPosX > stopXPercentage)
-//                    break; // It's enough. No need to draw lines after this timestamp as they will be invisible
+                if (timestampPosX > stopXPercentage)
+                    break; // It's enough. No need to draw lines after this timestamp as they will be invisible
             }
 
             chartPaint.setColor(data.getColor());
