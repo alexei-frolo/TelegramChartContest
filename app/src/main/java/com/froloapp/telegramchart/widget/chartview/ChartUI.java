@@ -7,6 +7,10 @@ package com.froloapp.telegramchart.widget.chartview;
 public interface ChartUI {
     void setAdapter(ChartAdapter adapter);
 
+    float getStartXPosition();
+
+    float getStopXPosition();
+
     // sets start x position in percentage (value in range 0..1)
     void setStartXPosition(float p);
 

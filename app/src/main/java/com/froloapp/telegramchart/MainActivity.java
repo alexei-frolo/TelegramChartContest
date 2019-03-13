@@ -47,16 +47,26 @@ public class MainActivity extends Activity implements ChartSlider.OnScrollListen
         checkboxFirst.setChecked(true);
         checkboxFirst.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) chartView.show(firstChart);
-                else chartView.hide(firstChart);
+                if (isChecked) {
+                    chartView.show(firstChart);
+                    chartSlider.show(firstChart);
+                } else {
+                    chartView.hide(firstChart);
+                    chartSlider.hide(firstChart);
+                }
             }
         });
 
         checkboxSecond.setChecked(true);
         checkboxSecond.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) chartView.show(secondChart);
-                else chartView.hide(secondChart);
+                if (isChecked) {
+                    chartView.show(secondChart);
+                    chartSlider.show(secondChart);
+                } else {
+                    chartView.hide(secondChart);
+                    chartSlider.hide(secondChart);
+                }
             }
         });
 
@@ -88,7 +98,8 @@ public class MainActivity extends Activity implements ChartSlider.OnScrollListen
                 chartView.setAdapter(adapter);
                 chartView.setXPositions(0f, 1f);
 
-                chartSlider.setPositions(0f, 1f);
+                chartSlider.setAdapter(adapter);
+                chartSlider.setBorderPositions(0f, 1f);
                 chartSlider.setOnScrollListener(MainActivity.this);
             }
             @Override

@@ -4,17 +4,13 @@ import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Property;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
@@ -23,40 +19,17 @@ import com.froloapp.telegramchart.BuildConfig;
 import com.froloapp.telegramchart.widget.Utils;
 
 
-/**
- * ChartView represents a set of linear charts drawn by different colors;
- * It has three layers to draw: phantom, background and foreground;
- * In the background layer, y axis bars (vertical lines) and x axis stamps (timestamps) are drawn;
- * In the phantom layer, phantom y bars and phantom x stamps that fade out when ChartView changes its start and end timestamps;
- * In the foreground layer, the charts are drawn;
- * P.S. Rel = relative (e.g. percentage)
- */
-public class ChartView extends View implements ChartUI {
+public class AbsChartView extends View implements ChartUI {
     // static
     private static final int DEFAULT_WIDTH_IN_DP = 200;
     private static final int DEFAULT_HEIGHT_IN_DP = 100;
-    private static final int TIMESTAMP_BAR_HEIGHT_IN_DP = 20;
-    private static final int DEFAULT_TEXT_HEIGHT_IN_SP = 15;
-    private static final int TOUCH_STAMP_THRESHOLD_IN_DP = 5;
     private static final long ANIM_DURATION = 200L;
 
-    // paint tools
-    private final Paint axisPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final Paint axisTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final Paint chartPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final Rect stampTextBounds = new Rect(); // here we store bounds for stamp text height
-    private final Path bufferPath = new Path(); // buffer path to avoid allocating to many paths for multiple charts
-    private float axisStrokeWidth;
-
-    // touch
-    private float touchStampThreshold;
-    private float lastTouchedDownX = 0f;
-    private float lastTouchedDownY = 0f;
-    private ChartData clickedChart;
-    private long clickedStamp;
-
-    // Adapter
     private ChartAdapter adapter;
+
+    // paint tools
+    private final Paint chartPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Path bufferPath = new Path(); // buffer path to avoid allocating to many paths for multiple charts
 
     // current start and stop positions on X Axis in percentage(from 0 to 1)
     private float startXPercentage;
@@ -65,19 +38,6 @@ public class ChartView extends View implements ChartUI {
     // current min and max value on Y axis
     private float minYValue;
     private float maxYValue;
-    // multiply min and max Y axis value by this coefficient
-    private float yValueCoefficient = 1f;
-
-    // Background (Axes)
-    private float axisAlpha = 1f;
-
-    // y axes
-    private int yAxisBarCount = 5;
-    private float yAxisStep = 0f;
-
-    // x axes
-    private int xAxisStampCount = 5;
-    private float xAxisStep = 0f;
 
     // Animators
     private ValueAnimator minValueAnimator;
@@ -86,13 +46,13 @@ public class ChartView extends View implements ChartUI {
     // Animator update listener
     private final ValueAnimator.AnimatorUpdateListener minYValueUpdateListener = new ValueAnimator.AnimatorUpdateListener() {
         @Override public void onAnimationUpdate(ValueAnimator animation) {
-            ChartView.this.minYValue = (float) animation.getAnimatedValue();
+            AbsChartView.this.minYValue = (float) animation.getAnimatedValue();
             invalidate();
         }
     };
     private final ValueAnimator.AnimatorUpdateListener maxYValueUpdateListener = new ValueAnimator.AnimatorUpdateListener() {
         @Override public void onAnimationUpdate(ValueAnimator animation) {
-            ChartView.this.maxYValue = (float) animation.getAnimatedValue();
+            AbsChartView.this.maxYValue = (float) animation.getAnimatedValue();
             invalidate();
         }
     };
@@ -102,47 +62,30 @@ public class ChartView extends View implements ChartUI {
     private ChartData fadedChart = null;
     private float fadedChartAlpha = 0f;
     private ObjectAnimator fadedChartAnimator;
-    private final Property<ChartView, Float> FADED_CHART_ALPHA = new Property<ChartView, Float>(float.class, "fadedChartAlpha") {
-        @Override public Float get(ChartView object) {
+    private final Property<AbsChartView, Float> FADED_CHART_ALPHA = new Property<AbsChartView, Float>(float.class, "fadedChartAlpha") {
+        @Override public Float get(AbsChartView object) {
             return object.fadedChartAlpha;
         }
-        @Override public void set(ChartView object, Float value) {
+        @Override public void set(AbsChartView object, Float value) {
             object.fadedChartAlpha = value;
             invalidate();
         }
     };
 
-    public ChartView(Context context) {
+    public AbsChartView(Context context) {
         this(context, null);
     }
 
-    public ChartView(Context context, AttributeSet attrs) {
+    public AbsChartView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public ChartView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public AbsChartView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context, attrs);
     }
 
     private void init(Context context, AttributeSet attrs) {
-        // touch
-        touchStampThreshold = Utils.dpToPx(TOUCH_STAMP_THRESHOLD_IN_DP, context);
-
-        // axis paint
-        axisStrokeWidth = Utils.dpToPx(1f, context);
-        axisPaint.setStrokeWidth(axisStrokeWidth);
-        axisPaint.setStyle(Paint.Style.STROKE);
-        // color for y axis bars and x axis stamps
-        axisPaint.setColor(Color.GRAY);
-
-        // axis text paint
-        float textSize = Utils.spToPx(DEFAULT_TEXT_HEIGHT_IN_SP, context);
-        axisTextPaint.setStyle(Paint.Style.FILL);
-        axisTextPaint.setStrokeWidth(axisStrokeWidth);
-        axisTextPaint.setColor(Color.GRAY);
-        axisTextPaint.setTextSize(textSize);
-
         // chart paint
         chartPaint.setStrokeWidth(Utils.dpToPx(1.5f, context));
     }
@@ -192,14 +135,13 @@ public class ChartView extends View implements ChartUI {
         final int measuredHeight = resolveSizeAndState(defHeight, heightMeasureSpec, 0);
         setMeasuredDimension(measuredWidth, measuredHeight);
         // update important values here
-        yAxisStep = ((float) (measuredHeight - getPaddingTop() - getPaddingBottom())) / yAxisBarCount;
         ChartAdapter adapter = this.adapter;
         if (adapter != null) {
             minYValue = adapter.getMinYValue(startXPercentage, stopXPercentage);
             maxYValue = adapter.getMaxXValue(startXPercentage, stopXPercentage);
         } else {
-            minYValue = 0;
-            maxYValue = 0;
+            minYValue = 0f;
+            maxYValue = 0f;
         }
         log("View measured");
     }
@@ -209,6 +151,9 @@ public class ChartView extends View implements ChartUI {
      * If so then it does phantom magic with current Y axis bars;
      */
     private void checkIfMinOrMaxValueChanged() {
+        ChartAdapter adapter = this.adapter;
+        if (adapter == null) return;
+
         int minValue = adapter.getMinYValue(startXPercentage, stopXPercentage);
         int maxValue = adapter.getMaxXValue(startXPercentage, stopXPercentage);
         // check min value
@@ -297,61 +242,16 @@ public class ChartView extends View implements ChartUI {
         animator.start();
     }
 
-    /* *******************************
-     ******** DRAWING METHODS ********
-     ****************************** */
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        drawPhantoms(canvas);
-        drawBackground(canvas);
-        drawForeground(canvas);
-    }
-
-    /**
-     * Draws phantom y axis bars and phantom x axis stamps;
-     * @param canvas canvas
-     */
-    private void drawPhantoms(Canvas canvas) {
-        log("Drawing phantoms");
-    }
-
-    /**
-     * Draws y axis bars and x axis stamps;
-     * @param canvas canvas
-     */
-    private void drawBackground(Canvas canvas) {
-        log("Drawing background layer");
-        //int contentWidth = getMeasuredWidth() - getPaddingLeft() - getPaddingRight();
-        int startX = getPaddingLeft();
-        int stopX = getMeasuredWidth() - getPaddingRight();
-        for (int i = 0; i < yAxisBarCount; i++) {
-            float y = getMeasuredHeight() - getPaddingBottom() - i * yAxisStep - (axisStrokeWidth / 2 + 1);
-            canvas.drawLine(startX, y, stopX, y, axisPaint);
-        }
-
-        // drawing timestamp texts
-        long timestamp = adapter.getMinTimestamp();
-        float timestampRel = 0f;
-        float xCoor = getXCoor(timestampRel);
-        String text = String.valueOf(timestamp);
-        axisTextPaint.getTextBounds(text, 0, text.length(), stampTextBounds);
-        final float yCoor = getMeasuredHeight() - getPaddingTop() - stampTextBounds.height() / 2;
-        canvas.drawText(text, xCoor, yCoor, axisTextPaint);
-        while (adapter.hasNextTimestamp(timestamp)) {
-            timestamp = adapter.getNextTimestamp(timestamp);
-            timestampRel = adapter.getNextTimestampPosition(timestampRel);
-            xCoor = getXCoor(timestampRel);
-            canvas.drawText(String.valueOf(timestamp), xCoor, yCoor, axisTextPaint);
-        }
-    }
-
     /**
      * Draws line charts;
      * @param canvas canvas
      */
-    private void drawForeground(Canvas canvas) {
+    protected void drawCharts(Canvas canvas) {
         log("Drawing foreground layer");
+        ChartAdapter adapter = this.adapter;
+        if (adapter == null)
+            return; // early return
+
         for (int i = 0; i < adapter.getChartCount(); i++) {
             ChartData data = adapter.getChart(i);
             if (!adapter.isVisible(data)) {
@@ -462,46 +362,5 @@ public class ChartView extends View implements ChartUI {
             animateFadedOutChart(chart);
             invalidate();
         }
-    }
-
-    /* *********************************
-     ********* TOUCH CALLBACKS *********
-     **********************************/
-
-    @SuppressLint("ClickableViewAccessibility")
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        int action = event.getAction();
-        switch (action) {
-            case MotionEvent.ACTION_DOWN: {
-                lastTouchedDownX = event.getX();
-                lastTouchedDownY = event.getY();
-                return true;
-            }
-            case MotionEvent.ACTION_MOVE: {
-                float x = event.getX();
-                float y = event.getY();
-                if (Math.abs(lastTouchedDownX - x) > touchStampThreshold
-                        || Math.abs(lastTouchedDownY - y) > touchStampThreshold)
-                    return false;
-                break;
-            }
-            case MotionEvent.ACTION_UP: {
-                float x = event.getX();
-                float y = event.getY();
-                if (Math.abs(lastTouchedDownX - x) < touchStampThreshold
-                    && Math.abs(lastTouchedDownY - y) < touchStampThreshold) {
-                    log("Clicked at (" + x + ", " + y + ")");
-                    // handle click here
-                    handleClick(x, y);
-                }
-                break;
-            }
-        }
-        return super.onTouchEvent(event);
-    }
-
-    private void handleClick(float x, float y) {
-
     }
 }

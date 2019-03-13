@@ -8,15 +8,12 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.view.View;
 
 import com.froloapp.telegramchart.BuildConfig;
 import com.froloapp.telegramchart.widget.Utils;
 
-public class ChartSlider extends View {
+public class ChartSlider extends AbsChartView {
     // static
-    private static final int DEFAULT_WIDTH_IN_DP = 200;
-    private static final int DEFAULT_HEIGHT_IN_DP = 30;
     private static final int DEFAULT_FRAME_STROKE_WIDTH_IN_DP = 3;
 
     /**
@@ -46,12 +43,12 @@ public class ChartSlider extends View {
     // If a finger touches a border in a place +- this threshold then the border must be under drag
     private float touchBorderThreshold;
 
-    private int overlayColor = Color.parseColor("#1791bbf2");
-    private int frameColor = Color.parseColor("#39346eba");
+    private int overlayColor = Color.parseColor("#8791bbf2");
+    private int frameColor = Color.parseColor("#59346eba");
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
-    private float startXPosition = 0f;
-    private float stopXPosition = 1f;
+    private float leftBorderXPosition = 0f;
+    private float rightBorderXPosition = 1f;
 
     // SCROLL LISTENER
     private OnScrollListener listener;
@@ -95,9 +92,9 @@ public class ChartSlider extends View {
         }
     }
 
-    public void setPositions(float startXPosition, float stopXPosition) {
-        this.startXPosition = startXPosition;
-        this.stopXPosition = stopXPosition;
+    public void setBorderPositions(float start, float stop) {
+        this.leftBorderXPosition = start;
+        this.rightBorderXPosition = stop;
         invalidate();
     }
 
@@ -114,18 +111,18 @@ public class ChartSlider extends View {
     }
 
     private boolean isFrameLeftBorderTouched(float x) {
-        float startStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * startXPosition;
+        float startStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * leftBorderXPosition;
         return x > startStampPos - touchBorderThreshold && x < startStampPos + touchBorderThreshold;
     }
 
     private boolean isFrameRightBorderTouched(float x) {
-        float endStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * stopXPosition;
+        float endStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * rightBorderXPosition;
         return x > endStampPos - touchBorderThreshold && x < endStampPos + touchBorderThreshold;
     }
 
     private boolean isFrameTouched(float x) {
-        float startStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * startXPosition;
-        float endStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * stopXPosition;
+        float startStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * leftBorderXPosition;
+        float endStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * rightBorderXPosition;
         return x > startStampPos + touchBorderThreshold && x < endStampPos - touchBorderThreshold;
     }
 
@@ -135,27 +132,21 @@ public class ChartSlider extends View {
     }
 
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        final int defWidth = (int) Utils.dpToPx(DEFAULT_WIDTH_IN_DP, getContext());
-        final int defHeight = (int) Utils.dpToPx(DEFAULT_HEIGHT_IN_DP, getContext());
-        final int measuredWidth = resolveSizeAndState(defWidth, widthMeasureSpec, 0);
-        final int measuredHeight = resolveSizeAndState(defHeight, heightMeasureSpec, 0);
-        setMeasuredDimension(measuredWidth, measuredHeight);
-    }
-
-    @Override
     protected void onDraw(Canvas canvas) {
+        // draw charts in background
+        drawCharts(canvas);
+
         int width = getMeasuredWidth() - getPaddingLeft() - getPaddingRight();
         int height = getMeasuredHeight() - getPaddingTop() - getPaddingBottom();
 
         paint.setColor(overlayColor);
         paint.setStyle(Paint.Style.FILL);
-        canvas.drawRect(0, 0, width * startXPosition, height, paint);
-        canvas.drawRect(width * stopXPosition, 0, width, height, paint);
+        canvas.drawRect(0, 0, width * leftBorderXPosition, height, paint);
+        canvas.drawRect(width * rightBorderXPosition, 0, width, height, paint);
 
         paint.setColor(frameColor);
         paint.setStyle(Paint.Style.STROKE);
-        canvas.drawRect(width * startXPosition, 0, width * stopXPosition, height, paint);
+        canvas.drawRect(width * leftBorderXPosition, 0, width * rightBorderXPosition, height, paint);
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -186,11 +177,11 @@ public class ChartSlider extends View {
                     float x = event.getX();
                     float frameScrollRel = (x - xDragPos) / getViewContentWith();
                     xDragPos = x;
-                    float newStartXPosition = checkPosition(startXPosition + frameScrollRel);
-                    if (canCompressFrame(newStartXPosition, stopXPosition)) {
-                        startXPosition = newStartXPosition;
+                    float newStartXPosition = checkPosition(leftBorderXPosition + frameScrollRel);
+                    if (canCompressFrame(newStartXPosition, rightBorderXPosition)) {
+                        leftBorderXPosition = newStartXPosition;
                         log("Left border dragged");
-                        dispatchScrolled(startXPosition, stopXPosition);
+                        dispatchScrolled(leftBorderXPosition, rightBorderXPosition);
                         invalidate();
                     }
                     return true;
@@ -198,11 +189,11 @@ public class ChartSlider extends View {
                     float x = event.getX();
                     float frameScrollRel = (x - xDragPos) / getViewContentWith();
                     xDragPos = x;
-                    float newStopXPosition = checkPosition(stopXPosition + frameScrollRel);
-                    if (canCompressFrame(startXPosition, newStopXPosition)) {
-                        stopXPosition = newStopXPosition;
+                    float newStopXPosition = checkPosition(rightBorderXPosition + frameScrollRel);
+                    if (canCompressFrame(leftBorderXPosition, newStopXPosition)) {
+                        rightBorderXPosition = newStopXPosition;
                         log("Right border dragged");
-                        dispatchScrolled(startXPosition, stopXPosition);
+                        dispatchScrolled(leftBorderXPosition, rightBorderXPosition);
                         invalidate();
                     }
                     return true;
@@ -210,15 +201,15 @@ public class ChartSlider extends View {
                     float x = event.getX();
                     float frameScrollRel = (x - xDragPos) / getViewContentWith();
                     if (frameScrollRel > 0) {
-                        frameScrollRel = Math.min(1 - stopXPosition, frameScrollRel);
+                        frameScrollRel = Math.min(1 - rightBorderXPosition, frameScrollRel);
                     } else {
-                        frameScrollRel = -Math.min(startXPosition, -frameScrollRel);
+                        frameScrollRel = -Math.min(leftBorderXPosition, -frameScrollRel);
                     }
-                    startXPosition = checkPosition(startXPosition + frameScrollRel);
-                    stopXPosition = checkPosition(stopXPosition + frameScrollRel);
+                    leftBorderXPosition = checkPosition(leftBorderXPosition + frameScrollRel);
+                    rightBorderXPosition = checkPosition(rightBorderXPosition + frameScrollRel);
                     xDragPos = x;
                     log("Frame dragged");
-                    dispatchScrolled(startXPosition, stopXPosition);
+                    dispatchScrolled(leftBorderXPosition, rightBorderXPosition);
                     invalidate();
                     return true;
                 }
@@ -231,5 +222,11 @@ public class ChartSlider extends View {
             }
         }
         return super.onTouchEvent(event);
+    }
+
+    @Override
+    public void setAdapter(ChartAdapter adapter) {
+        super.setAdapter(adapter);
+        setXPositions(0f, 1f);
     }
 }
