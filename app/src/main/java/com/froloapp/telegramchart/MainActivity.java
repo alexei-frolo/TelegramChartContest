@@ -98,7 +98,10 @@ public class MainActivity extends Activity implements ChartSlider.OnScrollListen
                 log(error);
                 Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
             }
-            @Override public void onResult(ChartAdapter adapter) {
+            @Override public void onResult(ChartAdapter[] adapters) {
+                ChartAdapter adapter = adapters[2];
+                MainActivity.this.adapter = adapter;
+
                 if (adapter.getChartCount() >= 2) {
                     firstChart = adapter.getChart(0);
                     secondChart = adapter.getChart(1);

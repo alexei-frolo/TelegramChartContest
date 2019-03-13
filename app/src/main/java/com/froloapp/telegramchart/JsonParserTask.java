@@ -27,7 +27,7 @@ public class JsonParserTask extends AsyncTask<InputStream, Void, Object> {
     interface Callback {
         void onStart();
         void onError(Throwable error);
-        void onResult(ChartAdapter adapter);
+        void onResult(ChartAdapter[] adapters);
         void onCancelled();
     }
 
@@ -44,8 +44,8 @@ public class JsonParserTask extends AsyncTask<InputStream, Void, Object> {
 
     @Override
     protected void onPostExecute(Object o) {
-        if (o instanceof ChartAdapter) {
-            callback.onResult((ChartAdapter) o);
+        if (o instanceof ChartAdapter[]) {
+            callback.onResult((ChartAdapter[]) o);
         } else if (o instanceof Throwable) {
             callback.onError((Throwable) o);
         }
@@ -62,7 +62,7 @@ public class JsonParserTask extends AsyncTask<InputStream, Void, Object> {
             final InputStream is = streams[0];
             String json = parseJson(is);
             SimpleChartAdapter[] adapters = parseAdapters(json);
-            return adapters[0];
+            return adapters;
         } catch (Throwable t) {
             return t;
         }
