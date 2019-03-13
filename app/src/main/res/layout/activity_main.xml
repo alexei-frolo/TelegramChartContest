@@ -17,8 +17,8 @@
         android:layout_height="210dp"/>
 
     <com.froloapp.telegramchart.widget.chartview.ChartSlider
-        app:overlayColor="#87A2A2A2"
-        app:frameBorderColor="#9C2D436B"
+        app:overlayColor="#A16D889B"
+        app:frameBorderColor="#9C47567C"
         app:frameBorderWidth="3dp"
         app:maxFrameCompression="0.2"
         android:layout_marginTop="10dp"
