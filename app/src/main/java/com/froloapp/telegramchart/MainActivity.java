@@ -5,12 +5,8 @@ import android.content.res.AssetManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.PopupWindow;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.froloapp.telegramchart.widget.chartview.ChartAdapter;

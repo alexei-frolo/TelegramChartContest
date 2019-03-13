@@ -9,12 +9,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.View;
-import android.widget.PopupWindow;
-import android.widget.TextView;
 
 import com.froloapp.telegramchart.BuildConfig;
 import com.froloapp.telegramchart.R;
