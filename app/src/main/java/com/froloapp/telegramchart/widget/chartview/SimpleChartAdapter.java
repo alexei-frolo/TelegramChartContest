@@ -226,9 +226,10 @@ public class SimpleChartAdapter implements ChartAdapter {
     public long getNextTimestamp(float timestampRel) {
         long minAxis = axes.get(0);
         long maxAxis = axes.get(axes.size() - 1);
-        long desiredAxis = (minAxis + (long) ((maxAxis - minAxis) * timestampRel)) + 1;
+        //long desiredAxis = (minAxis + (long) ((maxAxis - minAxis) * timestampRel)) + 1;
+        float approximatelyDesiredAxis = (minAxis + ((maxAxis - minAxis) * timestampRel));
         for (long axis : axes) {
-            if (axis >= desiredAxis)
+            if (axis > approximatelyDesiredAxis)
                 return axis;
         }
         throw new IllegalArgumentException("Invalid timestamp rel: " + timestampRel);
@@ -238,9 +239,10 @@ public class SimpleChartAdapter implements ChartAdapter {
     public float getNextTimestampPosition(float timestampRel) {
         long minAxis = axes.get(0);
         long maxAxis = axes.get(axes.size() - 1);
-        long desiredAxis = (minAxis + (long) ((maxAxis - minAxis) * timestampRel)) + 1;
+        //long desiredAxis = (minAxis + (long) ((maxAxis - minAxis) * timestampRel)) + 1;
+        float approximatelyDesiredAxis = (minAxis + ((maxAxis - minAxis) * timestampRel));
         for (long axis : axes) {
-            if (axis >= desiredAxis)
+            if (axis > approximatelyDesiredAxis)
                 return ((float) (axis - minAxis)) / (maxAxis - minAxis);
         }
         throw new IllegalArgumentException("Invalid timestamp rel: " + timestampRel);
