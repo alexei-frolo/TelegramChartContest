@@ -1,38 +1,26 @@
 package com.froloapp.telegramchart.widget.chartview;
 
-import android.animation.Animator;
-import android.animation.ObjectAnimator;
-import android.animation.PropertyValuesHolder;
-import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.Property;
 import android.view.MotionEvent;
-import android.view.View;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.Interpolator;
 
 import com.froloapp.telegramchart.BuildConfig;
+import com.froloapp.telegramchart.R;
 import com.froloapp.telegramchart.widget.Utils;
 
 
-/**
- * ChartView represents a set of linear charts drawn by different colors;
- * It has three layers to draw: phantom, background and foreground;
- * In the background layer, y axis bars (vertical lines) and x axis stamps (timestamps) are drawn;
- * In the phantom layer, phantom y bars and phantom x stamps that fade out when ChartView changes its start and end timestamps;
- * In the foreground layer, the charts are drawn;
- * P.S. Rel = relative (e.g. percentage)
- */
 public class ChartView extends AbsChartView {
     // static
+    private static final int DEFAULT_X_AXIS_STAMP_COUNT = 5;
+    private static final int DEFAULT_Y_AXIS_BAR_COUNT = 5;
+
     private static final int DEFAULT_TEXT_HEIGHT_IN_SP = 15;
     private static final int TOUCH_STAMP_THRESHOLD_IN_DP = 5;
     private static final long ANIM_DURATION = 200L;
@@ -57,11 +45,11 @@ public class ChartView extends AbsChartView {
     private float axisAlpha = 1f;
 
     // y axes
-    private int yAxisBarCount = 5;
+    private int yAxisBarCount;
     private float yAxisStep = 0f;
 
     // x axes
-    private int xAxisStampCount = 5;
+    private int xAxisStampCount;
     private float xAxisStep = 0f;
 
     public ChartView(Context context) {
@@ -78,6 +66,16 @@ public class ChartView extends AbsChartView {
     }
 
     private void init(Context context, AttributeSet attrs) {
+        if (attrs != null) {
+            TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.ChartView, 0, 0);
+            xAxisStampCount = typedArray.getColor(R.styleable.ChartView_xAxisStampCount, DEFAULT_X_AXIS_STAMP_COUNT);
+            yAxisBarCount = typedArray.getInteger(R.styleable.ChartView_yAxisBarCount, DEFAULT_Y_AXIS_BAR_COUNT);
+            typedArray.recycle();
+        } else {
+            xAxisStampCount = DEFAULT_X_AXIS_STAMP_COUNT;
+            yAxisBarCount = DEFAULT_Y_AXIS_BAR_COUNT;
+        }
+
         // touch
         touchStampThreshold = Utils.dpToPx(TOUCH_STAMP_THRESHOLD_IN_DP, context);
 

@@ -5,7 +5,9 @@ import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.AttributeSet;
@@ -16,14 +18,20 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 
 import com.froloapp.telegramchart.BuildConfig;
+import com.froloapp.telegramchart.R;
 import com.froloapp.telegramchart.widget.Utils;
 
 
+/**
+ * Helps to draw line charts, handle start and stop x positions and animate appearing or disappearing of a chart;
+ */
 public class AbsChartView extends View implements ChartUI {
     // static
     private static final int DEFAULT_WIDTH_IN_DP = 200;
     private static final int DEFAULT_HEIGHT_IN_DP = 100;
     private static final long ANIM_DURATION = 200L;
+
+    private static final float DEFAULT_CHART_LINE_WIDTH_IN_DP = 1.5f;
 
     private ChartAdapter adapter;
 
@@ -86,8 +94,16 @@ public class AbsChartView extends View implements ChartUI {
     }
 
     private void init(Context context, AttributeSet attrs) {
+        float chartLineWidth;
+        if (attrs != null) {
+            TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.AbsChartView, 0, 0);
+            chartLineWidth = typedArray.getDimension(R.styleable.AbsChartView_chartLineWidth, Utils.dpToPx(DEFAULT_CHART_LINE_WIDTH_IN_DP, context));
+            typedArray.recycle();
+        } else {
+            chartLineWidth = Utils.dpToPx(DEFAULT_CHART_LINE_WIDTH_IN_DP, context);
+        }
         // chart paint
-        chartPaint.setStrokeWidth(Utils.dpToPx(1.5f, context));
+        chartPaint.setStrokeWidth(chartLineWidth);
     }
 
     @Override

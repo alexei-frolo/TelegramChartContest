@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="AbsChartView">
+        <attr name="chartLineWidth" format="dimension|reference"/>
+    </declare-styleable>
+
+    <declare-styleable name="ChartSlider">
+        <attr name="overlayColor" format="color|reference"/>
+        <attr name="frameBorderColor" format="color|reference"/>
+        <attr name="frameBorderWidth" format="dimension|reference"/>
+        <attr name="maxFrameCompression" format="float|reference"/>
+    </declare-styleable>
+
+    <declare-styleable name="ChartView">
+        <attr name="xAxisStampCount" format="integer"/>
+        <attr name="yAxisBarCount" format="integer"/>
+    </declare-styleable>
+</resources>

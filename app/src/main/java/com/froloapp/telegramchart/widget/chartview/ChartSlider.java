@@ -2,6 +2,7 @@ package com.froloapp.telegramchart.widget.chartview;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -10,11 +11,13 @@ import android.util.Log;
 import android.view.MotionEvent;
 
 import com.froloapp.telegramchart.BuildConfig;
+import com.froloapp.telegramchart.R;
 import com.froloapp.telegramchart.widget.Utils;
 
 public class ChartSlider extends AbsChartView {
     // static
     private static final int DEFAULT_FRAME_STROKE_WIDTH_IN_DP = 3;
+    private static final float DEFAULT_MAX_FRAME_COMPRESSION = 0.2f;
 
     /**
      * The Slider is not currently scrolling.
@@ -43,12 +46,13 @@ public class ChartSlider extends AbsChartView {
     // If a finger touches a border in a place +- this threshold then the border must be under drag
     private float touchBorderThreshold;
 
-    private int overlayColor = Color.parseColor("#8791bbf2");
-    private int frameColor = Color.parseColor("#59346eba");
-    private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint overlayPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint framePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     private float leftBorderXPosition = 0f;
     private float rightBorderXPosition = 1f;
+
+    private float maxFrameCompression = 0.5f;
 
     // SCROLL LISTENER
     private OnScrollListener listener;
@@ -67,7 +71,29 @@ public class ChartSlider extends AbsChartView {
     }
 
     private void init(Context context, AttributeSet attrs) {
-        paint.setStrokeWidth(Utils.dpToPx(DEFAULT_FRAME_STROKE_WIDTH_IN_DP, context));
+        int overlayColor;
+        int frameBorderColor;
+        float frameBorderWidth;
+        if (attrs != null) {
+            TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.ChartSlider, 0, 0);
+            overlayColor = typedArray.getColor(R.styleable.ChartSlider_overlayColor, Color.parseColor("#AAFFFFFF"));
+            frameBorderColor = typedArray.getColor(R.styleable.ChartSlider_frameBorderColor, Color.parseColor("#AAC1C1C1"));
+            frameBorderWidth = typedArray.getDimension(R.styleable.ChartSlider_frameBorderWidth, Utils.dpToPx(DEFAULT_FRAME_STROKE_WIDTH_IN_DP, context));
+            maxFrameCompression = typedArray.getFloat(R.styleable.ChartSlider_maxFrameCompression, DEFAULT_MAX_FRAME_COMPRESSION);
+            typedArray.recycle();
+        } else {
+            overlayColor = Color.parseColor("#AAFFFFFF");
+            frameBorderColor = Color.parseColor("#AAC1C1C1");
+            frameBorderWidth = Utils.dpToPx(DEFAULT_FRAME_STROKE_WIDTH_IN_DP, context);
+            maxFrameCompression = DEFAULT_MAX_FRAME_COMPRESSION;
+        }
+        overlayPaint.setStyle(Paint.Style.FILL);
+        overlayPaint.setColor(overlayColor);
+
+        framePaint.setStyle(Paint.Style.STROKE);
+        framePaint.setStrokeWidth(frameBorderWidth);
+        framePaint.setColor(frameBorderColor);
+
         touchBorderThreshold = Utils.dpToPx(10f, context);
     }
 
@@ -128,7 +154,7 @@ public class ChartSlider extends AbsChartView {
 
     private boolean canCompressFrame(float startXPosition, float stopXPosition) {
         //return true;
-        return stopXPosition - startXPosition > 0.2f; // just fifth part. Change it if you need
+        return stopXPosition - startXPosition >= maxFrameCompression; // just fifth part. Change it if you need
     }
 
     @Override
@@ -139,14 +165,10 @@ public class ChartSlider extends AbsChartView {
         int width = getMeasuredWidth() - getPaddingLeft() - getPaddingRight();
         int height = getMeasuredHeight() - getPaddingTop() - getPaddingBottom();
 
-        paint.setColor(overlayColor);
-        paint.setStyle(Paint.Style.FILL);
-        canvas.drawRect(0, 0, width * leftBorderXPosition, height, paint);
-        canvas.drawRect(width * rightBorderXPosition, 0, width, height, paint);
+        canvas.drawRect(0, 0, width * leftBorderXPosition, height, overlayPaint);
+        canvas.drawRect(width * rightBorderXPosition, 0, width, height, overlayPaint);
 
-        paint.setColor(frameColor);
-        paint.setStyle(Paint.Style.STROKE);
-        canvas.drawRect(width * leftBorderXPosition, 0, width * rightBorderXPosition, height, paint);
+        canvas.drawRect(width * leftBorderXPosition, 0, width * rightBorderXPosition, height, framePaint);
     }
 
     @SuppressLint("ClickableViewAccessibility")
