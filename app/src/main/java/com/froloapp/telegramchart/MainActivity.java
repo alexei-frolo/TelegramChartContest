@@ -5,8 +5,12 @@ import android.content.res.AssetManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.PopupWindow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.froloapp.telegramchart.widget.chartview.ChartAdapter;
@@ -16,7 +20,7 @@ import com.froloapp.telegramchart.widget.chartview.ChartView;
 
 import java.io.InputStream;
 
-public class MainActivity extends Activity implements ChartSlider.OnScrollListener {
+public class MainActivity extends Activity implements ChartSlider.OnScrollListener, ChartView.OnStampClickListener {
 
     private ChartView chartView;
     private ChartAdapter adapter;
@@ -107,6 +111,7 @@ public class MainActivity extends Activity implements ChartSlider.OnScrollListen
                     secondChart = adapter.getChart(1);
                 }
 
+                chartView.setOnStampClickListener(MainActivity.this);
                 chartView.setAdapter(adapter);
                 chartView.setXPositions(0f, 1f);
 
@@ -132,5 +137,17 @@ public class MainActivity extends Activity implements ChartSlider.OnScrollListen
     public void onScroll(ChartSlider slider, float startStampRel, float endStampRel) {
         log("Scrolled: startStampRel=" + startStampRel + ", endStampRel=" + endStampRel);
         chartView.setXPositions(startStampRel, endStampRel);
+    }
+
+    @Override
+    public void onStampClick(float x, float y, float rawX, float rawY, long xAxis) {
+//            final View v = LayoutInflater.from(getContext()).inflate(R.layout.dialog_stamp_info, null, false);
+//            ((TextView) v.findViewById(R.id.textStamp)).setText(String.valueOf(closestXAxis));
+//            final PopupWindow popUp = new PopupWindow(v, 100, 100);
+//            Rect location = Utils.getViewLocation(this);
+//            popUp.setTouchable(true);
+//            popUp.setFocusable(true);
+//            popUp.setOutsideTouchable(true);
+//            popUp.showAtLocation(this, Gravity.END, -(int) x, +(int) y);
     }
 }

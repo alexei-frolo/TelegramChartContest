@@ -134,6 +134,11 @@ public class AbsChartView extends View implements ChartUI {
         return adapter;
     }
 
+    /*package-private*/ float getXPosition(float x) {
+        float rel = (getPaddingLeft() + x) / (getMeasuredWidth() - getPaddingRight());
+        return startXPercentage + (stopXPercentage - startXPercentage) * rel;
+    }
+
     /*package-private*/ int getXCoor(float p) {
         int contentWidth = getMeasuredWidth() - getPaddingLeft() - getPaddingRight();
         float xRelative = ((float) (p - startXPercentage)) / (stopXPercentage - startXPercentage);

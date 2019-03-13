@@ -2,8 +2,10 @@ package com.froloapp.telegramchart.widget;
 
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.View;
 
 public final class Utils {
     private Utils() {
@@ -26,5 +28,20 @@ public final class Utils {
             throw new IllegalArgumentException("Invalid percentage: " + p);
         }
         return p;
+    }
+
+    public static /*nullable*/ Rect getViewLocation(View v) {
+        int[] loc = new int[2];
+        try {
+            v.getLocationOnScreen(loc);
+        } catch (NullPointerException ignored) { // seems the view is not attached to window anymore
+            return null;
+        }
+        Rect location = new Rect();
+        location.left = loc[0];
+        location.top = loc[1];
+        location.right = location.left + v.getWidth();
+        location.bottom = location.top + v.getHeight();
+        return location;
     }
 }

@@ -9,7 +9,12 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.View;
+import android.widget.PopupWindow;
+import android.widget.TextView;
 
 import com.froloapp.telegramchart.BuildConfig;
 import com.froloapp.telegramchart.R;
@@ -28,6 +33,7 @@ public class ChartView extends AbsChartView {
     // paint tools
     private final Paint axisPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint axisTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint stampInfoPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Rect stampTextBounds = new Rect(); // here we store bounds for stamp text height
     private float axisStrokeWidth;
 
@@ -35,8 +41,10 @@ public class ChartView extends AbsChartView {
     private float touchStampThreshold;
     private float lastTouchedDownX = 0f;
     private float lastTouchedDownY = 0f;
-    private ChartData clickedChart;
-    private long clickedStamp;
+    private boolean clickedStamp = false;
+    private long clickedXAxis;
+    private float clickedXPosition;
+    private OnStampClickListener onStampClickListener;
 
     // multiply min and max Y axis value by this coefficient
     private float yValueCoefficient = 1f;
@@ -94,6 +102,14 @@ public class ChartView extends AbsChartView {
         axisTextPaint.setTextSize(textSize);
     }
 
+    public interface OnStampClickListener {
+        void onStampClick(float x, float y, float rawX, float rawY, long xAxis);
+    }
+
+    public void setOnStampClickListener(OnStampClickListener l) {
+        this.onStampClickListener = l;
+    }
+
     /* *********************************
      ********** HELPER METHODS *********
      ***********************************/
@@ -121,6 +137,7 @@ public class ChartView extends AbsChartView {
         drawPhantoms(canvas);
         drawBackground(canvas);
         drawForeground(canvas);
+        drawClickedTimestamp(canvas);
     }
 
     /**
@@ -172,6 +189,16 @@ public class ChartView extends AbsChartView {
         drawCharts(canvas);
     }
 
+    private void drawClickedTimestamp(Canvas canvas) {
+        ChartAdapter adapter = getAdapter();
+        if (adapter != null && clickedStamp) {
+            long xAxis = clickedXAxis;
+            float xPosition = clickedXPosition;
+            float x = getXCoor(xPosition);
+            canvas.drawLine(x, getPaddingTop(), x, getMeasuredHeight() - getPaddingBottom(), axisPaint);
+        }
+    }
+
     /* *********************************
      ********* TOUCH CALLBACKS *********
      **********************************/
@@ -180,6 +207,7 @@ public class ChartView extends AbsChartView {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         int action = event.getAction();
+        //clickedStamp = false;
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
                 lastTouchedDownX = event.getX();
@@ -201,7 +229,7 @@ public class ChartView extends AbsChartView {
                     && Math.abs(lastTouchedDownY - y) < touchStampThreshold) {
                     log("Clicked at (" + x + ", " + y + ")");
                     // handle click here
-                    handleClick(x, y);
+                    handleClick(x, y, event.getRawX(), event.getRawY());
                 }
                 break;
             }
@@ -209,7 +237,25 @@ public class ChartView extends AbsChartView {
         return super.onTouchEvent(event);
     }
 
-    private void handleClick(float x, float y) {
+    private void handleClick(float x, float y, float rawX, float rawY) {
+        ChartAdapter adapter = getAdapter();
+        if (adapter != null) {
+            float xPosition = getXPosition(x);
+            this.clickedXPosition = adapter.getClosestTimestampPosition(xPosition);
+            // looking for the closest X axis stamp
+            long closestXAxis = adapter.getClosestTimestamp(xPosition);
+            this.clickedXAxis = closestXAxis;
+            //dispatchClicked(x, y, rawX, rawY, closestXAxis);
 
+            this.clickedStamp = true;
+            invalidate();
+        }
+    }
+
+    private void dispatchClicked(float x, float y, float rawX, float rawY, long xAxis) {
+        OnStampClickListener l = this.onStampClickListener;
+        if (l != null) {
+            l.onStampClick(x, y, rawX, rawY, xAxis);
+        }
     }
 }

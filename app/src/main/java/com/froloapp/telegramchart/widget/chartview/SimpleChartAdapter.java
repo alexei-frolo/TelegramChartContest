@@ -77,6 +77,58 @@ public class SimpleChartAdapter implements ChartAdapter {
     }
 
     @Override
+    public float getClosestTimestampPosition(float toXPosition) {
+        long minAxis = axes.get(0);
+        long maxAxis = axes.get(axes.size() - 1);
+        //long desiredAxis = (minAxis + (long) ((maxAxis - minAxis) * timestampRel)) + 1;
+        float approximatelyDesiredAxis = (minAxis + ((maxAxis - minAxis) * toXPosition));
+        for (int i = 0; i < axes.size(); i++) {
+            long axis = axes.get(i);
+            if (axis > approximatelyDesiredAxis) {
+                float next = ((float) (axis - minAxis)) / (maxAxis - minAxis);
+                if (i > 0) {
+                    long previousAxis = axes.get(i - 1);
+                    float previous = ((float) (previousAxis - minAxis)) / (maxAxis - minAxis);
+                    if (Math.abs(previous - toXPosition) < Math.abs(next - toXPosition)) {
+                        return previous;
+                    } else {
+                        return next;
+                    }
+                } else {
+                    return next;
+                }
+            }
+        }
+        throw new IllegalArgumentException("Invalid timestamp rel: " + toXPosition);
+    }
+
+    @Override
+    public long getClosestTimestamp(float toXPosition) {
+        long minAxis = axes.get(0);
+        long maxAxis = axes.get(axes.size() - 1);
+        //long desiredAxis = (minAxis + (long) ((maxAxis - minAxis) * timestampRel)) + 1;
+        float approximatelyDesiredAxis = (minAxis + ((maxAxis - minAxis) * toXPosition));
+        for (int i = 0; i < axes.size(); i++) {
+            long axis = axes.get(i);
+            if (axis > approximatelyDesiredAxis) {
+                float next = ((float) (axis - minAxis)) / (maxAxis - minAxis);
+                if (i > 0) {
+                    long previousAxis = axes.get(i - 1);
+                    float previous = ((float) (previousAxis - minAxis)) / (maxAxis - minAxis);
+                    if (Math.abs(previous - toXPosition) < Math.abs(next - toXPosition)) {
+                        return previousAxis;
+                    } else {
+                        return axis;
+                    }
+                } else {
+                    return axis;
+                }
+            }
+        }
+        throw new IllegalArgumentException("Invalid timestamp rel: " + toXPosition);
+    }
+
+    @Override
     public boolean hasNextTimestamp(long afterXAxis) {
         int index = axes.indexOf(afterXAxis);
         return index >= 0 && index < axes.size() - 1;
