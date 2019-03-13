@@ -16,9 +16,15 @@
         android:layout_width="match_parent"
         android:layout_height="210dp"/>
 
-    <LinearLayout
+    <com.froloapp.telegramchart.widget.chartview.ChartSlider
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
+        android:background="#f1f1f1"
+        android:id="@+id/chartSlider"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"/>
+
+    <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -38,11 +44,5 @@
             android:layout_height="wrap_content"
             tools:ignore="HardcodedText" />
     </LinearLayout>
-
-    <com.froloapp.telegramchart.widget.chartview.ChartSlider
-        android:background="#f1f1f1"
-        android:id="@+id/chartSlider"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"/>
 
 </LinearLayout>
