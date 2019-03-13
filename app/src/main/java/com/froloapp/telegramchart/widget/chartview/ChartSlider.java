@@ -49,6 +49,8 @@ public class ChartSlider extends AbsChartView {
     private final Paint overlayPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint framePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
+    private float frameBorderWidth;
+
     private float leftBorderXPosition = 0f;
     private float rightBorderXPosition = 1f;
 
@@ -73,7 +75,6 @@ public class ChartSlider extends AbsChartView {
     private void init(Context context, AttributeSet attrs) {
         int overlayColor;
         int frameBorderColor;
-        float frameBorderWidth;
         if (attrs != null) {
             TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.ChartSlider, 0, 0);
             overlayColor = typedArray.getColor(R.styleable.ChartSlider_overlayColor, Color.parseColor("#AAFFFFFF"));
@@ -165,8 +166,8 @@ public class ChartSlider extends AbsChartView {
         int width = getMeasuredWidth() - getPaddingLeft() - getPaddingRight();
         int height = getMeasuredHeight() - getPaddingTop() - getPaddingBottom();
 
-        canvas.drawRect(0, 0, width * leftBorderXPosition, height, overlayPaint);
-        canvas.drawRect(width * rightBorderXPosition, 0, width, height, overlayPaint);
+        canvas.drawRect(0, 0, width * leftBorderXPosition - frameBorderWidth / 2, height, overlayPaint);
+        canvas.drawRect(width * rightBorderXPosition + frameBorderWidth / 2, 0, width, height, overlayPaint);
 
         canvas.drawRect(width * leftBorderXPosition, 0, width * rightBorderXPosition, height, framePaint);
     }
