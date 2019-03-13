@@ -31,7 +31,13 @@ public class MainActivity extends Activity implements ChartSlider.OnScrollListen
 
     private void log(String msg) {
         if (BuildConfig.DEBUG) {
-            Log.d("MainActivity", msg);
+            Log.d("ChartViewMainActivity", msg);
+        }
+    }
+
+    private void log(Throwable e) {
+        if (BuildConfig.DEBUG) {
+            Log.e("ChartViewMainActivity", "", e);
         }
     }
 
@@ -89,11 +95,14 @@ public class MainActivity extends Activity implements ChartSlider.OnScrollListen
                 // show progress here
             }
             @Override public void onError(Throwable error) {
+                log(error);
                 Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
             }
             @Override public void onResult(ChartAdapter adapter) {
-                firstChart = adapter.getChart(0);
-                secondChart = adapter.getChart(1);
+                if (adapter.getChartCount() >= 2) {
+                    firstChart = adapter.getChart(0);
+                    secondChart = adapter.getChart(1);
+                }
 
                 chartView.setAdapter(adapter);
                 chartView.setXPositions(0f, 1f);
@@ -109,9 +118,10 @@ public class MainActivity extends Activity implements ChartSlider.OnScrollListen
         jsonParserTask = newTask;
         AssetManager assets = getAssets();
         try {
-            InputStream is = assets.open("chart.json");
+            InputStream is = assets.open("chart_data.json");
             newTask.execute(is);
-        } catch (Throwable ignored) {
+        } catch (Throwable e) {
+            log(e);
         }
     }
 

@@ -36,10 +36,12 @@ public class SimpleChartAdapter implements ChartAdapter {
     public static class SimpleData implements ChartData {
         private Map<Long, Integer> data;
         private int color;
+        private String name;
 
-        public SimpleData(Map<Long, Integer> data, int color) {
+        public SimpleData(Map<Long, Integer> data, int color, String name) {
             this.data = data;
             this.color = color;
+            this.name = name;
         }
 
         @Override public int getColor() {
@@ -52,6 +54,10 @@ public class SimpleChartAdapter implements ChartAdapter {
                 throw new IllegalArgumentException("No such x axis found");
             }
             return value;
+        }
+
+        @Override public String getName() {
+            return name;
         }
     }
 

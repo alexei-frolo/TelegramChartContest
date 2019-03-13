@@ -16,11 +16,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 /**
  * Reads a json string from an input stream and parses it into chart data
  */
@@ -45,53 +42,6 @@ public class JsonParserTask extends AsyncTask<InputStream, Void, Object> {
     }
 
     @Override
-    protected Object doInBackground(InputStream... streams) {
-        try {
-            final InputStream is = streams[0];
-            final int bufferSize = 1024;
-            final char[] buffer = new char[bufferSize];
-            final StringBuilder out = new StringBuilder();
-            Reader in = new InputStreamReader(is, "UTF-8");
-            for (; ; ) {
-                int rsz = in.read(buffer, 0, buffer.length);
-                if (rsz < 0)
-                    break;
-                out.append(buffer, 0, rsz);
-            }
-            String json = out.toString();
-            JSONArray array = new JSONArray(json);
-
-            Set<Long> axesSet = new LinkedHashSet<>();
-            List<ChartData> charts = new ArrayList<>();
-
-            for (int k = 0; k < array.length(); k++) {
-                JSONArray dataArray = array.getJSONArray(k);
-                Map<Long, Integer> map = new LinkedHashMap<>();
-                for (int i = 0; i < dataArray.length(); i++) {
-                    JSONObject obj = dataArray.getJSONObject(i);
-                    long timestamp = obj.getLong("timestamp");
-                    int value = obj.getInt("value");
-                    axesSet.add(timestamp);
-                    map.put(timestamp, value);
-                }
-                int color;
-                if (k == 0) {
-                    color = Color.RED;
-                } else {
-                    color = Color.BLUE;
-                }
-                ChartData chart = new SimpleChartAdapter.SimpleData(map, color);
-                charts.add(chart);
-            }
-
-            List<Long> axes = new ArrayList<>(axesSet);
-            return new SimpleChartAdapter(axes, charts);
-        } catch (Throwable t) {
-            return t;
-        }
-    }
-
-    @Override
     protected void onPostExecute(Object o) {
         if (o instanceof ChartAdapter) {
             callback.onResult((ChartAdapter) o);
@@ -103,5 +53,88 @@ public class JsonParserTask extends AsyncTask<InputStream, Void, Object> {
     @Override
     protected void onCancelled() {
         callback.onCancelled();
+    }
+
+    @Override
+    protected Object doInBackground(InputStream... streams) {
+        try {
+            final InputStream is = streams[0];
+            String json = parseJson(is);
+            SimpleChartAdapter[] adapters = parseAdapters(json);
+            return adapters[0];
+        } catch (Throwable t) {
+            return t;
+        }
+    }
+
+    // parses input stream into json string
+    private String parseJson(InputStream is) throws Throwable {
+        final int bufferSize = 1024;
+        final char[] buffer = new char[bufferSize];
+        final StringBuilder out = new StringBuilder();
+        Reader in = new InputStreamReader(is, "UTF-8");
+        for (;; ) {
+            int rsz = in.read(buffer, 0, buffer.length);
+            if (rsz < 0)
+                break;
+            out.append(buffer, 0, rsz);
+        }
+        return out.toString();
+    }
+
+    // parses json string into chart adapters
+    private SimpleChartAdapter[] parseAdapters(String json) throws Throwable {
+        JSONArray array = new JSONArray(json);
+        int count = array.length();
+        SimpleChartAdapter[] adapters = new SimpleChartAdapter[count];
+        for (int i = 0; i < count; i++) {
+            JSONObject obj = array.getJSONObject(i);
+            adapters[i] = parseAdapter(obj);
+        }
+        return adapters;
+    }
+
+    // parses json object into chart adapter
+    private SimpleChartAdapter parseAdapter(JSONObject obj) throws Throwable {
+        JSONArray columnsJson = obj.getJSONArray("columns");
+        JSONObject typesJson = obj.getJSONObject("types");
+        JSONObject namesJson = obj.getJSONObject("names");
+        JSONObject colorsJson = obj.getJSONObject("colors");
+
+        int chartCount = columnsJson.length();
+
+        // collect timestamps first
+        List<Long> timestamps = new ArrayList<>();
+        for (int i = 0; i < chartCount; i++) {
+            JSONArray columns = columnsJson.getJSONArray(i);
+            String chartCode = columns.get(0).toString();
+            if (chartCode.equals("x")) { // these are timestamps
+                for (int j = 1; j < columns.length(); j++) {
+                    long stamp = columns.getLong(j);
+                    timestamps.add(stamp);
+                }
+            }
+        }
+
+        List<ChartData> charts = new ArrayList<>();
+        for (int i = 0; i < chartCount; i++) {
+            JSONArray columns = columnsJson.getJSONArray(i);
+            String chartCode = columns.get(0).toString();
+            if (chartCode.equals("x")) { // continue
+            } else {
+                Map<Long, Integer> map = new LinkedHashMap<>();
+                for (int j = 1; j < columns.length(); j++) {
+                    int value = columns.getInt(j);
+                    long stamp = timestamps.get(j - 1);
+                    map.put(stamp, value);
+                }
+                String type = typesJson.getString(chartCode); // what to do with this??
+                String name = namesJson.getString(chartCode);
+                String color = colorsJson.getString(chartCode);
+                ChartData data = new SimpleChartAdapter.SimpleData(map, Color.parseColor(color), name);
+                charts.add(data);
+            }
+        }
+        return new SimpleChartAdapter(timestamps, charts);
     }
 }
