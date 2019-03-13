@@ -14,5 +14,6 @@
     <declare-styleable name="ChartView">
         <attr name="xAxisStampCount" format="integer"/>
         <attr name="yAxisBarCount" format="integer"/>
+        <attr name="axisColor" format="color|reference"/>
     </declare-styleable>
 </resources>

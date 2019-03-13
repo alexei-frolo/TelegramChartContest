@@ -7,10 +7,11 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical"
-    android:padding="10dp"
+    android:padding="5dp"
     tools:context=".MainActivity">
 
     <com.froloapp.telegramchart.widget.chartview.ChartView
+        android:padding="5dp"
         android:background="#f1f1f1"
         android:id="@+id/chartView"
         android:layout_width="match_parent"

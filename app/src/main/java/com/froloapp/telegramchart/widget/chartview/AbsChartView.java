@@ -145,9 +145,9 @@ public class AbsChartView extends View implements ChartUI {
         return (int) (getPaddingLeft() + xRelative * contentWidth);
     }
 
-    /*package-private*/ int getYCoor(float value, float minValue, float maxValue) {
+    /*package-private*/ int getYCoor(float value) {
         int contentHeight = getMeasuredHeight() - getPaddingTop() - getPaddingBottom();
-        float yRelative = (value - minValue) / (maxValue - minValue);
+        float yRelative = (value - minYValue) / (maxYValue - minYValue);
         return (int) (getMeasuredHeight() - getPaddingTop() - yRelative * contentHeight);
     }
 
@@ -295,7 +295,7 @@ public class AbsChartView extends View implements ChartUI {
 
             bufferPath.reset();
             int xCoor = getXCoor(timestampPosX);
-            int yCoor = getYCoor(value, minYValue, maxYValue);
+            int yCoor = getYCoor(value);
             bufferPath.moveTo(xCoor, yCoor);
 
             while (adapter.hasNextTimestamp(timestamp)) {
@@ -304,7 +304,7 @@ public class AbsChartView extends View implements ChartUI {
 
                 value = data.getValue(timestamp);
                 xCoor = getXCoor(timestampPosX);
-                yCoor = getYCoor(value, minYValue, maxYValue);
+                yCoor = getYCoor(value);
                 bufferPath.lineTo(xCoor, yCoor);
 
                 if (timestampPosX > stopXPercentage)

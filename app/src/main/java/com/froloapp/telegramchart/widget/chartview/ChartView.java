@@ -31,6 +31,9 @@ public class ChartView extends AbsChartView {
     private final Paint stampInfoPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Rect stampTextBounds = new Rect(); // here we store bounds for stamp text height
     private float axisStrokeWidth;
+    private int axisColor;
+    private float stampInfoBigDotRadius;
+    private float stampInfoSmallDotRadius;
 
     // touch
     private float touchStampThreshold;
@@ -73,10 +76,12 @@ public class ChartView extends AbsChartView {
             TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.ChartView, 0, 0);
             xAxisStampCount = typedArray.getColor(R.styleable.ChartView_xAxisStampCount, DEFAULT_X_AXIS_STAMP_COUNT);
             yAxisBarCount = typedArray.getInteger(R.styleable.ChartView_yAxisBarCount, DEFAULT_Y_AXIS_BAR_COUNT);
+            axisColor = typedArray.getColor(R.styleable.ChartView_axisColor, Color.GRAY);
             typedArray.recycle();
         } else {
             xAxisStampCount = DEFAULT_X_AXIS_STAMP_COUNT;
             yAxisBarCount = DEFAULT_Y_AXIS_BAR_COUNT;
+            axisColor = Color.GRAY;
         }
 
         // touch
@@ -87,14 +92,21 @@ public class ChartView extends AbsChartView {
         axisPaint.setStrokeWidth(axisStrokeWidth);
         axisPaint.setStyle(Paint.Style.STROKE);
         // color for y axis bars and x axis stamps
-        axisPaint.setColor(Color.GRAY);
+        axisPaint.setColor(axisColor);
 
         // axis text paint
         float textSize = Utils.spToPx(DEFAULT_TEXT_HEIGHT_IN_SP, context);
         axisTextPaint.setStyle(Paint.Style.FILL);
         axisTextPaint.setStrokeWidth(axisStrokeWidth);
-        axisTextPaint.setColor(Color.GRAY);
+        axisTextPaint.setColor(axisColor);
         axisTextPaint.setTextSize(textSize);
+
+        // stamp info paint
+        stampInfoPaint.setStrokeWidth(axisStrokeWidth);
+        stampInfoPaint.setStyle(Paint.Style.STROKE);
+
+        stampInfoBigDotRadius = Utils.dpToPx(4f, context);
+        stampInfoSmallDotRadius = Utils.dpToPx(2f, context);
     }
 
     public interface OnStampClickListener {
@@ -190,7 +202,22 @@ public class ChartView extends AbsChartView {
             long xAxis = clickedXAxis;
             float xPosition = clickedXPosition;
             float x = getXCoor(xPosition);
-            canvas.drawLine(x, getPaddingTop(), x, getMeasuredHeight() - getPaddingBottom(), axisPaint);
+            stampInfoPaint.setStyle(Paint.Style.STROKE);
+            stampInfoPaint.setColor(axisColor);
+            canvas.drawLine(x, getPaddingTop(), x, getMeasuredHeight() - getPaddingBottom(), stampInfoPaint);
+
+            for (int i = 0; i < adapter.getChartCount(); i++) {
+                ChartData chart = adapter.getChart(i);
+                if (adapter.isVisible(chart)) {
+                    stampInfoPaint.setStyle(Paint.Style.FILL);
+                    stampInfoPaint.setColor(chart.getColor());
+                    long value = chart.getValue(xAxis);
+                    float y = getYCoor(value);
+                    canvas.drawCircle(x, y, stampInfoBigDotRadius, stampInfoPaint);
+                    stampInfoPaint.setColor(Color.WHITE);
+                    canvas.drawCircle(x, y, stampInfoSmallDotRadius, stampInfoPaint);
+                }
+            }
         }
     }
 
