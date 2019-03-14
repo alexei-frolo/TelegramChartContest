@@ -7,4 +7,8 @@
     <color name="white">#FFFFFF</color>
     <color name="lt_gray">#E2E2E2</color>
     <color name="gray">#C3C3C3</color>
+
+    <color name="slider_overlay">#AAF5F8F9</color>
+    <color name="slider_frame">#AADDE7EF</color>
+    <color name="chart_axis">#97A1A9</color>
 </resources>
