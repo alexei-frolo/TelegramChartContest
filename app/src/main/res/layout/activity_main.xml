@@ -8,26 +8,25 @@
     android:gravity="center"
     android:orientation="vertical"
     android:padding="5dp"
+    android:background="@color/white"
     tools:context=".MainActivity">
 
     <com.froloapp.telegramchart.widget.chartview.ChartView
         app:xAxisColor="@color/chart_axis"
         app:yAxisColor="@color/chart_axis"
         android:padding="5dp"
-        android:background="#f1f1f1"
         android:id="@+id/chartView"
         android:layout_width="match_parent"
         android:layout_height="210dp"/>
 
     <com.froloapp.telegramchart.widget.chartview.ChartSlider
-        app:overlayColor="@color/slider_frame"
+        app:overlayColor="@color/slider_overlay"
         app:frameBorderColor="@color/slider_frame"
         app:frameHorizontalBorderWidth="5dp"
         app:frameVerticalBorderWidth="1dp"
         app:maxFrameCompression="0.2"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
-        android:background="#f1f1f1"
         android:id="@+id/chartSlider"
         android:layout_width="match_parent"
         android:layout_height="50dp"/>
