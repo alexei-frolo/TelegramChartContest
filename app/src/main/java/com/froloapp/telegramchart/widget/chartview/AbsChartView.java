@@ -58,6 +58,7 @@ public class AbsChartView extends View implements ChartUI {
     private float maxYValue;
     private float stretchingY;
     private float yAxisAlpha;
+    private boolean drawYPhantoms;
 
     // axis
     private float axisStrokeWidth;
@@ -68,7 +69,10 @@ public class AbsChartView extends View implements ChartUI {
 
     // x axes
     private int xAxisStampCount;
+    private int xAxisStepCount; // stamp are drawn through this step
     private int xAxisColor;
+    private float xAxisAlpha;
+    private boolean drawXPhantoms;
 
     // Animators
     private ValueAnimator yAxisAnimator;
@@ -111,6 +115,7 @@ public class AbsChartView extends View implements ChartUI {
     };
     private final ValueAnimator.AnimatorListener yAxisAnimListener = new Animator.AnimatorListener() {
         @Override public void onAnimationStart(Animator animation) {
+            drawYPhantoms = true;
         }
         @Override public void onAnimationEnd(Animator animation) {
             finish();
@@ -118,15 +123,34 @@ public class AbsChartView extends View implements ChartUI {
         @Override public void onAnimationCancel(Animator animation) {
             finish();
         }
-        @Override public void onAnimationRepeat(Animator animation) {
-        }
+        @Override public void onAnimationRepeat(Animator animation) { }
         void finish() {
+            drawYPhantoms = false;
             yAxisAlpha = 1f;
             stretchingY = 1f;
             invalidate();
         }
     };
     private final Interpolator yValueInterpolator = new AccelerateDecelerateInterpolator();
+
+    private final ValueAnimator.AnimatorListener xAxisAnimListener = new Animator.AnimatorListener() {
+        @Override public void onAnimationStart(Animator animation) {
+            drawXPhantoms = true;
+        }
+        @Override public void onAnimationEnd(Animator animation) {
+            finish();
+        }
+        @Override public void onAnimationCancel(Animator animation) {
+            finish();
+        }
+        @Override public void onAnimationRepeat(Animator animation) { }
+        void finish() {
+            drawXPhantoms = false;
+            xAxisAlpha = 1f;
+            invalidate();
+        }
+    };
+    private final Interpolator xValueInterpolator = new AccelerateDecelerateInterpolator();
 
     // Faded in/out chart
     private ChartData fadedChart = null;
@@ -377,11 +401,19 @@ public class AbsChartView extends View implements ChartUI {
     }
 
     /**
+     * Draws X axis stamps;
+     * @param canvas canvas
+     */
+    protected void drawXAxis(Canvas canvas) {
+        log("Drawing X axis");
+    }
+
+    /**
      * Draws Y axis bars with Y stamps;
      * @param canvas canvas
      */
     protected void drawYAxis(Canvas canvas) {
-        log("Drawing background layer");
+        log("Drawing Y axis");
         ChartAdapter adapter = getAdapter();
         if (adapter == null) return;
 
@@ -389,27 +421,29 @@ public class AbsChartView extends View implements ChartUI {
         int startX = getPaddingLeft();
         int stopX = getMeasuredWidth() - getPaddingRight();
 
-        float yAxisBarStepFadeIn = (getMaxYValue() - getMinYValue()) / yAxisStampCount;
-        float yAxisBarStepFadeOut = (getMaxYValue() - getMinYValue()) / yAxisStampCount * getStretchingY();
+        float yAxisBarStepFadeIn = (getMaxYValue() - getMinYValue()) / yAxisStampCount * getStretchingY();
+        float yAxisBarStepFadeOut = (getMaxYValue() - getMinYValue()) / yAxisStampCount;
 
-//        int fadeInAlpha = (int) (255 * yAxisAlpha);
-//        int fadeOutAlpha = (int) (255 * (1 - yAxisAlpha));
-        int fadeInAlpha = (int) (255 * (1 - yAxisAlpha));
-        int fadeOutAlpha = (int) (255 * yAxisAlpha);
+        int fadeInAlpha = (int) (255 * yAxisAlpha);
+        int fadeOutAlpha = (int) (255 * (1 - yAxisAlpha));
+        //int fadeInAlpha = (int) (255 * (1 - yAxisAlpha));
+        //int fadeOutAlpha = (int) (255 * yAxisAlpha);
 
-        // Drawing fading out bars
-        yAxisPaint.setAlpha(fadeOutAlpha);
-        yAxisTextPaint.setAlpha(fadeOutAlpha);
-        for (int i = 0; i < yAxisStampCount; i++) {
-            float value = getMinYValue() + i * yAxisBarStepFadeOut;
-            float yFadeOut = getYCoor(value) - (axisStrokeWidth / 2 + 1);
-            // bar line
-            canvas.drawLine(startX, yFadeOut, stopX, yFadeOut, yAxisPaint);
+        if (drawYPhantoms) {
+            // Drawing fading out bars
+            yAxisPaint.setAlpha(fadeOutAlpha);
+            yAxisTextPaint.setAlpha(fadeOutAlpha);
+            for (int i = 0; i < yAxisStampCount; i++) {
+                float value = getMinYValue() + i * yAxisBarStepFadeOut;
+                float yFadeOut = getYCoor(value) - (axisStrokeWidth / 2 + 1);
+                // bar line
+                canvas.drawLine(startX, yFadeOut, stopX, yFadeOut, yAxisPaint);
 
-            // bar text
-            String text = adapter.getYBarText((int) value);
-            yAxisPaint.getTextBounds(text, 0, text.length(), stampTextBounds);
-            canvas.drawText(text, startX, yFadeOut, yAxisTextPaint);
+                // bar text
+                String text = adapter.getYBarText((int) value);
+                yAxisPaint.getTextBounds(text, 0, text.length(), stampTextBounds);
+                canvas.drawText(text, startX, yFadeOut, yAxisTextPaint);
+            }
         }
 
         // Drawing fading in bars

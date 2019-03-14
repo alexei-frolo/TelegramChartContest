@@ -97,6 +97,7 @@ public class ChartView extends AbsChartView {
 
     @Override
     protected void onDraw(Canvas canvas) {
+        drawXAxis(canvas);
         drawYAxis(canvas);
         drawForeground(canvas);
         drawClickedTimestamp(canvas);
