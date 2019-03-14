@@ -33,17 +33,21 @@ public class AbsChartView extends View implements ChartUI {
     private static final int DEFAULT_TEXT_HEIGHT_IN_SP = 15;
     private static final long ANIM_DURATION = 300L;
 
+    private static final int DEFAULT_X_AXIS_STAMP_COUNT = 5;
+    private static final int DEFAULT_Y_AXIS_BAR_COUNT = 5;
+
     private static final float DEFAULT_CHART_LINE_WIDTH_IN_DP = 1.5f;
 
     private ChartAdapter adapter;
 
     // paint tools
     private final Paint chartPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final Paint yAxisBarPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint yAxisPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint yAxisTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint xAxisPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint xAxisTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Path bufferPath = new Path(); // buffer path to avoid allocating to many paths for multiple charts
     private final Rect stampTextBounds = new Rect(); // here we store bounds for stamp text height
-    private float yAxisLineWidth;
 
     // current start and stop positions on X Axis in percentage(from 0 to 1)
     private float startXPercentage;
@@ -53,8 +57,18 @@ public class AbsChartView extends View implements ChartUI {
     private float minYValue;
     private float maxYValue;
     private float stretchingY;
-    private int yAxisBarCount = 5;
     private float yAxisAlpha;
+
+    // axis
+    private float axisStrokeWidth;
+
+    // y axes
+    private int yAxisStampCount;
+    private int yAxisColor;
+
+    // x axes
+    private int xAxisStampCount;
+    private int xAxisColor;
 
     // Animators
     private ValueAnimator yAxisAnimator;
@@ -150,20 +164,39 @@ public class AbsChartView extends View implements ChartUI {
         } else {
             chartLineWidth = Utils.dpToPx(DEFAULT_CHART_LINE_WIDTH_IN_DP, context);
         }
+
+        if (attrs != null) {
+            TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.ChartView, 0, 0);
+            xAxisStampCount = typedArray.getColor(R.styleable.AbsChartView_xAxisStampCount, DEFAULT_X_AXIS_STAMP_COUNT);
+            yAxisStampCount = typedArray.getInteger(R.styleable.AbsChartView_yAxisStampCount, DEFAULT_Y_AXIS_BAR_COUNT);
+            xAxisColor = typedArray.getColor(R.styleable.AbsChartView_xAxisColor, Color.LTGRAY);
+            yAxisColor = typedArray.getColor(R.styleable.AbsChartView_yAxisColor, Color.LTGRAY);
+            typedArray.recycle();
+        } else {
+            xAxisStampCount = DEFAULT_X_AXIS_STAMP_COUNT;
+            yAxisStampCount = DEFAULT_Y_AXIS_BAR_COUNT;
+            xAxisColor = Color.LTGRAY;
+            yAxisColor = Color.LTGRAY;
+        }
+
         // chart paint
         chartPaint.setStrokeWidth(chartLineWidth);
 
         // axis paint
-        yAxisLineWidth = Utils.dpToPx(1f, context);
-        yAxisBarPaint.setStrokeWidth(yAxisLineWidth);
-        yAxisBarPaint.setStyle(Paint.Style.STROKE);
+        axisStrokeWidth = Utils.dpToPx(1f, context);
+        yAxisPaint.setStrokeWidth(axisStrokeWidth);
+        yAxisPaint.setStyle(Paint.Style.STROKE);
         // color for y axis bars and x axis stamps
-        yAxisBarPaint.setColor(Color.LTGRAY);
+        yAxisPaint.setColor(yAxisColor);
 
         yAxisTextPaint.setStyle(Paint.Style.FILL);
         float textSize = Utils.spToPx(DEFAULT_TEXT_HEIGHT_IN_SP, context);
         yAxisTextPaint.setTextSize(textSize);
-        yAxisTextPaint.setColor(Color.LTGRAY);
+        yAxisTextPaint.setColor(yAxisColor);
+    }
+
+    public int getXAxisColor() {
+        return xAxisColor;
     }
 
     @Override
@@ -347,7 +380,7 @@ public class AbsChartView extends View implements ChartUI {
      * Draws Y axis bars with Y stamps;
      * @param canvas canvas
      */
-    protected void drawYAxisBars(Canvas canvas) {
+    protected void drawYAxis(Canvas canvas) {
         log("Drawing background layer");
         ChartAdapter adapter = getAdapter();
         if (adapter == null) return;
@@ -356,8 +389,8 @@ public class AbsChartView extends View implements ChartUI {
         int startX = getPaddingLeft();
         int stopX = getMeasuredWidth() - getPaddingRight();
 
-        float yAxisBarStepFadeIn = (getMaxYValue() - getMinYValue()) / yAxisBarCount;
-        float yAxisBarStepFadeOut = (getMaxYValue() - getMinYValue()) / yAxisBarCount * getStretchingY();
+        float yAxisBarStepFadeIn = (getMaxYValue() - getMinYValue()) / yAxisStampCount;
+        float yAxisBarStepFadeOut = (getMaxYValue() - getMinYValue()) / yAxisStampCount * getStretchingY();
 
 //        int fadeInAlpha = (int) (255 * yAxisAlpha);
 //        int fadeOutAlpha = (int) (255 * (1 - yAxisAlpha));
@@ -365,32 +398,32 @@ public class AbsChartView extends View implements ChartUI {
         int fadeOutAlpha = (int) (255 * yAxisAlpha);
 
         // Drawing fading out bars
-        yAxisBarPaint.setAlpha(fadeOutAlpha);
+        yAxisPaint.setAlpha(fadeOutAlpha);
         yAxisTextPaint.setAlpha(fadeOutAlpha);
-        for (int i = 0; i < yAxisBarCount; i++) {
+        for (int i = 0; i < yAxisStampCount; i++) {
             float value = getMinYValue() + i * yAxisBarStepFadeOut;
-            float yFadeOut = getYCoor(value) - (yAxisLineWidth / 2 + 1);
+            float yFadeOut = getYCoor(value) - (axisStrokeWidth / 2 + 1);
             // bar line
-            canvas.drawLine(startX, yFadeOut, stopX, yFadeOut, yAxisBarPaint);
+            canvas.drawLine(startX, yFadeOut, stopX, yFadeOut, yAxisPaint);
 
             // bar text
             String text = adapter.getYBarText((int) value);
-            yAxisBarPaint.getTextBounds(text, 0, text.length(), stampTextBounds);
+            yAxisPaint.getTextBounds(text, 0, text.length(), stampTextBounds);
             canvas.drawText(text, startX, yFadeOut, yAxisTextPaint);
         }
 
         // Drawing fading in bars
-        yAxisBarPaint.setAlpha(fadeInAlpha);
+        yAxisPaint.setAlpha(fadeInAlpha);
         yAxisTextPaint.setAlpha(fadeInAlpha);
-        for (int i = 0; i < yAxisBarCount; i++) {
+        for (int i = 0; i < yAxisStampCount; i++) {
             //float y = getMeasuredHeight() - getPaddingBottom() - i * yAxisBarStep - (axisStrokeWidth / 2 + 1);
             float value = getMinYValue() + i * yAxisBarStepFadeIn;
-            float yFadeIn = getYCoor(value) - (yAxisLineWidth / 2 + 1);
-            canvas.drawLine(startX, yFadeIn, stopX, yFadeIn, yAxisBarPaint);
+            float yFadeIn = getYCoor(value) - (axisStrokeWidth / 2 + 1);
+            canvas.drawLine(startX, yFadeIn, stopX, yFadeIn, yAxisPaint);
 
             // bar text
             String text = adapter.getYBarText((int) value);
-            yAxisBarPaint.getTextBounds(text, 0, text.length(), stampTextBounds);
+            yAxisPaint.getTextBounds(text, 0, text.length(), stampTextBounds);
             canvas.drawText(text, startX, yFadeIn, yAxisTextPaint);
         }
     }

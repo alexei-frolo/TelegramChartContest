@@ -2,36 +2,26 @@ package com.froloapp.telegramchart.widget.chartview;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 
 import com.froloapp.telegramchart.BuildConfig;
-import com.froloapp.telegramchart.R;
 import com.froloapp.telegramchart.widget.Utils;
 
 
 public class ChartView extends AbsChartView {
     // static
-    private static final int DEFAULT_X_AXIS_STAMP_COUNT = 5;
-    private static final int DEFAULT_Y_AXIS_BAR_COUNT = 5;
 
     private static final int DEFAULT_TEXT_HEIGHT_IN_SP = 15;
     private static final int TOUCH_STAMP_THRESHOLD_IN_DP = 5;
     private static final long ANIM_DURATION = 200L;
 
     // paint tools
-    private final Paint axisPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final Paint axisTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint stampInfoPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final Rect stampTextBounds = new Rect(); // here we store bounds for stamp text height
-    private float axisStrokeWidth;
-    private int axisColor;
     private float stampInfoBigDotRadius;
     private float stampInfoSmallDotRadius;
 
@@ -50,14 +40,6 @@ public class ChartView extends AbsChartView {
     // Background (Axes)
     private float axisAlpha = 1f;
 
-    // y axes
-    private int yAxisBarCount;
-    //private float yAxisStep = 0f;
-
-    // x axes
-    private int xAxisStampCount;
-    private float xAxisStep = 0f;
-
     public ChartView(Context context) {
         this(context, null);
     }
@@ -72,37 +54,11 @@ public class ChartView extends AbsChartView {
     }
 
     private void init(Context context, AttributeSet attrs) {
-        if (attrs != null) {
-            TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.ChartView, 0, 0);
-            xAxisStampCount = typedArray.getColor(R.styleable.ChartView_xAxisStampCount, DEFAULT_X_AXIS_STAMP_COUNT);
-            yAxisBarCount = typedArray.getInteger(R.styleable.ChartView_yAxisBarCount, DEFAULT_Y_AXIS_BAR_COUNT);
-            axisColor = typedArray.getColor(R.styleable.ChartView_axisColor, Color.GRAY);
-            typedArray.recycle();
-        } else {
-            xAxisStampCount = DEFAULT_X_AXIS_STAMP_COUNT;
-            yAxisBarCount = DEFAULT_Y_AXIS_BAR_COUNT;
-            axisColor = Color.GRAY;
-        }
-
         // touch
         touchStampThreshold = Utils.dpToPx(TOUCH_STAMP_THRESHOLD_IN_DP, context);
 
-        // axis paint
-        axisStrokeWidth = Utils.dpToPx(1f, context);
-        axisPaint.setStrokeWidth(axisStrokeWidth);
-        axisPaint.setStyle(Paint.Style.STROKE);
-        // color for y axis bars and x axis stamps
-        axisPaint.setColor(axisColor);
-
-        // axis text paint
-        float textSize = Utils.spToPx(DEFAULT_TEXT_HEIGHT_IN_SP, context);
-        axisTextPaint.setStyle(Paint.Style.FILL);
-        axisTextPaint.setStrokeWidth(axisStrokeWidth);
-        axisTextPaint.setColor(axisColor);
-        axisTextPaint.setTextSize(textSize);
-
         // stamp info paint
-        stampInfoPaint.setStrokeWidth(axisStrokeWidth);
+        stampInfoPaint.setStrokeWidth(Utils.dpToPx(1f, context));
         stampInfoPaint.setStyle(Paint.Style.STROKE);
 
         stampInfoBigDotRadius = Utils.dpToPx(4f, context);
@@ -131,7 +87,7 @@ public class ChartView extends AbsChartView {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         // update important values here
-        //yAxisStep = ((float) (getMeasuredHeight() - getPaddingTop() - getPaddingBottom())) / yAxisBarCount;
+        //yAxisStep = ((float) (getMeasuredHeight() - getPaddingTop() - getPaddingBottom())) / yAxisStampCount;
         log("View measured");
     }
 
@@ -141,7 +97,7 @@ public class ChartView extends AbsChartView {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        drawYAxisBars(canvas);
+        drawYAxis(canvas);
         drawForeground(canvas);
         drawClickedTimestamp(canvas);
     }
@@ -163,7 +119,7 @@ public class ChartView extends AbsChartView {
             float x = getXCoor(xPosition);
             stampInfoPaint.setAlpha(255);
             stampInfoPaint.setStyle(Paint.Style.STROKE);
-            stampInfoPaint.setColor(axisColor);
+            stampInfoPaint.setColor(getXAxisColor());
             canvas.drawLine(x, getPaddingTop(), x, getMeasuredHeight() - getPaddingBottom(), stampInfoPaint);
 
             ChartData fadedChart = getFadedChart();
