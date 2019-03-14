@@ -1,6 +1,15 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'Frolo'
+            keyPassword 'j15avaCkurt7'
+            storeFile file('../frolojks.jks')
+            storePassword 'j15avaCkurt7'
+        }
+    }
+
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.froloapp.telegramchart"
@@ -11,11 +20,20 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
-        release {
+        debug {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            resValue "string", "app_name", "Telegram Chart Dev"
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            versionNameSuffix "-D"
+        }
+        release {
+            resValue "string", "app_name", "Telegram Chart"
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            versionNameSuffix "-R"
+            signingConfig signingConfigs.config
         }
     }
+
 }
 
 dependencies {
