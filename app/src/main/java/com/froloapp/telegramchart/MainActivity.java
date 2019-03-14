@@ -99,7 +99,7 @@ public class MainActivity extends Activity implements ChartSlider.OnScrollListen
                 Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
             }
             @Override public void onResult(ChartAdapter[] adapters) {
-                ChartAdapter adapter = adapters[2];
+                ChartAdapter adapter = adapters[0];
                 MainActivity.this.adapter = adapter;
 
                 if (adapter.getChartCount() >= 2) {
