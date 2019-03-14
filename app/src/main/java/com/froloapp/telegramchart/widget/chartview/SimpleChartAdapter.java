@@ -330,4 +330,14 @@ public class SimpleChartAdapter implements ChartAdapter {
             }
         }
     }
+
+    @Override
+    public String getYBarText(int value) {
+        return String.valueOf(value);
+    }
+
+    @Override
+    public String getXStampText(long timestamp) {
+        return String.valueOf(timestamp);
+    }
 }

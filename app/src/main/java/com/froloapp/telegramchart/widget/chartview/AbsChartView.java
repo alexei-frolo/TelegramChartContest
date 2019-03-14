@@ -7,8 +7,10 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Property;
@@ -28,7 +30,8 @@ public class AbsChartView extends View implements ChartUI {
     // static
     private static final int DEFAULT_WIDTH_IN_DP = 200;
     private static final int DEFAULT_HEIGHT_IN_DP = 100;
-    private static final long ANIM_DURATION = 200L;
+    private static final int DEFAULT_TEXT_HEIGHT_IN_SP = 15;
+    private static final long ANIM_DURATION = 300L;
 
     private static final float DEFAULT_CHART_LINE_WIDTH_IN_DP = 1.5f;
 
@@ -36,7 +39,11 @@ public class AbsChartView extends View implements ChartUI {
 
     // paint tools
     private final Paint chartPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint yAxisBarPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint yAxisTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Path bufferPath = new Path(); // buffer path to avoid allocating to many paths for multiple charts
+    private final Rect stampTextBounds = new Rect(); // here we store bounds for stamp text height
+    private float yAxisLineWidth;
 
     // current start and stop positions on X Axis in percentage(from 0 to 1)
     private float startXPercentage;
@@ -45,21 +52,63 @@ public class AbsChartView extends View implements ChartUI {
     // current min and max value on Y axis
     private float minYValue;
     private float maxYValue;
+    private float stretchingY;
+    private int yAxisBarCount = 5;
+    private float yAxisAlpha;
 
     // Animators
-    private ValueAnimator minValueAnimator;
-    private ValueAnimator maxValueAnimator;
+    private ValueAnimator yAxisAnimator;
 
-    // Animator update listener
-    private final ValueAnimator.AnimatorUpdateListener minYValueUpdateListener = new ValueAnimator.AnimatorUpdateListener() {
-        @Override public void onAnimationUpdate(ValueAnimator animation) {
-            AbsChartView.this.minYValue = (float) animation.getAnimatedValue();
-            invalidate();
+    private final static Property<AbsChartView, Float> MIN_Y_VALUE = new Property<AbsChartView, Float>(float.class, "minYValue") {
+        @Override public Float get(AbsChartView object) {
+            return object.minYValue;
+        }
+        @Override public void set(AbsChartView object, Float value) {
+            object.minYValue = value;
+            object.invalidate();
         }
     };
-    private final ValueAnimator.AnimatorUpdateListener maxYValueUpdateListener = new ValueAnimator.AnimatorUpdateListener() {
-        @Override public void onAnimationUpdate(ValueAnimator animation) {
-            AbsChartView.this.maxYValue = (float) animation.getAnimatedValue();
+    private final static Property<AbsChartView, Float> MAX_Y_VALUE = new Property<AbsChartView, Float>(float.class, "maxYValue") {
+        @Override public Float get(AbsChartView object) {
+            return object.maxYValue;
+        }
+        @Override public void set(AbsChartView object, Float value) {
+            object.maxYValue = value;
+            object.invalidate();
+        }
+    };
+    private final static Property<AbsChartView, Float> STRETCHING_Y = new Property<AbsChartView, Float>(float.class, "stretchingY") {
+        @Override public Float get(AbsChartView object) {
+            return object.stretchingY;
+        }
+        @Override public void set(AbsChartView object, Float value) {
+            object.stretchingY = value;
+            object.invalidate();
+        }
+    };
+    private final static Property<AbsChartView, Float> Y_AXIS_ALPHA = new Property<AbsChartView, Float>(float.class, "yAxisAlpha") {
+        @Override public Float get(AbsChartView object) {
+            return object.yAxisAlpha;
+        }
+        @Override public void set(AbsChartView object, Float value) {
+            object.yAxisAlpha = value;
+            object.invalidate();
+        }
+    };
+    private final ValueAnimator.AnimatorListener yAxisAnimListener = new Animator.AnimatorListener() {
+        @Override public void onAnimationStart(Animator animation) {
+        }
+        @Override public void onAnimationEnd(Animator animation) {
+            finish();
+        }
+        @Override public void onAnimationCancel(Animator animation) {
+            finish();
+        }
+        @Override public void onAnimationRepeat(Animator animation) {
+        }
+        void finish() {
+            yAxisAlpha = 1f;
+            stretchingY = 1f;
             invalidate();
         }
     };
@@ -103,6 +152,18 @@ public class AbsChartView extends View implements ChartUI {
         }
         // chart paint
         chartPaint.setStrokeWidth(chartLineWidth);
+
+        // axis paint
+        yAxisLineWidth = Utils.dpToPx(1f, context);
+        yAxisBarPaint.setStrokeWidth(yAxisLineWidth);
+        yAxisBarPaint.setStyle(Paint.Style.STROKE);
+        // color for y axis bars and x axis stamps
+        yAxisBarPaint.setColor(Color.LTGRAY);
+
+        yAxisTextPaint.setStyle(Paint.Style.FILL);
+        float textSize = Utils.spToPx(DEFAULT_TEXT_HEIGHT_IN_SP, context);
+        yAxisTextPaint.setTextSize(textSize);
+        yAxisTextPaint.setColor(Color.LTGRAY);
     }
 
     @Override
@@ -110,14 +171,11 @@ public class AbsChartView extends View implements ChartUI {
         super.onDetachedFromWindow();
         // We need to cancel all animations here
 
-        ValueAnimator a1 = minValueAnimator;
+        ValueAnimator a1 = yAxisAnimator;
         if (a1 != null) a1.cancel();
 
-        ValueAnimator a2 = maxValueAnimator;
+        ValueAnimator a2 = fadedChartAnimator;
         if (a2 != null) a2.cancel();
-
-        ValueAnimator a3 = fadedChartAnimator;
-        if (a3 != null) a3.cancel();
     }
 
     /* *********************************
@@ -132,6 +190,18 @@ public class AbsChartView extends View implements ChartUI {
 
     /*package-private*/ ChartAdapter getAdapter() {
         return adapter;
+    }
+
+    /*package-private*/ float getMinYValue() {
+        return minYValue;
+    }
+
+    /*package-private*/ float getMaxYValue() {
+        return maxYValue;
+    }
+
+    /*package-private*/ float getStretchingY() {
+        return stretchingY;
     }
 
     /*package-private*/ float getXPosition(float x) {
@@ -178,32 +248,31 @@ public class AbsChartView extends View implements ChartUI {
         ChartAdapter adapter = this.adapter;
         if (adapter == null) return;
 
+        float oldRange = maxYValue - minYValue;
+
         int minValue = adapter.getMinYValue(startXPercentage, stopXPercentage);
         int maxValue = adapter.getMaxXValue(startXPercentage, stopXPercentage);
+        float newRange = maxValue - minValue;
+
+        this.stretchingY = newRange / oldRange;
+        this.yAxisAlpha = 0.1f;
+
         // check min value
-        if (minValue != this.minYValue) {
+        if (minValue != this.minYValue || maxValue != this.maxYValue) {
             log("Min Y value changed. Starting animator");
-            ValueAnimator oldAnimator = minValueAnimator;
+            ValueAnimator oldAnimator = yAxisAnimator;
             if (oldAnimator != null) oldAnimator.cancel();
 
-            ValueAnimator newAnimator = ValueAnimator.ofFloat(this.minYValue, minValue);
-            newAnimator.addUpdateListener(minYValueUpdateListener);
-            newAnimator.setInterpolator(yValueInterpolator);
-            newAnimator.setDuration(ANIM_DURATION);
-            minValueAnimator = newAnimator;
-            newAnimator.start();
-        }
-        // check max value
-        if (maxValue != this.maxYValue) {
-            log("Max Y value changed. Starting animator");
-            ValueAnimator oldAnimator = maxValueAnimator;
-            if (oldAnimator != null) oldAnimator.cancel();
+            PropertyValuesHolder h1 = PropertyValuesHolder.ofFloat(MIN_Y_VALUE, minValue);
+            PropertyValuesHolder h2 = PropertyValuesHolder.ofFloat(MAX_Y_VALUE, maxValue);
+            PropertyValuesHolder h3 = PropertyValuesHolder.ofFloat(STRETCHING_Y, 1f);
+            PropertyValuesHolder h4 = PropertyValuesHolder.ofFloat(Y_AXIS_ALPHA, 1f);
 
-            ValueAnimator newAnimator = ValueAnimator.ofFloat(this.maxYValue, maxValue);
-            newAnimator.addUpdateListener(maxYValueUpdateListener);
+            ObjectAnimator newAnimator = ObjectAnimator.ofPropertyValuesHolder(this, h1, h2, h3, h4);
             newAnimator.setInterpolator(yValueInterpolator);
             newAnimator.setDuration(ANIM_DURATION);
-            maxValueAnimator = newAnimator;
+            newAnimator.addListener(yAxisAnimListener);
+            yAxisAnimator = newAnimator;
             newAnimator.start();
         }
     }
@@ -264,6 +333,58 @@ public class AbsChartView extends View implements ChartUI {
         });
         this.fadedChartAnimator = animator;
         animator.start();
+    }
+
+    /**
+     * Draws Y axis bars with Y stamps;
+     * @param canvas canvas
+     */
+    protected void drawYAxisBars(Canvas canvas) {
+        log("Drawing background layer");
+        ChartAdapter adapter = getAdapter();
+        if (adapter == null) return;
+
+        //int contentWidth = getMeasuredWidth() - getPaddingLeft() - getPaddingRight();
+        int startX = getPaddingLeft();
+        int stopX = getMeasuredWidth() - getPaddingRight();
+
+        float yAxisBarStepFadeIn = (getMaxYValue() - getMinYValue()) / yAxisBarCount;
+        float yAxisBarStepFadeOut = (getMaxYValue() - getMinYValue()) / yAxisBarCount * getStretchingY();
+
+//        int fadeInAlpha = (int) (255 * yAxisAlpha);
+//        int fadeOutAlpha = (int) (255 * (1 - yAxisAlpha));
+        int fadeInAlpha = (int) (255 * (1 - yAxisAlpha));
+        int fadeOutAlpha = (int) (255 * yAxisAlpha);
+
+        // Drawing fading out bars
+        yAxisBarPaint.setAlpha(fadeOutAlpha);
+        yAxisTextPaint.setAlpha(fadeOutAlpha);
+        for (int i = 0; i < yAxisBarCount; i++) {
+            float value = getMinYValue() + i * yAxisBarStepFadeOut;
+            float yFadeOut = getYCoor(value) - (yAxisLineWidth / 2 + 1);
+            // bar line
+            canvas.drawLine(startX, yFadeOut, stopX, yFadeOut, yAxisBarPaint);
+
+            // bar text
+            String text = adapter.getYBarText((int) value);
+            yAxisBarPaint.getTextBounds(text, 0, text.length(), stampTextBounds);
+            canvas.drawText(text, startX, yFadeOut, yAxisTextPaint);
+        }
+
+        // Drawing fading in bars
+        yAxisBarPaint.setAlpha(fadeInAlpha);
+        yAxisTextPaint.setAlpha(fadeInAlpha);
+        for (int i = 0; i < yAxisBarCount; i++) {
+            //float y = getMeasuredHeight() - getPaddingBottom() - i * yAxisBarStep - (axisStrokeWidth / 2 + 1);
+            float value = getMinYValue() + i * yAxisBarStepFadeIn;
+            float yFadeIn = getYCoor(value) - (yAxisLineWidth / 2 + 1);
+            canvas.drawLine(startX, yFadeIn, stopX, yFadeIn, yAxisBarPaint);
+
+            // bar text
+            String text = adapter.getYBarText((int) value);
+            yAxisBarPaint.getTextBounds(text, 0, text.length(), stampTextBounds);
+            canvas.drawText(text, startX, yFadeIn, yAxisTextPaint);
+        }
     }
 
     /**

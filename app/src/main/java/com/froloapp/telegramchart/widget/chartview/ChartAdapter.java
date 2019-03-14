@@ -28,4 +28,7 @@ public interface ChartAdapter {
 
     int getMinYValue(float fromTimestampPosition, float toTimestampPosition);
     int getMaxXValue(float fromTimestampPosition, float toTimestampPosition);
+
+    String getYBarText(int value);
+    String getXStampText(long timestamp);
 }

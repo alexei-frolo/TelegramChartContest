@@ -52,7 +52,7 @@ public class ChartView extends AbsChartView {
 
     // y axes
     private int yAxisBarCount;
-    private float yAxisStep = 0f;
+    //private float yAxisStep = 0f;
 
     // x axes
     private int xAxisStampCount;
@@ -131,7 +131,7 @@ public class ChartView extends AbsChartView {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         // update important values here
-        yAxisStep = ((float) (getMeasuredHeight() - getPaddingTop() - getPaddingBottom())) / yAxisBarCount;
+        //yAxisStep = ((float) (getMeasuredHeight() - getPaddingTop() - getPaddingBottom())) / yAxisBarCount;
         log("View measured");
     }
 
@@ -142,7 +142,7 @@ public class ChartView extends AbsChartView {
     @Override
     protected void onDraw(Canvas canvas) {
         drawPhantoms(canvas);
-        drawBackground(canvas);
+        drawYAxisBars(canvas);
         drawForeground(canvas);
         drawClickedTimestamp(canvas);
     }
@@ -163,11 +163,15 @@ public class ChartView extends AbsChartView {
         log("Drawing background layer");
         ChartAdapter adapter = getAdapter();
         if (adapter == null) return;
+
+        float yAxisBarStep = (getMaxYValue() - getMinYValue()) / yAxisBarCount * getStretchingY();
+
         //int contentWidth = getMeasuredWidth() - getPaddingLeft() - getPaddingRight();
         int startX = getPaddingLeft();
         int stopX = getMeasuredWidth() - getPaddingRight();
         for (int i = 0; i < yAxisBarCount; i++) {
-            float y = getMeasuredHeight() - getPaddingBottom() - i * yAxisStep - (axisStrokeWidth / 2 + 1);
+            //float y = getMeasuredHeight() - getPaddingBottom() - i * yAxisBarStep - (axisStrokeWidth / 2 + 1);
+            float y = getYCoor(getMinYValue() + i * yAxisBarStep) - (axisStrokeWidth / 2 + 1);
             canvas.drawLine(startX, y, stopX, y, axisPaint);
         }
 
