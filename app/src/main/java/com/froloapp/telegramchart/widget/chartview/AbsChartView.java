@@ -192,6 +192,14 @@ public class AbsChartView extends View implements ChartUI {
         return adapter;
     }
 
+    /*package-private*/ /*nullable*/ ChartData getFadedChart() {
+        return fadedChart;
+    }
+
+    /*package-private*/ float getFadedChartAlpha() {
+        return fadedChartAlpha;
+    }
+
     /*package-private*/ float getMinYValue() {
         return minYValue;
     }

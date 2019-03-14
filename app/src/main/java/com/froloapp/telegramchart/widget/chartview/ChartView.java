@@ -141,54 +141,9 @@ public class ChartView extends AbsChartView {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        drawPhantoms(canvas);
         drawYAxisBars(canvas);
         drawForeground(canvas);
         drawClickedTimestamp(canvas);
-    }
-
-    /**
-     * Draws phantom y axis bars and phantom x axis stamps;
-     * @param canvas canvas
-     */
-    private void drawPhantoms(Canvas canvas) {
-        log("Drawing phantoms");
-    }
-
-    /**
-     * Draws y axis bars and x axis stamps;
-     * @param canvas canvas
-     */
-    private void drawBackground(Canvas canvas) {
-        log("Drawing background layer");
-        ChartAdapter adapter = getAdapter();
-        if (adapter == null) return;
-
-        float yAxisBarStep = (getMaxYValue() - getMinYValue()) / yAxisBarCount * getStretchingY();
-
-        //int contentWidth = getMeasuredWidth() - getPaddingLeft() - getPaddingRight();
-        int startX = getPaddingLeft();
-        int stopX = getMeasuredWidth() - getPaddingRight();
-        for (int i = 0; i < yAxisBarCount; i++) {
-            //float y = getMeasuredHeight() - getPaddingBottom() - i * yAxisBarStep - (axisStrokeWidth / 2 + 1);
-            float y = getYCoor(getMinYValue() + i * yAxisBarStep) - (axisStrokeWidth / 2 + 1);
-            canvas.drawLine(startX, y, stopX, y, axisPaint);
-        }
-
-        // drawing timestamp texts
-        long timestamp = adapter.getMinTimestamp();
-        float timestampRel = 0f;
-        float xCoor = getXCoor(timestampRel);
-        String text = String.valueOf(timestamp);
-        axisTextPaint.getTextBounds(text, 0, text.length(), stampTextBounds);
-        final float yCoor = getMeasuredHeight() - getPaddingTop() - stampTextBounds.height() / 2;
-        canvas.drawText(text, xCoor, yCoor, axisTextPaint);
-        while (adapter.hasNextTimestamp(timestamp)) {
-            timestamp = adapter.getNextTimestamp(timestamp);
-            timestampRel = adapter.getNextTimestampPosition(timestampRel);
-            xCoor = getXCoor(timestampRel);
-            canvas.drawText(String.valueOf(timestamp), xCoor, yCoor, axisTextPaint);
-        }
     }
 
     /**
@@ -206,15 +161,31 @@ public class ChartView extends AbsChartView {
             long xAxis = clickedXAxis;
             float xPosition = clickedXPosition;
             float x = getXCoor(xPosition);
+            stampInfoPaint.setAlpha(255);
             stampInfoPaint.setStyle(Paint.Style.STROKE);
             stampInfoPaint.setColor(axisColor);
             canvas.drawLine(x, getPaddingTop(), x, getMeasuredHeight() - getPaddingBottom(), stampInfoPaint);
 
+            ChartData fadedChart = getFadedChart();
             for (int i = 0; i < adapter.getChartCount(); i++) {
                 ChartData chart = adapter.getChart(i);
-                if (adapter.isVisible(chart)) {
+                boolean needToDraw;
+                float alpha;
+                if (chart == fadedChart) {
+                    needToDraw = true;
+                    alpha = getFadedChartAlpha();
+                } else if (adapter.isVisible(chart)) {
+                    needToDraw = true;
+                    alpha = 1f;
+                } else {
+                    needToDraw = false;
+                    alpha = 0f;
+                }
+
+                if (needToDraw) {
                     stampInfoPaint.setStyle(Paint.Style.FILL);
                     stampInfoPaint.setColor(chart.getColor());
+                    stampInfoPaint.setAlpha((int) (alpha * 255));
                     long value = chart.getValue(xAxis);
                     float y = getYCoor(value);
                     canvas.drawCircle(x, y, stampInfoBigDotRadius, stampInfoPaint);
