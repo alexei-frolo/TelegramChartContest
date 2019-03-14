@@ -144,8 +144,8 @@ public class SimpleChartAdapter implements ChartAdapter {
     public int getMinYValue(float fromXAxisRel, float toXAxisRel) {
         long startAxis = axes.get(0);
         long endAxis = axes.get(axes.size() - 1);
-        long fromXAxis = (long) (startAxis + (endAxis - startAxis) * fromXAxisRel);
-        long toXAxis = (long) (startAxis + (endAxis - startAxis) * toXAxisRel);
+        long fromXAxis = (long) (startAxis + (endAxis - startAxis) * fromXAxisRel) - 1;
+        long toXAxis = (long) (startAxis + (endAxis - startAxis) * toXAxisRel) + 1;
         int min = Integer.MAX_VALUE;
         for (int i = 0; i < axes.size(); i++) {
             long axis = axes.get(i);
@@ -153,7 +153,7 @@ public class SimpleChartAdapter implements ChartAdapter {
                 if (i < axes.size() - 1) {
                     // check if the next axis is in bounds
                     long nextAxis = axes.get(i + 1);
-                    if (nextAxis < fromXAxis) {
+                    if (nextAxis >= fromXAxis) {
                         for (ChartHolder holder : chartHolders) {
                             if (!holder.visible) continue;
 
@@ -193,8 +193,8 @@ public class SimpleChartAdapter implements ChartAdapter {
     public int getMaxXValue(float fromXAxisRel, float toXAxisRel) {
         long startAxis = axes.get(0);
         long endAxis = axes.get(axes.size() - 1);
-        long fromXAxis = (long) (startAxis + (endAxis - startAxis) * fromXAxisRel);
-        long toXAxis = (long) (startAxis + (endAxis - startAxis) * toXAxisRel);
+        long fromXAxis = (long) (startAxis + (endAxis - startAxis) * fromXAxisRel) - 1;
+        long toXAxis = (long) (startAxis + (endAxis - startAxis) * toXAxisRel) + 1;
         int max = Integer.MIN_VALUE;
         for (int i = 0; i < axes.size(); i++) {
             long axis = axes.get(i);
@@ -202,7 +202,7 @@ public class SimpleChartAdapter implements ChartAdapter {
                 if (i < axes.size() - 1) {
                     // check if the next axis is in bounds
                     long nextAxis = axes.get(i + 1);
-                    if (nextAxis < fromXAxis) {
+                    if (nextAxis >= fromXAxis) {
                         for (ChartHolder holder : chartHolders) {
                             if (!holder.visible) continue;
 
