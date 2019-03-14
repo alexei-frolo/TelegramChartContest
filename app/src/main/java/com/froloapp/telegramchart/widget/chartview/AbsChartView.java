@@ -73,6 +73,8 @@ public class AbsChartView extends View implements ChartUI {
     private int xAxisColor;
     private float xAxisAlpha;
     private boolean drawXPhantoms;
+    private long[] xAxisStamps;
+    private long[] xAxisPhantomStamps;
 
     // Animators
     private ValueAnimator yAxisAnimator;
@@ -202,6 +204,9 @@ public class AbsChartView extends View implements ChartUI {
             xAxisColor = Color.LTGRAY;
             yAxisColor = Color.LTGRAY;
         }
+        // init it when we know count of x stamps
+        xAxisStamps = new long[xAxisStampCount];
+        xAxisPhantomStamps = new long[xAxisStampCount];
 
         // chart paint
         chartPaint.setStrokeWidth(chartLineWidth);
@@ -400,12 +405,65 @@ public class AbsChartView extends View implements ChartUI {
         animator.start();
     }
 
+    private long[] collectVisibleXAxisStamps(float startPosition, float stopPosition, long[] buffer) {
+        ChartAdapter adapter = getAdapter();
+        if (adapter == null || adapter.getChartCount() == 0) {
+            return new long[0];
+        }
+        if (adapter.getChartCount() < buffer.length) {
+            buffer = new long[adapter.getChartCount()];
+        }
+
+        float position = startPosition;
+        float positionStep = (stopPosition - startPosition) / buffer.length;
+
+        long stamp = adapter.getPreviousTimestamp(position);
+        position += positionStep;
+
+        int collectedCount = 0;
+        buffer[collectedCount++] = stamp;
+        while (adapter.hasNextTimestamp(position) && collectedCount < buffer.length) {
+            stamp = adapter.getNextTimestamp(position);
+            position += positionStep;
+            buffer[collectedCount++] = stamp;
+        }
+        return buffer;
+    }
+
     /**
      * Draws X axis stamps;
      * @param canvas canvas
      */
     protected void drawXAxis(Canvas canvas) {
         log("Drawing X axis");
+        ChartAdapter adapter = getAdapter();
+        if (adapter == null) return;
+
+        long minStamp = adapter.getMinTimestamp();
+        long maxStamp = adapter.getMaxTimestamp();
+
+        int y = getMeasuredHeight() - getPaddingBottom();
+
+        if (drawXPhantoms) {
+            for (long stamp : xAxisPhantomStamps) {
+                String text = adapter.getXStampText(stamp);
+                xAxisTextPaint.getTextBounds(text, 0, text.length(), stampTextBounds);
+
+                float xPosition = ((float) (stamp - minStamp)) / (maxStamp - minStamp);
+                float x = getXCoor(xPosition);
+                canvas.drawText(text, x, y, xAxisPaint);
+            }
+        }
+
+        long[] stamps = collectVisibleXAxisStamps(startXPercentage, stopXPercentage, xAxisStamps);
+        for (long stamp : stamps) {
+            String text = adapter.getXStampText(stamp);
+            xAxisTextPaint.getTextBounds(text, 0, text.length(), stampTextBounds);
+
+            float xPosition = ((float) (stamp - minStamp)) / (maxStamp - minStamp);
+            float x = getXCoor(xPosition);
+            canvas.drawText(text, x, y, xAxisPaint);
+        }
     }
 
     /**
@@ -441,7 +499,7 @@ public class AbsChartView extends View implements ChartUI {
 
                 // bar text
                 String text = adapter.getYBarText((int) value);
-                yAxisPaint.getTextBounds(text, 0, text.length(), stampTextBounds);
+                yAxisTextPaint.getTextBounds(text, 0, text.length(), stampTextBounds);
                 canvas.drawText(text, startX, yFadeOut, yAxisTextPaint);
             }
         }
@@ -457,7 +515,7 @@ public class AbsChartView extends View implements ChartUI {
 
             // bar text
             String text = adapter.getYBarText((int) value);
-            yAxisPaint.getTextBounds(text, 0, text.length(), stampTextBounds);
+            yAxisTextPaint.getTextBounds(text, 0, text.length(), stampTextBounds);
             canvas.drawText(text, startX, yFadeIn, yAxisTextPaint);
         }
     }
