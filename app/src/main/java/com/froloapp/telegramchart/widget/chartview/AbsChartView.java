@@ -36,7 +36,8 @@ public class AbsChartView extends View implements ChartUI {
     private static final int DEFAULT_X_AXIS_STAMP_COUNT = 5;
     private static final int DEFAULT_Y_AXIS_BAR_COUNT = 5;
 
-    private static final float DEFAULT_CHART_LINE_WIDTH_IN_DP = 1.5f;
+    private static final float DEFAULT_CHART_LINE_WIDTH_IN_DP = 1f;
+    private static final float DEFAULT_AXIS_LINE_WIDTH_IN_DP = 1f;
 
     private ChartAdapter adapter;
 
@@ -185,20 +186,16 @@ public class AbsChartView extends View implements ChartUI {
         float chartLineWidth;
         if (attrs != null) {
             TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.AbsChartView, 0, 0);
-            chartLineWidth = typedArray.getDimension(R.styleable.AbsChartView_chartLineWidth, Utils.dpToPx(DEFAULT_CHART_LINE_WIDTH_IN_DP, context));
-            typedArray.recycle();
-        } else {
-            chartLineWidth = Utils.dpToPx(DEFAULT_CHART_LINE_WIDTH_IN_DP, context);
-        }
-
-        if (attrs != null) {
-            TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.ChartView, 0, 0);
+            chartLineWidth = typedArray.getDimension(R.styleable.AbsChartView_chartStrokeWidth, Utils.dpToPx(DEFAULT_CHART_LINE_WIDTH_IN_DP, context));
+            axisStrokeWidth = typedArray.getDimension(R.styleable.AbsChartView_axisStrokeWidth, Utils.dpToPx(DEFAULT_AXIS_LINE_WIDTH_IN_DP, context));
             xAxisStampCount = typedArray.getColor(R.styleable.AbsChartView_xAxisStampCount, DEFAULT_X_AXIS_STAMP_COUNT);
             yAxisStampCount = typedArray.getInteger(R.styleable.AbsChartView_yAxisStampCount, DEFAULT_Y_AXIS_BAR_COUNT);
             xAxisColor = typedArray.getColor(R.styleable.AbsChartView_xAxisColor, Color.LTGRAY);
             yAxisColor = typedArray.getColor(R.styleable.AbsChartView_yAxisColor, Color.LTGRAY);
             typedArray.recycle();
         } else {
+            chartLineWidth = Utils.dpToPx(DEFAULT_CHART_LINE_WIDTH_IN_DP, context);
+            axisStrokeWidth = Utils.dpToPx(DEFAULT_AXIS_LINE_WIDTH_IN_DP, context);
             xAxisStampCount = DEFAULT_X_AXIS_STAMP_COUNT;
             yAxisStampCount = DEFAULT_Y_AXIS_BAR_COUNT;
             xAxisColor = Color.LTGRAY;
@@ -212,7 +209,6 @@ public class AbsChartView extends View implements ChartUI {
         chartPaint.setStrokeWidth(chartLineWidth);
 
         // axis paint
-        axisStrokeWidth = Utils.dpToPx(1f, context);
         yAxisPaint.setStrokeWidth(axisStrokeWidth);
         yAxisPaint.setStyle(Paint.Style.STROKE);
         // color for y axis bars and x axis stamps

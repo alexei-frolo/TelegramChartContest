@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="AbsChartView">
-        <attr name="chartLineWidth" format="dimension|reference"/>
+        <attr name="chartStrokeWidth" format="dimension|reference"/>
+        <attr name="axisStrokeWidth" format="dimension|reference"/>
         <attr name="xAxisStampCount" format="integer"/>
         <attr name="yAxisStampCount" format="integer"/>
         <attr name="xAxisColor" format="color|reference"/>
