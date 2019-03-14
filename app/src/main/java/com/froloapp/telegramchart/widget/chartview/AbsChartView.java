@@ -405,31 +405,6 @@ public class AbsChartView extends View implements ChartUI {
         animator.start();
     }
 
-    private long[] collectVisibleXAxisStamps(float startPosition, float stopPosition, long[] buffer) {
-        ChartAdapter adapter = getAdapter();
-        if (adapter == null || adapter.getChartCount() == 0) {
-            return new long[0];
-        }
-        if (adapter.getChartCount() < buffer.length) {
-            buffer = new long[adapter.getChartCount()];
-        }
-
-        float position = startPosition;
-        float positionStep = (stopPosition - startPosition) / buffer.length;
-
-        long stamp = adapter.getPreviousTimestamp(position);
-        position += positionStep;
-
-        int collectedCount = 0;
-        buffer[collectedCount++] = stamp;
-        while (adapter.hasNextTimestamp(position) && collectedCount < buffer.length) {
-            stamp = adapter.getNextTimestamp(position);
-            position += positionStep;
-            buffer[collectedCount++] = stamp;
-        }
-        return buffer;
-    }
-
     /**
      * Draws X axis stamps;
      * @param canvas canvas
@@ -453,16 +428,6 @@ public class AbsChartView extends View implements ChartUI {
                 float x = getXCoor(xPosition);
                 canvas.drawText(text, x, y, xAxisPaint);
             }
-        }
-
-        long[] stamps = collectVisibleXAxisStamps(startXPercentage, stopXPercentage, xAxisStamps);
-        for (long stamp : stamps) {
-            String text = adapter.getXStampText(stamp);
-            xAxisTextPaint.getTextBounds(text, 0, text.length(), stampTextBounds);
-
-            float xPosition = ((float) (stamp - minStamp)) / (maxStamp - minStamp);
-            float x = getXCoor(xPosition);
-            canvas.drawText(text, x, y, xAxisPaint);
         }
     }
 
