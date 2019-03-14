@@ -3,15 +3,18 @@ package com.froloapp.telegramchart.widget.chartview;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class SimpleChartAdapter implements ChartAdapter {
-    private List<Long> axes;
+    private List<Long> timestamps;
     private long mixXAxis;
     private long maxXAxis;
 
     private List<ChartHolder> chartHolders;
+    private final Map<Long, Integer> localMinimums = new HashMap<>();
+    private final Map<Long, Integer> localMaximums = new HashMap<>();
 
     private static class ChartHolder {
         final ChartData data;
@@ -22,14 +25,23 @@ public class SimpleChartAdapter implements ChartAdapter {
         }
     }
 
-    public SimpleChartAdapter(List<Long> axes, List<ChartData> charts) {
-        this.axes = axes;
-        Collections.sort(axes); // default sort
-        this.mixXAxis = axes.get(0);
-        this.maxXAxis = axes.get(axes.size() - 1);
+    public SimpleChartAdapter(List<Long> timestamps, List<ChartData> charts) {
+        this.timestamps = timestamps;
+        Collections.sort(timestamps); // default sort
+        this.mixXAxis = timestamps.get(0);
+        this.maxXAxis = timestamps.get(timestamps.size() - 1);
         this.chartHolders = new ArrayList<>(charts.size());
         for (ChartData data : charts) {
             chartHolders.add(new ChartHolder(data, true));
+        }
+
+        // save local minimums nad maximums
+        for (int i = 0; i < timestamps.size(); i++) {
+            long timestamp = timestamps.get(i);
+            int minValue = findMinValue(timestamp);
+            int maxValue = findMaxValue(timestamp);
+            localMinimums.put(timestamp, minValue);
+            localMaximums.put(timestamp, maxValue);
         }
     }
 
@@ -78,16 +90,16 @@ public class SimpleChartAdapter implements ChartAdapter {
 
     @Override
     public float getClosestTimestampPosition(float toXPosition) {
-        long minAxis = axes.get(0);
-        long maxAxis = axes.get(axes.size() - 1);
+        long minAxis = timestamps.get(0);
+        long maxAxis = timestamps.get(timestamps.size() - 1);
         //long desiredAxis = (minAxis + (long) ((maxAxis - minAxis) * timestampRel)) + 1;
         float approximatelyDesiredAxis = (minAxis + ((maxAxis - minAxis) * toXPosition));
-        for (int i = 0; i < axes.size(); i++) {
-            long axis = axes.get(i);
+        for (int i = 0; i < timestamps.size(); i++) {
+            long axis = timestamps.get(i);
             if (axis > approximatelyDesiredAxis) {
                 float next = ((float) (axis - minAxis)) / (maxAxis - minAxis);
                 if (i > 0) {
-                    long previousAxis = axes.get(i - 1);
+                    long previousAxis = timestamps.get(i - 1);
                     float previous = ((float) (previousAxis - minAxis)) / (maxAxis - minAxis);
                     if (Math.abs(previous - toXPosition) < Math.abs(next - toXPosition)) {
                         return previous;
@@ -104,16 +116,16 @@ public class SimpleChartAdapter implements ChartAdapter {
 
     @Override
     public long getClosestTimestamp(float toXPosition) {
-        long minAxis = axes.get(0);
-        long maxAxis = axes.get(axes.size() - 1);
+        long minAxis = timestamps.get(0);
+        long maxAxis = timestamps.get(timestamps.size() - 1);
         //long desiredAxis = (minAxis + (long) ((maxAxis - minAxis) * timestampRel)) + 1;
         float approximatelyDesiredAxis = (minAxis + ((maxAxis - minAxis) * toXPosition));
-        for (int i = 0; i < axes.size(); i++) {
-            long axis = axes.get(i);
+        for (int i = 0; i < timestamps.size(); i++) {
+            long axis = timestamps.get(i);
             if (axis > approximatelyDesiredAxis) {
                 float next = ((float) (axis - minAxis)) / (maxAxis - minAxis);
                 if (i > 0) {
-                    long previousAxis = axes.get(i - 1);
+                    long previousAxis = timestamps.get(i - 1);
                     float previous = ((float) (previousAxis - minAxis)) / (maxAxis - minAxis);
                     if (Math.abs(previous - toXPosition) < Math.abs(next - toXPosition)) {
                         return previousAxis;
@@ -130,60 +142,76 @@ public class SimpleChartAdapter implements ChartAdapter {
 
     @Override
     public boolean hasNextTimestamp(long afterXAxis) {
-        int index = axes.indexOf(afterXAxis);
-        return index >= 0 && index < axes.size() - 1;
+        int index = timestamps.indexOf(afterXAxis);
+        return index >= 0 && index < timestamps.size() - 1;
     }
 
     @Override
     public long getNextTimestamp(long afterXAxis) {
-        int index = axes.indexOf(afterXAxis);
-        return axes.get(index + 1);
+        int index = timestamps.indexOf(afterXAxis);
+        return timestamps.get(index + 1);
+    }
+
+    // finds min value for the given timestamp
+    private int findMinValue(long timestamp) {
+        int min = Integer.MAX_VALUE;
+        for (ChartHolder holder : chartHolders) {
+            if (!holder.visible) continue;
+
+            int value = holder.data.getValue(timestamp);
+            if (value < min) {
+                min = value;
+            }
+        }
+        return min;
+    }
+
+    // finds max value for the given timestamp
+    private int findMaxValue(long timestamp) {
+        int max = Integer.MIN_VALUE;
+        for (ChartHolder holder : chartHolders) {
+            if (!holder.visible) continue;
+
+            int value = holder.data.getValue(timestamp);
+            if (value > max) {
+                max = value;
+            }
+        }
+        return max;
     }
 
     @Override
     public int getMinYValue(float fromXAxisRel, float toXAxisRel) {
-        long startAxis = axes.get(0);
-        long endAxis = axes.get(axes.size() - 1);
+        long startAxis = timestamps.get(0);
+        long endAxis = timestamps.get(timestamps.size() - 1);
         long fromXAxis = (long) (startAxis + (endAxis - startAxis) * fromXAxisRel) - 1;
         long toXAxis = (long) (startAxis + (endAxis - startAxis) * toXAxisRel) + 1;
         int min = Integer.MAX_VALUE;
-        for (int i = 0; i < axes.size(); i++) {
-            long axis = axes.get(i);
+        for (int i = 0; i < timestamps.size(); i++) {
+            long axis = timestamps.get(i);
             if (axis < fromXAxis) {
-                if (i < axes.size() - 1) {
-                    // check if the next axis is in bounds
-                    long nextAxis = axes.get(i + 1);
+                if (i < timestamps.size() - 1) {
+                    // check if the next axis is in the bounds
+                    long nextAxis = timestamps.get(i + 1);
                     if (nextAxis >= fromXAxis) {
-                        for (ChartHolder holder : chartHolders) {
-                            if (!holder.visible) continue;
-
-                            int value = holder.data.getValue(axis);
-                            if (value < min) {
-                                min = value;
-                            }
+                        int localMin = findMinValue(axis);
+                        if (localMin < min) {
+                            min = localMin;
                         }
                     }
                 }
                 continue;
             }
             if (axis > toXAxis) {
-                for (ChartHolder holder : chartHolders) {
-                    if (!holder.visible) continue;
-
-                    int value = holder.data.getValue(axis);
-                    if (value < min) {
-                        min = value;
-                    }
+                int localMin = findMinValue(axis);
+                if (localMin < min) {
+                    min = localMin;
                 }
                 break;
             }
-            for (ChartHolder holder : chartHolders) {
-                if (!holder.visible) continue;
-
-                int value = holder.data.getValue(axis);
-                if (value < min) {
-                    min = value;
-                }
+            int localMin = findMinValue(axis);
+            if (localMin < min) {
+                min = localMin;
             }
         }
         return min;
@@ -191,48 +219,36 @@ public class SimpleChartAdapter implements ChartAdapter {
 
     @Override
     public int getMaxXValue(float fromXAxisRel, float toXAxisRel) {
-        long startAxis = axes.get(0);
-        long endAxis = axes.get(axes.size() - 1);
+        long startAxis = timestamps.get(0);
+        long endAxis = timestamps.get(timestamps.size() - 1);
         long fromXAxis = (long) (startAxis + (endAxis - startAxis) * fromXAxisRel) - 1;
         long toXAxis = (long) (startAxis + (endAxis - startAxis) * toXAxisRel) + 1;
         int max = Integer.MIN_VALUE;
-        for (int i = 0; i < axes.size(); i++) {
-            long axis = axes.get(i);
+        for (int i = 0; i < timestamps.size(); i++) {
+            long axis = timestamps.get(i);
             if (axis < fromXAxis) {
-                if (i < axes.size() - 1) {
-                    // check if the next axis is in bounds
-                    long nextAxis = axes.get(i + 1);
+                if (i < timestamps.size() - 1) {
+                    // check if the next axis is in the bounds
+                    long nextAxis = timestamps.get(i + 1);
                     if (nextAxis >= fromXAxis) {
-                        for (ChartHolder holder : chartHolders) {
-                            if (!holder.visible) continue;
-
-                            int value = holder.data.getValue(axis);
-                            if (value > max) {
-                                max = value;
-                            }
+                        int localMax = findMaxValue(axis);
+                        if (localMax > max) {
+                            max = localMax;
                         }
                     }
                 }
                 continue;
             }
             if (axis > toXAxis) {
-                for (ChartHolder holder : chartHolders) {
-                    if (!holder.visible) continue;
-
-                    int value = holder.data.getValue(axis);
-                    if (value > max) {
-                        max = value;
-                    }
+                int localMax = findMaxValue(axis);
+                if (localMax > max) {
+                    max = localMax;
                 }
                 break;
             }
-            for (ChartHolder holder : chartHolders) {
-                if (!holder.visible) continue;
-
-                int value = holder.data.getValue(axis);
-                if (value > max) {
-                    max = value;
-                }
+            int localMax = findMaxValue(axis);
+            if (localMax > max) {
+                max = localMax;
             }
         }
         return max;
@@ -245,24 +261,24 @@ public class SimpleChartAdapter implements ChartAdapter {
 
     @Override
     public long getPreviousTimestamp(float beforeTimestampPosition) {
-        long minAxis = axes.get(0);
-        long maxAxis = axes.get(axes.size() - 1);
+        long minAxis = timestamps.get(0);
+        long maxAxis = timestamps.get(timestamps.size() - 1);
         long desiredAxis = (minAxis + (long) ((maxAxis - minAxis) * beforeTimestampPosition)) - 1;
-        for (int i = axes.size() - 1; i >=0; i--) {
-            long axis = axes.get(i);
+        for (int i = timestamps.size() - 1; i >=0; i--) {
+            long axis = timestamps.get(i);
             if (axis <= desiredAxis)
                 return axis;
         }
-        return axes.get(0);
+        return timestamps.get(0);
     }
 
     @Override
     public float getPreviousTimestampPosition(float beforeTimestampPosition) {
-        long minAxis = axes.get(0);
-        long maxAxis = axes.get(axes.size() - 1);
+        long minAxis = timestamps.get(0);
+        long maxAxis = timestamps.get(timestamps.size() - 1);
         long desiredAxis = (minAxis + (long) ((maxAxis - minAxis) * beforeTimestampPosition)) - 1;
-        for (int i = axes.size() - 1; i >=0; i--) {
-            long axis = axes.get(i);
+        for (int i = timestamps.size() - 1; i >=0; i--) {
+            long axis = timestamps.get(i);
             if (axis <= desiredAxis)
                 return ((float) (axis - minAxis)) / (maxAxis - minAxis);
         }
@@ -276,11 +292,11 @@ public class SimpleChartAdapter implements ChartAdapter {
 
     @Override
     public long getNextTimestamp(float timestampRel) {
-        long minAxis = axes.get(0);
-        long maxAxis = axes.get(axes.size() - 1);
+        long minAxis = timestamps.get(0);
+        long maxAxis = timestamps.get(timestamps.size() - 1);
         //long desiredAxis = (minAxis + (long) ((maxAxis - minAxis) * timestampRel)) + 1;
         float approximatelyDesiredAxis = (minAxis + ((maxAxis - minAxis) * timestampRel));
-        for (long axis : axes) {
+        for (long axis : timestamps) {
             if (axis > approximatelyDesiredAxis)
                 return axis;
         }
@@ -289,11 +305,11 @@ public class SimpleChartAdapter implements ChartAdapter {
 
     @Override
     public float getNextTimestampPosition(float timestampRel) {
-        long minAxis = axes.get(0);
-        long maxAxis = axes.get(axes.size() - 1);
+        long minAxis = timestamps.get(0);
+        long maxAxis = timestamps.get(timestamps.size() - 1);
         //long desiredAxis = (minAxis + (long) ((maxAxis - minAxis) * timestampRel)) + 1;
         float approximatelyDesiredAxis = (minAxis + ((maxAxis - minAxis) * timestampRel));
-        for (long axis : axes) {
+        for (long axis : timestamps) {
             if (axis > approximatelyDesiredAxis)
                 return ((float) (axis - minAxis)) / (maxAxis - minAxis);
         }
