@@ -2,6 +2,7 @@ package com.froloapp.telegramchart;
 
 import android.app.Activity;
 import android.content.res.AssetManager;
+import android.content.res.ColorStateList;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -103,8 +104,13 @@ public class MainActivity extends Activity implements ChartSlider.OnScrollListen
                 MainActivity.this.adapter = adapter;
 
                 if (adapter.getChartCount() >= 2) {
-                    firstChart = adapter.getChart(0);
-                    secondChart = adapter.getChart(1);
+                    ChartData first = adapter.getChart(0);
+                    checkboxFirst.setHighlightColor(first.getColor());
+                    firstChart = first;
+
+                    ChartData second = adapter.getChart(1);
+                    checkboxSecond.setHighlightColor(second.getColor());
+                    secondChart = second;
                 }
 
                 chartView.setOnStampClickListener(MainActivity.this);
