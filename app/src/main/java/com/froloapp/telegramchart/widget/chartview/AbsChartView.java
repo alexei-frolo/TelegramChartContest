@@ -221,7 +221,7 @@ public class AbsChartView extends View implements ChartUI {
         }
     }
 
-    /*package-private*/ ChartAdapter getAdapter() {
+    /*package-private*/ /*nullable*/ ChartAdapter getAdapter() {
         return adapter;
     }
 
