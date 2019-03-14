@@ -16,7 +16,8 @@ import com.froloapp.telegramchart.widget.Utils;
 
 public class ChartSlider extends AbsChartView {
     // static
-    private static final int DEFAULT_FRAME_STROKE_WIDTH_IN_DP = 3;
+    private static final int DEFAULT_FRAME_HORIZONTAL_BORDER_WIDTH_IN_DP = 5;
+    private static final int DEFAULT_FRAME_VERTICAl_BORDER_WIDTH_IN_DP = 1;
     private static final float DEFAULT_MAX_FRAME_COMPRESSION = 0.2f;
 
     /**
@@ -49,7 +50,8 @@ public class ChartSlider extends AbsChartView {
     private final Paint overlayPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint framePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
-    private float frameBorderWidth;
+    private float frameHorizontalBorderWidth;
+    private float frameVerticalBorderWidth;
 
     private float leftBorderXPosition = 0f;
     private float rightBorderXPosition = 1f;
@@ -79,23 +81,26 @@ public class ChartSlider extends AbsChartView {
             TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.ChartSlider, 0, 0);
             overlayColor = typedArray.getColor(R.styleable.ChartSlider_overlayColor, Color.parseColor("#AAFFFFFF"));
             frameBorderColor = typedArray.getColor(R.styleable.ChartSlider_frameBorderColor, Color.parseColor("#AAC1C1C1"));
-            frameBorderWidth = typedArray.getDimension(R.styleable.ChartSlider_frameBorderWidth, Utils.dpToPx(DEFAULT_FRAME_STROKE_WIDTH_IN_DP, context));
+            frameHorizontalBorderWidth = typedArray.getDimension(R.styleable.ChartSlider_frameHorizontalBorderWidth,
+                    Utils.dpToPx(DEFAULT_FRAME_HORIZONTAL_BORDER_WIDTH_IN_DP, context));
+            frameVerticalBorderWidth = typedArray.getDimension(R.styleable.ChartSlider_frameVerticalBorderWidth,
+                    Utils.dpToPx(DEFAULT_FRAME_VERTICAl_BORDER_WIDTH_IN_DP, context));
             maxFrameCompression = typedArray.getFloat(R.styleable.ChartSlider_maxFrameCompression, DEFAULT_MAX_FRAME_COMPRESSION);
             typedArray.recycle();
         } else {
             overlayColor = Color.parseColor("#AAFFFFFF");
             frameBorderColor = Color.parseColor("#AAC1C1C1");
-            frameBorderWidth = Utils.dpToPx(DEFAULT_FRAME_STROKE_WIDTH_IN_DP, context);
+            frameHorizontalBorderWidth = Utils.dpToPx(DEFAULT_FRAME_HORIZONTAL_BORDER_WIDTH_IN_DP, context);
+            frameVerticalBorderWidth = Utils.dpToPx(DEFAULT_FRAME_VERTICAl_BORDER_WIDTH_IN_DP, context);
             maxFrameCompression = DEFAULT_MAX_FRAME_COMPRESSION;
         }
         overlayPaint.setStyle(Paint.Style.FILL);
         overlayPaint.setColor(overlayColor);
 
         framePaint.setStyle(Paint.Style.STROKE);
-        framePaint.setStrokeWidth(frameBorderWidth);
         framePaint.setColor(frameBorderColor);
 
-        touchBorderThreshold = Utils.dpToPx(10f, context);
+        touchBorderThreshold = Utils.dpToPx(15f, context);
     }
 
     private void log(String msg) {
@@ -164,12 +169,35 @@ public class ChartSlider extends AbsChartView {
         drawCharts(canvas);
 
         int width = getMeasuredWidth() - getPaddingLeft() - getPaddingRight();
-        int height = getMeasuredHeight() - getPaddingTop() - getPaddingBottom();
+        //int height = getMeasuredHeight() - getPaddingTop() - getPaddingBottom();
 
-        canvas.drawRect(0, 0, width * leftBorderXPosition - frameBorderWidth / 2, height, overlayPaint);
-        canvas.drawRect(width * rightBorderXPosition + frameBorderWidth / 2, 0, width, height, overlayPaint);
+        float left = getPaddingLeft();
+        float top = getPaddingTop();
+        float right = getMeasuredWidth() - getPaddingRight();
+        float bottom = getMeasuredHeight() - getPaddingBottom();
 
-        canvas.drawRect(width * leftBorderXPosition, 0, width * rightBorderXPosition, height, framePaint);
+        float leftBorder = getPaddingLeft() + width * leftBorderXPosition;
+        float rightBorder = getPaddingLeft() + width * rightBorderXPosition;
+
+        // drawing left overlay
+        canvas.drawRect(left, top, leftBorder + frameHorizontalBorderWidth, bottom, overlayPaint);
+        // drawing right overlay
+        canvas.drawRect(rightBorder - frameHorizontalBorderWidth, top, right, bottom, overlayPaint);
+
+        // drawing frame
+        framePaint.setStrokeWidth(frameHorizontalBorderWidth);
+        canvas.drawLine(leftBorder + frameHorizontalBorderWidth / 2, getPaddingTop(),
+                leftBorder + frameHorizontalBorderWidth / 2, getMeasuredHeight() - getPaddingBottom(), framePaint);
+        canvas.drawLine(rightBorder - frameHorizontalBorderWidth / 2, getPaddingTop(),
+                rightBorder - frameHorizontalBorderWidth / 2, getMeasuredHeight() - getPaddingBottom(), framePaint);
+
+        framePaint.setStrokeWidth(frameVerticalBorderWidth);
+        canvas.drawLine(leftBorder, getPaddingTop() + frameVerticalBorderWidth / 2,
+                rightBorder, getPaddingTop() + frameVerticalBorderWidth / 2, framePaint);
+        canvas.drawLine(leftBorder, getMeasuredHeight() - getPaddingBottom() - frameVerticalBorderWidth / 2,
+                rightBorder, getMeasuredHeight() - getPaddingBottom() - frameVerticalBorderWidth / 2, framePaint);
+//        canvas.drawRect(width * leftBorderXPosition + frameBorderWidth / 2, 0,
+//                width * rightBorderXPosition - frameBorderWidth / 2, height, framePaint);
     }
 
     @SuppressLint("ClickableViewAccessibility")

@@ -11,7 +11,8 @@
     <declare-styleable name="ChartSlider">
         <attr name="overlayColor" format="color|reference"/>
         <attr name="frameBorderColor" format="color|reference"/>
-        <attr name="frameBorderWidth" format="dimension|reference"/>
+        <attr name="frameHorizontalBorderWidth" format="dimension|reference"/>
+        <attr name="frameVerticalBorderWidth" format="dimension|reference"/>
         <attr name="maxFrameCompression" format="float|reference"/>
     </declare-styleable>
 
