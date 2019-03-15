@@ -230,12 +230,6 @@ public class AbsChartView extends View implements ChartUI {
      ********** HELPER METHODS *********
      ***********************************/
 
-    private void log(String msg) {
-        if (BuildConfig.DEBUG) {
-            Log.d("AbsChartView", msg);
-        }
-    }
-
     /*package-private*/ /*nullable*/ ChartAdapter getAdapter() {
         return adapter;
     }
@@ -281,7 +275,6 @@ public class AbsChartView extends View implements ChartUI {
             minYValue = 0f;
             maxYValue = 0f;
         }
-        log("View measured");
     }
 
     /**
@@ -304,7 +297,6 @@ public class AbsChartView extends View implements ChartUI {
 
         // check min value
         if (minValue != this.minYValue || maxValue != this.maxYValue) {
-            //log("Min Y value changed. Starting animator");
             ValueAnimator oldAnimator = yAxisAnimator;
             if (oldAnimator != null) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) oldAnimator.pause();
@@ -391,7 +383,6 @@ public class AbsChartView extends View implements ChartUI {
      * @param canvas canvas
      */
     protected void drawXAxis(Canvas canvas) {
-        //log("Drawing X axis");
         ChartAdapter adapter = getAdapter();
         if (adapter == null) return;
         // TO DO: draw phantom and actual stamps on X axis
@@ -425,7 +416,6 @@ public class AbsChartView extends View implements ChartUI {
         int phantomYBarStartValue = this.phantomYBarStartValue;
         int phantomYBarStep = this.phantomYBarStep;
 
-        log("DRAWING Y AXIS. DRAW_PHANTOMS=" + drawYPhantoms);
         if (drawYPhantoms) {
             // Drawing fading out bars
             yAxisPaint.setAlpha(fadeOutAlpha);
@@ -457,7 +447,6 @@ public class AbsChartView extends View implements ChartUI {
      * @param canvas canvas
      */
     protected void drawCharts(Canvas canvas) {
-        //log("Drawing foreground layer");
         ChartAdapter adapter = this.adapter;
         if (adapter == null)
             return; // early return
