@@ -33,7 +33,7 @@ public final class Charts {
         @Override public int getValue(long x) {
             Integer value = data.get(x);
             if (value == null) {
-                throw new IllegalArgumentException("No such x axis found");
+                throw new IllegalArgumentException("No such x axis found: " + x);
             }
             return value;
         }
