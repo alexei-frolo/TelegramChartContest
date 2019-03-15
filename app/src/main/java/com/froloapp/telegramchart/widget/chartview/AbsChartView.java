@@ -462,8 +462,7 @@ public class AbsChartView extends View implements ChartUI {
         if (adapter == null)
             return; // early return
 
-        final float avTimestampPosXStep = 1f / adapter.getTimestampCount();
-        final float timestampPosXStep = avTimestampPosXStep * (1f / (stopXPercentage - startXPercentage));
+        final float avTimestampPosXStep = 1f / adapter.getTimestampCount(); // average step
         final long startTimestamp = adapter.getPreviousTimestamp(startXPercentage);
         final float startTimestampPosX = adapter.getPreviousTimestampPosition(startXPercentage);
 
@@ -486,7 +485,7 @@ public class AbsChartView extends View implements ChartUI {
 
             while (adapter.hasNextTimestamp(timestamp)) {
                 timestamp = adapter.getNextTimestamp(timestamp);
-                timestampPosX += timestampPosXStep;
+                timestampPosX += avTimestampPosXStep;
 
                 value = data.getValue(timestamp);
                 xCoor = getXCoor(timestampPosX);
