@@ -16,18 +16,18 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.froloapp.telegramchart.widget.Utils;
-import com.froloapp.telegramchart.widget.chartview.ChartAdapter;
-import com.froloapp.telegramchart.widget.chartview.ChartData;
-import com.froloapp.telegramchart.widget.chartview.ChartSlider;
-import com.froloapp.telegramchart.widget.chartview.ChartView;
+import com.froloapp.telegramchart.widget.linechartview.LineChartAdapter;
+import com.froloapp.telegramchart.widget.linechartview.Line;
+import com.froloapp.telegramchart.widget.linechartview.LineChartSlider;
+import com.froloapp.telegramchart.widget.linechartview.LineChartView;
 
 import java.io.InputStream;
 
-public class MainActivity extends Activity implements ChartSlider.OnScrollListener, ChartView.OnStampClickListener {
+public class MainActivity extends Activity implements LineChartSlider.OnScrollListener, LineChartView.OnStampClickListener {
 
     private Spinner spinnerChartSelector;
-    private ChartView chartView;
-    private ChartSlider chartSlider;
+    private LineChartView chartView;
+    private LineChartSlider chartSlider;
     private LinearLayout layoutCheckboxes;
 
     // hold task to cancel if needed
@@ -70,7 +70,7 @@ public class MainActivity extends Activity implements ChartSlider.OnScrollListen
                 log(error);
                 Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
             }
-            @Override public void onResult(ChartAdapter[] adapters) {
+            @Override public void onResult(LineChartAdapter[] adapters) {
                 initSpinner(adapters);
                 if (adapters.length >= 1) {
                     spinnerChartSelector.setSelection(0);
@@ -90,27 +90,27 @@ public class MainActivity extends Activity implements ChartSlider.OnScrollListen
         }
     }
 
-    private void initSpinner(final ChartAdapter[] adapters) {
-        ArrayAdapter<ChartAdapter> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item);
+    private void initSpinner(final LineChartAdapter[] adapters) {
+        ArrayAdapter<LineChartAdapter> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item);
         adapter.addAll(adapters);
         spinnerChartSelector.setAdapter(adapter);
         spinnerChartSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                ChartAdapter a = adapters[position];
+                LineChartAdapter a = adapters[position];
                 initChart(a);
             }
             @Override public void onNothingSelected(AdapterView<?> parent) { }
         });
     }
 
-    private void initCheckboxes(final ChartAdapter adapter) {
+    private void initCheckboxes(final LineChartAdapter adapter) {
         layoutCheckboxes.removeAllViews();
         // adding checkboxes dynamic
-        for (int i = 0; i < adapter.getChartCount(); i++) {
-            final ChartData chart = adapter.getChart(i);
+        for (int i = 0; i < adapter.getLineCount(); i++) {
+            final Line chart = adapter.getLineAt(i);
             CheckBox checkBox = new CheckBox(this);
             checkBox.setText(chart.getName());
-            checkBox.setChecked(adapter.isVisible(chart));
+            checkBox.setChecked(adapter.isLineEnabled(chart));
             checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if (isChecked) {
@@ -134,7 +134,7 @@ public class MainActivity extends Activity implements ChartSlider.OnScrollListen
         }
     }
 
-    private void initChart(ChartAdapter adapter) {
+    private void initChart(LineChartAdapter adapter) {
         initCheckboxes(adapter);
 
         final float startXPosition = 0.0f;
@@ -150,7 +150,7 @@ public class MainActivity extends Activity implements ChartSlider.OnScrollListen
     }
 
     @Override
-    public void onScroll(ChartSlider slider, float startStampRel, float endStampRel) {
+    public void onScroll(LineChartSlider slider, float startStampRel, float endStampRel) {
         chartView.setXPositions(startStampRel, endStampRel);
     }
 

@@ -1,4 +1,4 @@
-package com.froloapp.telegramchart.widget.chartview;
+package com.froloapp.telegramchart.widget.linechartview;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
@@ -25,7 +25,7 @@ import com.froloapp.telegramchart.widget.Utils;
 /**
  * Helps to draw line charts, handle start and stop x positions and animate appearing or disappearing of a chart;
  */
-public class AbsChartView extends View implements ChartUI {
+public class AbsLineChartView extends View implements LineChartUI {
     // static
     private static final int DEFAULT_WIDTH_IN_DP = 200;
     private static final int DEFAULT_HEIGHT_IN_DP = 100;
@@ -49,7 +49,7 @@ public class AbsChartView extends View implements ChartUI {
     private float axisStrokeWidth;
 
     // adapter
-    private ChartAdapter adapter;
+    private LineChartAdapter adapter;
     // current start and stop positions on X Axis in percentage(from 0 to 1)
     private float startXPercentage;
     private float stopXPercentage;
@@ -83,29 +83,29 @@ public class AbsChartView extends View implements ChartUI {
     // Animators
     private ValueAnimator yAxisAnimator;
 
-    private final static Property<AbsChartView, Float> MIN_Y_VALUE = new Property<AbsChartView, Float>(float.class, "minYValue") {
-        @Override public Float get(AbsChartView object) {
+    private final static Property<AbsLineChartView, Float> MIN_Y_VALUE = new Property<AbsLineChartView, Float>(float.class, "minYValue") {
+        @Override public Float get(AbsLineChartView object) {
             return object.minYValue;
         }
-        @Override public void set(AbsChartView object, Float value) {
+        @Override public void set(AbsLineChartView object, Float value) {
             object.minYValue = value;
             object.invalidate();
         }
     };
-    private final static Property<AbsChartView, Float> MAX_Y_VALUE = new Property<AbsChartView, Float>(float.class, "maxYValue") {
-        @Override public Float get(AbsChartView object) {
+    private final static Property<AbsLineChartView, Float> MAX_Y_VALUE = new Property<AbsLineChartView, Float>(float.class, "maxYValue") {
+        @Override public Float get(AbsLineChartView object) {
             return object.maxYValue;
         }
-        @Override public void set(AbsChartView object, Float value) {
+        @Override public void set(AbsLineChartView object, Float value) {
             object.maxYValue = value;
             object.invalidate();
         }
     };
-    private final static Property<AbsChartView, Float> Y_AXIS_ALPHA = new Property<AbsChartView, Float>(float.class, "yAxisAlpha") {
-        @Override public Float get(AbsChartView object) {
+    private final static Property<AbsLineChartView, Float> Y_AXIS_ALPHA = new Property<AbsLineChartView, Float>(float.class, "yAxisAlpha") {
+        @Override public Float get(AbsLineChartView object) {
             return object.yAxisAlpha;
         }
-        @Override public void set(AbsChartView object, Float value) {
+        @Override public void set(AbsLineChartView object, Float value) {
             object.yAxisAlpha = value;
             object.invalidate();
         }
@@ -147,28 +147,28 @@ public class AbsChartView extends View implements ChartUI {
     private final Interpolator xValueInterpolator = new AccelerateDecelerateInterpolator();
 
     // Faded in/out chart
-    private ChartData fadedChart = null;
+    private Line fadedChart = null;
     private float fadedChartAlpha = 0f;
     private ObjectAnimator fadedChartAnimator;
-    private final Property<AbsChartView, Float> FADED_CHART_ALPHA = new Property<AbsChartView, Float>(float.class, "fadedChartAlpha") {
-        @Override public Float get(AbsChartView object) {
+    private final Property<AbsLineChartView, Float> FADED_CHART_ALPHA = new Property<AbsLineChartView, Float>(float.class, "fadedChartAlpha") {
+        @Override public Float get(AbsLineChartView object) {
             return object.fadedChartAlpha;
         }
-        @Override public void set(AbsChartView object, Float value) {
+        @Override public void set(AbsLineChartView object, Float value) {
             object.fadedChartAlpha = value;
             invalidate();
         }
     };
 
-    public AbsChartView(Context context) {
+    public AbsLineChartView(Context context) {
         this(context, null);
     }
 
-    public AbsChartView(Context context, AttributeSet attrs) {
+    public AbsLineChartView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public AbsChartView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public AbsLineChartView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context, attrs);
     }
@@ -176,13 +176,13 @@ public class AbsChartView extends View implements ChartUI {
     private void init(Context context, AttributeSet attrs) {
         float chartLineWidth;
         if (attrs != null) {
-            TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.AbsChartView, 0, 0);
-            chartLineWidth = typedArray.getDimension(R.styleable.AbsChartView_chartStrokeWidth, Utils.dpToPx(DEFAULT_CHART_LINE_WIDTH_IN_DP, context));
-            axisStrokeWidth = typedArray.getDimension(R.styleable.AbsChartView_axisStrokeWidth, Utils.dpToPx(DEFAULT_AXIS_LINE_WIDTH_IN_DP, context));
-            xAxisStampCount = typedArray.getColor(R.styleable.AbsChartView_xAxisStampCount, DEFAULT_X_AXIS_STAMP_COUNT);
-            yAxisStampCount = typedArray.getInteger(R.styleable.AbsChartView_yAxisStampCount, DEFAULT_Y_AXIS_BAR_COUNT);
-            xAxisColor = typedArray.getColor(R.styleable.AbsChartView_xAxisColor, Color.LTGRAY);
-            yAxisColor = typedArray.getColor(R.styleable.AbsChartView_yAxisColor, Color.LTGRAY);
+            TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.AbsLineChartView, 0, 0);
+            chartLineWidth = typedArray.getDimension(R.styleable.AbsLineChartView_chartStrokeWidth, Utils.dpToPx(DEFAULT_CHART_LINE_WIDTH_IN_DP, context));
+            axisStrokeWidth = typedArray.getDimension(R.styleable.AbsLineChartView_axisStrokeWidth, Utils.dpToPx(DEFAULT_AXIS_LINE_WIDTH_IN_DP, context));
+            xAxisStampCount = typedArray.getColor(R.styleable.AbsLineChartView_xAxisStampCount, DEFAULT_X_AXIS_STAMP_COUNT);
+            yAxisStampCount = typedArray.getInteger(R.styleable.AbsLineChartView_yAxisStampCount, DEFAULT_Y_AXIS_BAR_COUNT);
+            xAxisColor = typedArray.getColor(R.styleable.AbsLineChartView_xAxisColor, Color.LTGRAY);
+            yAxisColor = typedArray.getColor(R.styleable.AbsLineChartView_yAxisColor, Color.LTGRAY);
             typedArray.recycle();
         } else {
             chartLineWidth = Utils.dpToPx(DEFAULT_CHART_LINE_WIDTH_IN_DP, context);
@@ -228,11 +228,11 @@ public class AbsChartView extends View implements ChartUI {
      ********** HELPER METHODS *********
      ***********************************/
 
-    /*package-private*/ /*nullable*/ ChartAdapter getAdapter() {
+    /*package-private*/ /*nullable*/ LineChartAdapter getAdapter() {
         return adapter;
     }
 
-    /*package-private*/ /*nullable*/ ChartData getFadedChart() {
+    /*package-private*/ /*nullable*/ Line getFadedChart() {
         return fadedChart;
     }
 
@@ -265,7 +265,7 @@ public class AbsChartView extends View implements ChartUI {
         final int measuredHeight = resolveSizeAndState(defHeight, heightMeasureSpec, 0);
         setMeasuredDimension(measuredWidth, measuredHeight);
         // update important values here
-        ChartAdapter adapter = this.adapter;
+        LineChartAdapter adapter = this.adapter;
         if (adapter != null) {
             minYValue = adapter.getLocalMinimum(startXPercentage, stopXPercentage);
             maxYValue = adapter.getLocalMaximum(startXPercentage, stopXPercentage);
@@ -280,7 +280,7 @@ public class AbsChartView extends View implements ChartUI {
      * If so then it does phantom magic with current Y axis bars;
      */
     private void checkIfMinOrMaxValueChanged() {
-        ChartAdapter adapter = this.adapter;
+        LineChartAdapter adapter = this.adapter;
         if (adapter == null) return;
 
         int minValue = adapter.getLocalMinimum(startXPercentage, stopXPercentage);
@@ -314,7 +314,7 @@ public class AbsChartView extends View implements ChartUI {
         }
     }
 
-    private void animateFadedInChart(final ChartData chart) {
+    private void animateFadedInChart(final Line chart) {
         Animator oldAnimator = this.fadedChartAnimator;
         if (oldAnimator != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) oldAnimator.pause();
@@ -345,7 +345,7 @@ public class AbsChartView extends View implements ChartUI {
         animator.start();
     }
 
-    private void animateFadedOutChart(final ChartData chart) {
+    private void animateFadedOutChart(final Line chart) {
         Animator oldAnimator = this.fadedChartAnimator;
         if (oldAnimator != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) oldAnimator.pause();
@@ -381,7 +381,7 @@ public class AbsChartView extends View implements ChartUI {
      * @param canvas canvas
      */
     protected void drawXAxis(Canvas canvas) {
-        ChartAdapter adapter = getAdapter();
+        LineChartAdapter adapter = getAdapter();
         if (adapter == null) return;
         // TO DO: draw phantom and actual stamps on X axis
     }
@@ -402,7 +402,7 @@ public class AbsChartView extends View implements ChartUI {
      * @param canvas canvas
      */
     protected void drawYAxis(Canvas canvas) {
-        ChartAdapter adapter = this.adapter;
+        LineChartAdapter adapter = this.adapter;
         if (adapter == null) return;
 
         int startX = getPaddingLeft();
@@ -439,30 +439,30 @@ public class AbsChartView extends View implements ChartUI {
     /**
      * Draws charts;
      * For optimization, the logic of rendering is next:
-     * 1) Find the previous timestamp that goes before {@link AbsChartView#startXPercentage} value;
-     * 2) Create a path of Y values for each chart until reached timestamp that goes after {@link AbsChartView#stopXPercentage} value;
+     * 1) Find the previous timestamp that goes before {@link AbsLineChartView#startXPercentage} value;
+     * 2) Create a path of Y values for each chart until reached timestamp that goes after {@link AbsLineChartView#stopXPercentage} value;
      * 3) Draw each path on canvas using appropriate colors;
      * @param canvas canvas
      */
     protected void drawCharts(Canvas canvas) {
-        ChartAdapter adapter = this.adapter;
+        LineChartAdapter adapter = this.adapter;
         if (adapter == null)
             return; // early return
 
         final int timestampCount = adapter.getTimestampCount();
         final float avTimestampPosXStep = 1f / adapter.getTimestampCount(); // average step
-        final long startTimestamp = adapter.getPreviousTimestamp(startXPercentage);
-        final float startTimestampPosX = adapter.getPreviousTimestampPosition(startXPercentage);
+        final int startTimestampIndex = adapter.getLeftClosestTimestampIndex(startXPercentage);
+        final float startTimestampPosX = adapter.getTimestampRelPositionAt(startTimestampIndex);
 
-        for (int i = 0; i < adapter.getChartCount(); i++) {
-            ChartData data = adapter.getChart(i);
-            if (!adapter.isVisible(data)) {
+        for (int i = 0; i < adapter.getLineCount(); i++) {
+            Line data = adapter.getLineAt(i);
+            if (!adapter.isLineEnabled(data)) {
                 if (fadedChart == null || !fadedChart.equals(data))
                     continue;
             }
 
             float timestampPosX = startTimestampPosX;
-            int timestampIndex = adapter.getTimestampIndex(startTimestamp);
+            int timestampIndex = startTimestampIndex;
 
             int value = data.getValueAt(timestampIndex);
 
@@ -499,7 +499,7 @@ public class AbsChartView extends View implements ChartUI {
      **********************************/
 
     @Override
-    public void setAdapter(ChartAdapter adapter) {
+    public void setAdapter(LineChartAdapter adapter) {
         this.adapter = adapter;
         checkIfMinOrMaxValueChanged();
         invalidate();
@@ -544,11 +544,11 @@ public class AbsChartView extends View implements ChartUI {
     }
 
     @Override
-    public void show(ChartData chart) {
+    public void show(Line chart) {
         // showing a chart here
-        ChartAdapter adapter = this.adapter;
+        LineChartAdapter adapter = this.adapter;
         if (adapter != null) {
-            adapter.setVisible(chart, true);
+            adapter.setLineEnabled(chart, true);
             checkIfMinOrMaxValueChanged();
             animateFadedInChart(chart);
             invalidate();
@@ -556,11 +556,11 @@ public class AbsChartView extends View implements ChartUI {
     }
 
     @Override
-    public void hide(ChartData chart) {
+    public void hide(Line chart) {
         // hiding a chart here
-        ChartAdapter adapter = this.adapter;
+        LineChartAdapter adapter = this.adapter;
         if (adapter != null) {
-            adapter.setVisible(chart, false);
+            adapter.setLineEnabled(chart, false);
             checkIfMinOrMaxValueChanged();
             animateFadedOutChart(chart);
             invalidate();

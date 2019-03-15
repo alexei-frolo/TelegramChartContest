@@ -1,11 +1,11 @@
-package com.froloapp.telegramchart.widget.chartview;
+package com.froloapp.telegramchart.widget.linechartview;
 
 
 /**
- * Represents UI for a chart view
+ * Represents UI for a line chart view
  */
-public interface ChartUI {
-    void setAdapter(ChartAdapter adapter);
+public interface LineChartUI {
+    void setAdapter(LineChartAdapter adapter);
 
     float getStartXPosition();
 
@@ -20,6 +20,6 @@ public interface ChartUI {
     // sets start and stop x positions in percentage (value in range 0..1)
     void setXPositions(float start, float stop);
 
-    void show(ChartData chart);
-    void hide(ChartData chart);
+    void show(Line chart);
+    void hide(Line chart);
 }

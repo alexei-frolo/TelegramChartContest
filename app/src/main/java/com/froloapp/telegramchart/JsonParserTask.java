@@ -4,10 +4,10 @@ package com.froloapp.telegramchart;
 import android.graphics.Color;
 import android.os.AsyncTask;
 
-import com.froloapp.telegramchart.widget.chartview.ChartAdapter;
-import com.froloapp.telegramchart.widget.chartview.ChartData;
-import com.froloapp.telegramchart.widget.chartview.factory.ChartAdapters;
-import com.froloapp.telegramchart.widget.chartview.factory.Charts;
+import com.froloapp.telegramchart.widget.linechartview.LineChartAdapter;
+import com.froloapp.telegramchart.widget.linechartview.Line;
+import com.froloapp.telegramchart.widget.linechartview.factory.LineChartAdapters;
+import com.froloapp.telegramchart.widget.linechartview.factory.Lines;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -28,7 +28,7 @@ public class JsonParserTask extends AsyncTask<InputStream, Void, Object> {
     interface Callback {
         void onStart();
         void onError(Throwable error);
-        void onResult(ChartAdapter[] adapters);
+        void onResult(LineChartAdapter[] adapters);
         void onCancelled();
     }
 
@@ -45,8 +45,8 @@ public class JsonParserTask extends AsyncTask<InputStream, Void, Object> {
 
     @Override
     protected void onPostExecute(Object o) {
-        if (o instanceof ChartAdapter[]) {
-            callback.onResult((ChartAdapter[]) o);
+        if (o instanceof LineChartAdapter[]) {
+            callback.onResult((LineChartAdapter[]) o);
         } else if (o instanceof Throwable) {
             callback.onError((Throwable) o);
         }
@@ -62,7 +62,7 @@ public class JsonParserTask extends AsyncTask<InputStream, Void, Object> {
         try {
             final InputStream is = streams[0];
             String json = parseJson(is);
-            ChartAdapter[] adapters = parseAdapters(json);
+            LineChartAdapter[] adapters = parseAdapters(json);
             return adapters;
         } catch (Throwable t) {
             return t;
@@ -85,10 +85,10 @@ public class JsonParserTask extends AsyncTask<InputStream, Void, Object> {
     }
 
     // parses json string into chart adapters
-    private ChartAdapter[] parseAdapters(String json) throws Throwable {
+    private LineChartAdapter[] parseAdapters(String json) throws Throwable {
         JSONArray array = new JSONArray(json);
         int count = array.length();
-        ChartAdapter[] adapters = new ChartAdapter[count];
+        LineChartAdapter[] adapters = new LineChartAdapter[count];
         for (int i = 0; i < count; i++) {
             JSONObject obj = array.getJSONObject(i);
             adapters[i] = parseAdapter(obj);
@@ -97,7 +97,7 @@ public class JsonParserTask extends AsyncTask<InputStream, Void, Object> {
     }
 
     // parses json object into chart adapter
-    private ChartAdapter parseAdapter(JSONObject obj) throws Throwable {
+    private LineChartAdapter parseAdapter(JSONObject obj) throws Throwable {
         JSONArray columnsJson = obj.getJSONArray("columns");
         JSONObject typesJson = obj.getJSONObject("types");
         JSONObject namesJson = obj.getJSONObject("names");
@@ -118,7 +118,7 @@ public class JsonParserTask extends AsyncTask<InputStream, Void, Object> {
             }
         }
 
-        List<ChartData> charts = new ArrayList<>();
+        List<Line> charts = new ArrayList<>();
         for (int i = 0; i < chartCount; i++) {
             JSONArray columns = columnsJson.getJSONArray(i);
             String chartCode = columns.get(0).toString();
@@ -136,12 +136,12 @@ public class JsonParserTask extends AsyncTask<InputStream, Void, Object> {
                 String type = typesJson.getString(chartCode); // what to do with this??
                 String name = namesJson.getString(chartCode);
                 String color = colorsJson.getString(chartCode);
-                //ChartData data = Charts.create(map, Color.parseColor(color), name);
+                //Line data = Lines.create(map, Color.parseColor(color), name);
                 //charts.add(data);
-                ChartData data = Charts.create(values, Color.parseColor(color), name);
+                Line data = Lines.create(values, Color.parseColor(color), name);
                 charts.add(data);
             }
         }
-        return ChartAdapters.create(timestamps, charts);
+        return LineChartAdapters.create(timestamps, charts);
     }
 }

@@ -1,8 +1,8 @@
-package com.froloapp.telegramchart.widget.chartview.factory;
+package com.froloapp.telegramchart.widget.linechartview.factory;
 
 
-import com.froloapp.telegramchart.widget.chartview.ChartAdapter;
-import com.froloapp.telegramchart.widget.chartview.ChartData;
+import com.froloapp.telegramchart.widget.linechartview.LineChartAdapter;
+import com.froloapp.telegramchart.widget.linechartview.Line;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
-class SimpleChartAdapter implements ChartAdapter {
+class SimpleLineChartAdapter implements LineChartAdapter {
     private static AtomicInteger chartId = new AtomicInteger(0);
 
     private static int nextChartId() {
@@ -21,34 +21,34 @@ class SimpleChartAdapter implements ChartAdapter {
 
     private final int id;
 
-    private List<Long> timestamps;
+    private final List<Long> timestamps = new ArrayList<>();
     private long firstTimestamp;
     private long lastTimestamp;
 
-    private List<ChartHolder> chartHolders = new ArrayList<>();
-    private final Map<Long, Integer> localMinimums = new HashMap<>();
-    private final Map<Long, Integer> localMaximums = new HashMap<>();
+    private List<LineHolder> lineHolders = new ArrayList<>();
+    private final Map<Integer, Integer> localMinimums = new HashMap<>(); // local minimums at indexes
+    private final Map<Integer, Integer> localMaximums = new HashMap<>(); // local maximums at indexes
 
-    private static class ChartHolder {
-        final ChartData data;
+    private static class LineHolder {
+        final Line data;
         boolean visible;
-        ChartHolder(ChartData data, boolean visible) {
+        LineHolder(Line data, boolean visible) {
             this.data = data;
             this.visible = visible;
         }
     }
 
-    SimpleChartAdapter(List<Long> timestamps, List<ChartData> charts) {
+    SimpleLineChartAdapter(List<Long> timestamps, List<Line> lines) {
         id = nextChartId();
 
-        chartHolders.clear();
+        lineHolders.clear();
+        this.timestamps.addAll(timestamps);
         if (!timestamps.isEmpty()) {
-            this.timestamps = timestamps;
             this.firstTimestamp = timestamps.get(0);
             this.lastTimestamp = timestamps.get(timestamps.size() - 1);
             Collections.sort(timestamps); // default sort
-            for (ChartData data : charts) {
-                chartHolders.add(new ChartHolder(data, true));
+            for (Line data : lines) {
+                lineHolders.add(new LineHolder(data, true));
             }
         }
 
@@ -60,27 +60,44 @@ class SimpleChartAdapter implements ChartAdapter {
         localMinimums.clear();
         localMaximums.clear();
         for (int i = 0; i < timestamps.size(); i++) {
-            long timestamp = timestamps.get(i);
             int minValue = findMinValueAt(i);
             int maxValue = findMaxValueAt(i);
-            localMinimums.put(timestamp, minValue);
-            localMaximums.put(timestamp, maxValue);
+            localMinimums.put(i, minValue);
+            localMaximums.put(i, maxValue);
         }
-    }
-
-    @Override
-    public long getFirstTimestamp() {
-        return firstTimestamp;
-    }
-
-    @Override
-    public long getLastTimestamp() {
-        return lastTimestamp;
     }
 
     @Override
     public int getTimestampCount() {
         return timestamps.size();
+    }
+
+    @Override
+    public long getTimestampAt(int index) {
+        return timestamps.get(index);
+    }
+
+    @Override
+    public int getLeftClosestTimestampIndex(float toXPosition) {
+        if (timestamps.isEmpty()) return -1; // early return
+
+        long minTimestamp = timestamps.get(0);
+        long maxTimestamp = timestamps.get(timestamps.size() - 1);
+        long approximatelyTimestamp = minTimestamp + (long) ((maxTimestamp - minTimestamp) * toXPosition);
+        for (int i = timestamps.size() - 1; i >=0; i--) {
+            long axis = timestamps.get(i);
+            if (axis < approximatelyTimestamp)
+                return i;
+        }
+        return 0;
+    }
+
+    @Override
+    public float getTimestampRelPositionAt(int index) {
+        long timestamp = timestamps.get(index);
+        long minTimestamp = timestamps.get(0);
+        long maxTimestamp = timestamps.get(timestamps.size() - 1);
+        return ((float) (timestamp - minTimestamp)) / (maxTimestamp - minTimestamp);
     }
 
     @Override
@@ -143,7 +160,7 @@ class SimpleChartAdapter implements ChartAdapter {
     // finds min value for the given timestamp
     private int findMinValueAt(int index) {
         int min = Integer.MAX_VALUE;
-        for (ChartHolder holder : chartHolders) {
+        for (LineHolder holder : lineHolders) {
             if (!holder.visible) continue;
 
             int value = holder.data.getValueAt(index);
@@ -157,7 +174,7 @@ class SimpleChartAdapter implements ChartAdapter {
     // finds max value for the given timestamp
     private int findMaxValueAt(int index) {
         int max = Integer.MIN_VALUE;
-        for (ChartHolder holder : chartHolders) {
+        for (LineHolder holder : lineHolders) {
             if (!holder.visible) continue;
 
             int value = holder.data.getValueAt(index);
@@ -168,26 +185,24 @@ class SimpleChartAdapter implements ChartAdapter {
         return max;
     }
 
-    private int getMinValue(long timestamp) {
-        Integer v = localMinimums.get(timestamp);
+    private int getMinValueAt(int index) {
+        Integer v = localMinimums.get(index);
         if (v != null) {
             return v;
         } else {
-            int index = getTimestampIndex(timestamp);
             int min = findMaxValueAt(index);
-            localMinimums.put(timestamp, min);
+            localMinimums.put(index, min);
             return min;
         }
     }
 
-    private int getMaxValue(long timestamp) {
-        Integer v = localMaximums.get(timestamp);
+    private int getMaxValueAt(int index) {
+        Integer v = localMaximums.get(index);
         if (v != null) {
             return v;
         } else {
-            int index = getTimestampIndex(timestamp);
             int max = findMaxValueAt(index);
-            localMaximums.put(timestamp, max);
+            localMaximums.put(index, max);
             return max;
         }
     }
@@ -206,7 +221,7 @@ class SimpleChartAdapter implements ChartAdapter {
                     // check if the next axis is in the bounds
                     long nextTimestamp = timestamps.get(i + 1);
                     if (nextTimestamp >= fromTimestamp) {
-                        int localMin = getMinValue(timestamp);
+                        int localMin = getMinValueAt(i);
                         if (localMin < min) {
                             min = localMin;
                         }
@@ -215,13 +230,13 @@ class SimpleChartAdapter implements ChartAdapter {
                 continue;
             }
             if (timestamp > toTimestamp) {
-                int localMin = getMinValue(timestamp);
+                int localMin = getMinValueAt(i);
                 if (localMin < min) {
                     min = localMin;
                 }
                 break;
             }
-            int localMin = getMinValue(timestamp);
+            int localMin = getMinValueAt(i);
             if (localMin < min) {
                 min = localMin;
             }
@@ -243,7 +258,7 @@ class SimpleChartAdapter implements ChartAdapter {
                     // check if the next axis is in the bounds
                     long nextTimestamp = timestamps.get(i + 1);
                     if (nextTimestamp >= fromTimestamp) {
-                        int localMax = getMaxValue(timestamp);
+                        int localMax = getMaxValueAt(i);
                         if (localMax > max) {
                             max = localMax;
                         }
@@ -252,13 +267,13 @@ class SimpleChartAdapter implements ChartAdapter {
                 continue;
             }
             if (timestamp > toTimestamp) {
-                int localMax = getMaxValue(timestamp);
+                int localMax = getMaxValueAt(i);
                 if (localMax > max) {
                     max = localMax;
                 }
                 break;
             }
-            int localMax = getMaxValue(timestamp);
+            int localMax = getMaxValueAt(i);
             if (localMax > max) {
                 max = localMax;
             }
@@ -267,50 +282,19 @@ class SimpleChartAdapter implements ChartAdapter {
     }
 
     @Override
-    public boolean hasPreviousTimestamp(float beforeTimestampPosition) {
-        return beforeTimestampPosition > 0f;
+    public int getLineCount() {
+        return lineHolders.size();
     }
 
     @Override
-    public long getPreviousTimestamp(float beforeTimestampPosition) {
-        long minAxis = timestamps.get(0);
-        long maxAxis = timestamps.get(timestamps.size() - 1);
-        long desiredAxis = (minAxis + (long) ((maxAxis - minAxis) * beforeTimestampPosition)) - 1;
-        for (int i = timestamps.size() - 1; i >=0; i--) {
-            long axis = timestamps.get(i);
-            if (axis <= desiredAxis)
-                return axis;
-        }
-        return timestamps.get(0);
+    public Line getLineAt(int index) {
+        return lineHolders.get(index).data;
     }
 
     @Override
-    public float getPreviousTimestampPosition(float beforeTimestampPosition) {
-        long minAxis = timestamps.get(0);
-        long maxAxis = timestamps.get(timestamps.size() - 1);
-        long desiredAxis = (minAxis + (long) ((maxAxis - minAxis) * beforeTimestampPosition)) - 1;
-        for (int i = timestamps.size() - 1; i >=0; i--) {
-            long axis = timestamps.get(i);
-            if (axis <= desiredAxis)
-                return ((float) (axis - minAxis)) / (maxAxis - minAxis);
-        }
-        return 0f;
-    }
-
-    @Override
-    public int getChartCount() {
-        return chartHolders.size();
-    }
-
-    @Override
-    public ChartData getChart(int index) {
-        return chartHolders.get(index).data;
-    }
-
-    @Override
-    public boolean isVisible(ChartData chart) {
-        for (int i = 0; i < chartHolders.size(); i++) {
-            ChartHolder holder = chartHolders.get(i);
+    public boolean isLineEnabled(Line chart) {
+        for (int i = 0; i < lineHolders.size(); i++) {
+            LineHolder holder = lineHolders.get(i);
             if (holder.data.equals(chart)) {
                 return holder.visible;
             }
@@ -319,14 +303,14 @@ class SimpleChartAdapter implements ChartAdapter {
     }
 
     @Override
-    public void setVisible(ChartData chart, boolean visible) {
-        for (int i = 0; i < chartHolders.size(); i++) {
-            ChartHolder holder = chartHolders.get(i);
+    public void setLineEnabled(Line chart, boolean visible) {
+        for (int i = 0; i < lineHolders.size(); i++) {
+            LineHolder holder = lineHolders.get(i);
             if (holder.data.equals(chart)) {
                 holder.visible = visible;
             }
         }
-        // think of much more optimized way
+        // TO DO: think of much more optimized way
         calcMinimumsAndMaximums();
     }
 
@@ -342,6 +326,6 @@ class SimpleChartAdapter implements ChartAdapter {
 
     @Override
     public String toString() {
-        return "Simple chart #" + String.valueOf(id);
+        return "Line chart #" + String.valueOf(id);
     }
 }

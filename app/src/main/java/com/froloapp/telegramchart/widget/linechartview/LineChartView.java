@@ -1,4 +1,4 @@
-package com.froloapp.telegramchart.widget.chartview;
+package com.froloapp.telegramchart.widget.linechartview;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -13,7 +13,7 @@ import com.froloapp.telegramchart.BuildConfig;
 import com.froloapp.telegramchart.widget.Utils;
 
 
-public class ChartView extends AbsChartView {
+public class LineChartView extends AbsLineChartView {
     // static
     private static final int DEFAULT_TEXT_HEIGHT_IN_SP = 15;
     private static final int TOUCH_STAMP_THRESHOLD_IN_DP = 5;
@@ -33,15 +33,15 @@ public class ChartView extends AbsChartView {
     private float clickedXPosition;
     private OnStampClickListener onStampClickListener;
 
-    public ChartView(Context context) {
+    public LineChartView(Context context) {
         this(context, null);
     }
 
-    public ChartView(Context context, AttributeSet attrs) {
+    public LineChartView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public ChartView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public LineChartView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context, attrs);
     }
@@ -97,7 +97,7 @@ public class ChartView extends AbsChartView {
     }
 
     private void drawClickedTimestamp(Canvas canvas) {
-        ChartAdapter adapter = getAdapter();
+        LineChartAdapter adapter = getAdapter();
         if (adapter != null && clickedStamp) {
             long xAxis = clickedXAxis;
             float xPosition = clickedXPosition;
@@ -107,15 +107,15 @@ public class ChartView extends AbsChartView {
             stampInfoPaint.setColor(getXAxisColor());
             canvas.drawLine(x, getPaddingTop(), x, getMeasuredHeight() - getPaddingBottom(), stampInfoPaint);
 
-            ChartData fadedChart = getFadedChart();
-            for (int i = 0; i < adapter.getChartCount(); i++) {
-                ChartData chart = adapter.getChart(i);
+            Line fadedChart = getFadedChart();
+            for (int i = 0; i < adapter.getLineCount(); i++) {
+                Line chart = adapter.getLineAt(i);
                 boolean needToDraw;
                 float alpha;
                 if (chart == fadedChart) {
                     needToDraw = true;
                     alpha = getFadedChartAlpha();
-                } else if (adapter.isVisible(chart)) {
+                } else if (adapter.isLineEnabled(chart)) {
                     needToDraw = true;
                     alpha = 1f;
                 } else {
@@ -178,7 +178,7 @@ public class ChartView extends AbsChartView {
     }
 
     private void handleClick(float x, float y, float rawX, float rawY) {
-        ChartAdapter adapter = getAdapter();
+        LineChartAdapter adapter = getAdapter();
         if (adapter != null) {
             float xPosition = getXPosition(x);
             this.clickedXPosition = adapter.getClosestTimestampPosition(xPosition);
@@ -200,7 +200,7 @@ public class ChartView extends AbsChartView {
     }
 
     @Override
-    public void setAdapter(ChartAdapter adapter) {
+    public void setAdapter(LineChartAdapter adapter) {
         clickedStamp = false;
         super.setAdapter(adapter);
     }

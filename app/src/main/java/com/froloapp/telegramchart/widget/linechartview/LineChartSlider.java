@@ -1,4 +1,4 @@
-package com.froloapp.telegramchart.widget.chartview;
+package com.froloapp.telegramchart.widget.linechartview;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -12,7 +12,7 @@ import android.view.MotionEvent;
 import com.froloapp.telegramchart.R;
 import com.froloapp.telegramchart.widget.Utils;
 
-public class ChartSlider extends AbsChartView {
+public class LineChartSlider extends AbsLineChartView {
     // static
     private static final int DEFAULT_FRAME_HORIZONTAL_BORDER_WIDTH_IN_DP = 5;
     private static final int DEFAULT_FRAME_VERTICAl_BORDER_WIDTH_IN_DP = 1;
@@ -59,15 +59,15 @@ public class ChartSlider extends AbsChartView {
     // SCROLL LISTENER
     private OnScrollListener listener;
 
-    public ChartSlider(Context context) {
+    public LineChartSlider(Context context) {
         this(context, null);
     }
 
-    public ChartSlider(Context context, AttributeSet attrs) {
+    public LineChartSlider(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public ChartSlider(Context context, AttributeSet attrs, int defStyleAttr) {
+    public LineChartSlider(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context, attrs);
     }
@@ -76,14 +76,14 @@ public class ChartSlider extends AbsChartView {
         int overlayColor;
         int frameBorderColor;
         if (attrs != null) {
-            TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.ChartSlider, 0, 0);
-            overlayColor = typedArray.getColor(R.styleable.ChartSlider_overlayColor, Color.parseColor("#AAFFFFFF"));
-            frameBorderColor = typedArray.getColor(R.styleable.ChartSlider_frameBorderColor, Color.parseColor("#AAC1C1C1"));
-            frameHorizontalBorderWidth = typedArray.getDimension(R.styleable.ChartSlider_frameHorizontalBorderWidth,
+            TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.LineChartSlider, 0, 0);
+            overlayColor = typedArray.getColor(R.styleable.LineChartSlider_overlayColor, Color.parseColor("#AAFFFFFF"));
+            frameBorderColor = typedArray.getColor(R.styleable.LineChartSlider_frameBorderColor, Color.parseColor("#AAC1C1C1"));
+            frameHorizontalBorderWidth = typedArray.getDimension(R.styleable.LineChartSlider_frameHorizontalBorderWidth,
                     Utils.dpToPx(DEFAULT_FRAME_HORIZONTAL_BORDER_WIDTH_IN_DP, context));
-            frameVerticalBorderWidth = typedArray.getDimension(R.styleable.ChartSlider_frameVerticalBorderWidth,
+            frameVerticalBorderWidth = typedArray.getDimension(R.styleable.LineChartSlider_frameVerticalBorderWidth,
                     Utils.dpToPx(DEFAULT_FRAME_VERTICAl_BORDER_WIDTH_IN_DP, context));
-            maxFrameCompression = typedArray.getFloat(R.styleable.ChartSlider_maxFrameCompression, DEFAULT_MAX_FRAME_COMPRESSION);
+            maxFrameCompression = typedArray.getFloat(R.styleable.LineChartSlider_maxFrameCompression, DEFAULT_MAX_FRAME_COMPRESSION);
             typedArray.recycle();
         } else {
             overlayColor = Color.parseColor("#AAFFFFFF");
@@ -102,7 +102,7 @@ public class ChartSlider extends AbsChartView {
     }
 
     public interface OnScrollListener {
-        void onScroll(ChartSlider slider, float startStampRel, float endStampRel);
+        void onScroll(LineChartSlider slider, float startStampRel, float endStampRel);
     }
 
     public void setOnScrollListener(OnScrollListener listener) {
@@ -262,7 +262,7 @@ public class ChartSlider extends AbsChartView {
     }
 
     @Override
-    public void setAdapter(ChartAdapter adapter) {
+    public void setAdapter(LineChartAdapter adapter) {
         super.setAdapter(adapter);
         super.setXPositions(0f, 1f);
     }

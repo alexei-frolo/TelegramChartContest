@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="AbsChartView">
+    <declare-styleable name="AbsLineChartView">
         <attr name="chartStrokeWidth" format="dimension|reference"/>
         <attr name="axisStrokeWidth" format="dimension|reference"/>
         <attr name="xAxisStampCount" format="integer"/>
@@ -9,7 +9,7 @@
         <attr name="yAxisColor" format="color|reference"/>
     </declare-styleable>
 
-    <declare-styleable name="ChartSlider">
+    <declare-styleable name="LineChartSlider">
         <attr name="overlayColor" format="color|reference"/>
         <attr name="frameBorderColor" format="color|reference"/>
         <attr name="frameHorizontalBorderWidth" format="dimension|reference"/>
@@ -17,6 +17,6 @@
         <attr name="maxFrameCompression" format="float|reference"/>
     </declare-styleable>
 
-    <declare-styleable name="ChartView">
+    <declare-styleable name="LineChartView">
     </declare-styleable>
 </resources>
