@@ -100,7 +100,7 @@ public class ChartSlider extends AbsChartView {
         framePaint.setStyle(Paint.Style.STROKE);
         framePaint.setColor(frameBorderColor);
 
-        touchBorderThreshold = Utils.dpToPx(15f, context);
+        touchBorderThreshold = Utils.dpToPx(5f, context);
     }
 
     private void log(String msg) {
@@ -144,12 +144,14 @@ public class ChartSlider extends AbsChartView {
 
     private boolean isFrameLeftBorderTouched(float x) {
         float startStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * leftBorderXPosition;
-        return x > startStampPos - touchBorderThreshold && x < startStampPos + touchBorderThreshold;
+        return x > startStampPos - frameHorizontalBorderWidth - touchBorderThreshold
+                && x < startStampPos + frameHorizontalBorderWidth + touchBorderThreshold;
     }
 
     private boolean isFrameRightBorderTouched(float x) {
         float endStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * rightBorderXPosition;
-        return x > endStampPos - touchBorderThreshold && x < endStampPos + touchBorderThreshold;
+        return x > endStampPos - frameHorizontalBorderWidth - touchBorderThreshold
+                && x < endStampPos + frameHorizontalBorderWidth + touchBorderThreshold;
     }
 
     private boolean isFrameTouched(float x) {
