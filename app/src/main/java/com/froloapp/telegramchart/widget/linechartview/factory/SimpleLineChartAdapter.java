@@ -1,18 +1,22 @@
 package com.froloapp.telegramchart.widget.linechartview.factory;
 
 
-import com.froloapp.telegramchart.widget.linechartview.LineChartAdapter;
+import android.util.SparseIntArray;
+
 import com.froloapp.telegramchart.widget.linechartview.Line;
+import com.froloapp.telegramchart.widget.linechartview.LineChartAdapter;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
 class SimpleLineChartAdapter implements LineChartAdapter {
+    // static
+    private static final int DEFAULT_MIN_VALUE = -10;
+    private static final int DEFAULT_MAX_VALUE = 10;
+
     private static AtomicInteger chartId = new AtomicInteger(0);
 
     private static int nextChartId() {
@@ -22,12 +26,10 @@ class SimpleLineChartAdapter implements LineChartAdapter {
     private final int id;
 
     private final List<Long> timestamps = new ArrayList<>();
-    private long firstTimestamp;
-    private long lastTimestamp;
 
     private List<LineHolder> lineHolders = new ArrayList<>();
-    private final Map<Integer, Integer> localMinimums = new HashMap<>(); // local minimums at indexes
-    private final Map<Integer, Integer> localMaximums = new HashMap<>(); // local maximums at indexes
+    private final SparseIntArray localMinimums = new SparseIntArray(); // local minimums at indexes
+    private final SparseIntArray localMaximums = new SparseIntArray(); // local maximums at indexes
 
     private static class LineHolder {
         final Line data;
@@ -44,8 +46,6 @@ class SimpleLineChartAdapter implements LineChartAdapter {
         lineHolders.clear();
         this.timestamps.addAll(timestamps);
         if (!timestamps.isEmpty()) {
-            this.firstTimestamp = timestamps.get(0);
-            this.lastTimestamp = timestamps.get(timestamps.size() - 1);
             Collections.sort(timestamps); // default sort
             for (Line data : lines) {
                 lineHolders.add(new LineHolder(data, true));
@@ -186,25 +186,11 @@ class SimpleLineChartAdapter implements LineChartAdapter {
     }
 
     private int getMinValueAt(int index) {
-        Integer v = localMinimums.get(index);
-        if (v != null) {
-            return v;
-        } else {
-            int min = findMaxValueAt(index);
-            localMinimums.put(index, min);
-            return min;
-        }
+        return localMinimums.get(index, DEFAULT_MIN_VALUE);
     }
 
     private int getMaxValueAt(int index) {
-        Integer v = localMaximums.get(index);
-        if (v != null) {
-            return v;
-        } else {
-            int max = findMaxValueAt(index);
-            localMaximums.put(index, max);
-            return max;
-        }
+        return localMaximums.get(index, DEFAULT_MAX_VALUE);
     }
 
     @Override

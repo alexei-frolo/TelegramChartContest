@@ -4,8 +4,8 @@ package com.froloapp.telegramchart;
 import android.graphics.Color;
 import android.os.AsyncTask;
 
-import com.froloapp.telegramchart.widget.linechartview.LineChartAdapter;
 import com.froloapp.telegramchart.widget.linechartview.Line;
+import com.froloapp.telegramchart.widget.linechartview.LineChartAdapter;
 import com.froloapp.telegramchart.widget.linechartview.factory.LineChartAdapters;
 import com.froloapp.telegramchart.widget.linechartview.factory.Lines;
 

@@ -16,8 +16,8 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.froloapp.telegramchart.widget.Utils;
-import com.froloapp.telegramchart.widget.linechartview.LineChartAdapter;
 import com.froloapp.telegramchart.widget.linechartview.Line;
+import com.froloapp.telegramchart.widget.linechartview.LineChartAdapter;
 import com.froloapp.telegramchart.widget.linechartview.LineChartSlider;
 import com.froloapp.telegramchart.widget.linechartview.LineChartView;
 
