@@ -131,6 +131,7 @@ public class ChartView extends AbsChartView {
                     float y = getYCoor(value);
                     canvas.drawCircle(x, y, stampInfoBigDotRadius, stampInfoPaint);
                     stampInfoPaint.setColor(Color.WHITE);
+                    stampInfoPaint.setAlpha((int) (alpha * 255));
                     canvas.drawCircle(x, y, stampInfoSmallDotRadius, stampInfoPaint);
                 }
             }
