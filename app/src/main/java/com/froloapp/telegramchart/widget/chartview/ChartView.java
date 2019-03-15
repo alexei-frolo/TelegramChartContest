@@ -197,4 +197,10 @@ public class ChartView extends AbsChartView {
             l.onStampClick(x, y, rawX, rawY, xAxis);
         }
     }
+
+    @Override
+    public void setAdapter(ChartAdapter adapter) {
+        clickedStamp = false;
+        super.setAdapter(adapter);
+    }
 }
