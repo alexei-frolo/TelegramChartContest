@@ -2,7 +2,6 @@ package com.froloapp.telegramchart;
 
 import android.app.Activity;
 import android.content.res.AssetManager;
-import android.content.res.ColorStateList;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;

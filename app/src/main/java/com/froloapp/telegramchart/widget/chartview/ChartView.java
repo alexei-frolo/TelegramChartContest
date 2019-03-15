@@ -15,7 +15,6 @@ import com.froloapp.telegramchart.widget.Utils;
 
 public class ChartView extends AbsChartView {
     // static
-
     private static final int DEFAULT_TEXT_HEIGHT_IN_SP = 15;
     private static final int TOUCH_STAMP_THRESHOLD_IN_DP = 5;
     private static final long ANIM_DURATION = 200L;
@@ -33,12 +32,6 @@ public class ChartView extends AbsChartView {
     private long clickedXAxis;
     private float clickedXPosition;
     private OnStampClickListener onStampClickListener;
-
-    // multiply min and max Y axis value by this coefficient
-    private float yValueCoefficient = 1f;
-
-    // Background (Axes)
-    private float axisAlpha = 1f;
 
     public ChartView(Context context) {
         this(context, null);
@@ -99,17 +92,8 @@ public class ChartView extends AbsChartView {
     protected void onDraw(Canvas canvas) {
         drawXAxis(canvas);
         drawYAxis(canvas);
-        drawForeground(canvas);
-        drawClickedTimestamp(canvas);
-    }
-
-    /**
-     * Draws line charts;
-     * @param canvas canvas
-     */
-    private void drawForeground(Canvas canvas) {
-        log("Drawing foreground layer");
         drawCharts(canvas);
+        drawClickedTimestamp(canvas);
     }
 
     private void drawClickedTimestamp(Canvas canvas) {
