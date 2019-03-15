@@ -39,8 +39,6 @@ public class AbsChartView extends View implements ChartUI {
     private static final float DEFAULT_CHART_LINE_WIDTH_IN_DP = 1f;
     private static final float DEFAULT_AXIS_LINE_WIDTH_IN_DP = 1f;
 
-    private ChartAdapter adapter;
-
     // paint tools
     private final Paint chartPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint yAxisPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -51,10 +49,11 @@ public class AbsChartView extends View implements ChartUI {
     private final Rect stampTextBounds = new Rect(); // here we store bounds for stamp text height
     private float axisStrokeWidth;
 
+    // adapter
+    private ChartAdapter adapter;
     // current start and stop positions on X Axis in percentage(from 0 to 1)
     private float startXPercentage;
     private float stopXPercentage;
-
     // current min and max value on Y axis
     private float minYValue;
     private float maxYValue;
@@ -234,7 +233,7 @@ public class AbsChartView extends View implements ChartUI {
 
     private void log(String msg) {
         if (BuildConfig.DEBUG) {
-            Log.d("ChartView", msg);
+            Log.d("AbsChartView", msg);
         }
     }
 
@@ -248,14 +247,6 @@ public class AbsChartView extends View implements ChartUI {
 
     /*package-private*/ float getFadedChartAlpha() {
         return fadedChartAlpha;
-    }
-
-    /*package-private*/ float getMinYValue() {
-        return minYValue;
-    }
-
-    /*package-private*/ float getMaxYValue() {
-        return maxYValue;
     }
 
     /*package-private*/ float getXPosition(float x) {
