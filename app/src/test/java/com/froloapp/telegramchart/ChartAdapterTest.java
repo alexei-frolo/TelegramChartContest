@@ -50,4 +50,36 @@ public class ChartAdapterTest {
     public void test_ChartCount() {
         assertEquals(adapter.getChartCount(), 2);
     }
+
+    @Test
+    public void test_ChartVisible() {
+        // chart 1
+        adapter.setVisible(chart1, false);
+        assertFalse(adapter.isVisible(chart1));
+
+        // chart 2
+        adapter.setVisible(chart2, true);
+        assertTrue(adapter.isVisible(chart2));
+
+        // chart 1
+        adapter.setVisible(chart1, true);
+        assertTrue(adapter.isVisible(chart1));
+
+        // chart 2
+        adapter.setVisible(chart2, false);
+        assertFalse(adapter.isVisible(chart2));
+    }
+
+    @Test
+    public void test_FirstAndLastTimestamps() {
+        assertEquals(adapter.getFirstTimestamp(), 1);
+        assertEquals(adapter.getLastTimestamp(), 10);
+    }
+
+    @Test
+    public void test_LocalMinimum() {
+        adapter.setVisible(chart1, true);
+        adapter.setVisible(chart2, true);
+        assertEquals(adapter.getLocalMinimum(0.35f, 0.9f), 51);
+    }
 }
