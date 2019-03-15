@@ -33,12 +33,6 @@ public class MainActivity extends Activity implements ChartSlider.OnScrollListen
     // hold task to cancel if needed
     private JsonParserTask jsonParserTask;
 
-    private void log(String msg) {
-        if (BuildConfig.DEBUG) {
-            Log.d("ChartViewMainActivity", msg);
-        }
-    }
-
     private void log(Throwable e) {
         if (BuildConfig.DEBUG) {
             Log.e("ChartViewMainActivity", "", e);
@@ -157,7 +151,6 @@ public class MainActivity extends Activity implements ChartSlider.OnScrollListen
 
     @Override
     public void onScroll(ChartSlider slider, float startStampRel, float endStampRel) {
-        log("Scrolled: startStampRel=" + startStampRel + ", endStampRel=" + endStampRel);
         chartView.setXPositions(startStampRel, endStampRel);
     }
 
