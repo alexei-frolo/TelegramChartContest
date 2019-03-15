@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -20,28 +19,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
-    <com.froloapp.telegramchart.widget.chartview.ChartView
-        app:xAxisColor="@color/chart_axis"
-        app:yAxisColor="@color/chart_axis"
-        app:chartStrokeWidth="1.5dp"
-        app:axisStrokeWidth="0.5dp"
-        android:padding="5dp"
-        android:id="@+id/chartView"
-        android:layout_width="match_parent"
-        android:layout_height="210dp"/>
-
-    <com.froloapp.telegramchart.widget.chartview.ChartSlider
-        app:chartStrokeWidth="1dp"
-        app:overlayColor="@color/slider_overlay"
-        app:frameBorderColor="@color/slider_frame"
-        app:frameHorizontalBorderWidth="7dp"
-        app:frameVerticalBorderWidth="1dp"
-        app:maxFrameCompression="0.2"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        android:id="@+id/chartSlider"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"/>
+    <include layout="@layout/include_charts"/>
 
     <LinearLayout
         android:id="@+id/layoutCheckboxes"
