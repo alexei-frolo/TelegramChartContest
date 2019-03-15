@@ -31,7 +31,7 @@ public class AbsChartView extends View implements ChartUI {
     private static final int DEFAULT_WIDTH_IN_DP = 200;
     private static final int DEFAULT_HEIGHT_IN_DP = 100;
     private static final int DEFAULT_TEXT_HEIGHT_IN_SP = 15;
-    private static final long ANIM_DURATION = 300L;
+    private static final long ANIM_DURATION = 180L; // I think 180 ms is the best duration
 
     private static final int DEFAULT_X_AXIS_STAMP_COUNT = 5;
     private static final int DEFAULT_Y_AXIS_BAR_COUNT = 5;
