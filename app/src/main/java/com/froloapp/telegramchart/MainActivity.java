@@ -113,12 +113,15 @@ public class MainActivity extends Activity implements ChartSlider.OnScrollListen
                     secondChart = second;
                 }
 
+                float startXPosition = 0.0f;
+                float stopXPosition = 0.3f;
+
                 chartView.setOnStampClickListener(MainActivity.this);
                 chartView.setAdapter(adapter);
-                chartView.setXPositions(0f, 1f);
+                chartView.setXPositions(startXPosition, stopXPosition);
 
                 chartSlider.setAdapter(adapter);
-                chartSlider.setBorderPositions(0f, 1f);
+                chartSlider.setBorderPositions(startXPosition, stopXPosition);
                 chartSlider.setOnScrollListener(MainActivity.this);
             }
             @Override
