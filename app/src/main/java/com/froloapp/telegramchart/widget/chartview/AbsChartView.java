@@ -13,13 +13,11 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.Property;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 
-import com.froloapp.telegramchart.BuildConfig;
 import com.froloapp.telegramchart.R;
 import com.froloapp.telegramchart.widget.Utils;
 
