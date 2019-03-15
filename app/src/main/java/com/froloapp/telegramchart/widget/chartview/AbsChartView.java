@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Property;
@@ -31,7 +32,7 @@ public class AbsChartView extends View implements ChartUI {
     private static final int DEFAULT_WIDTH_IN_DP = 200;
     private static final int DEFAULT_HEIGHT_IN_DP = 100;
     private static final int DEFAULT_TEXT_HEIGHT_IN_SP = 15;
-    private static final long ANIM_DURATION = 180L; // I think 180 ms is the best duration
+    private static final long ANIM_DURATION = 2000L; // I think 180 ms is the best duration
 
     private static final int DEFAULT_X_AXIS_STAMP_COUNT = 5;
     private static final int DEFAULT_Y_AXIS_BAR_COUNT = 5;
@@ -113,6 +114,7 @@ public class AbsChartView extends View implements ChartUI {
     };
     private final ValueAnimator.AnimatorListener yAxisAnimListener = new Animator.AnimatorListener() {
         @Override public void onAnimationStart(Animator animation) {
+            log("Y ANIMATOR STARTED");
             drawYPhantoms = true;
         }
         @Override public void onAnimationEnd(Animator animation) {
@@ -123,9 +125,10 @@ public class AbsChartView extends View implements ChartUI {
         }
         @Override public void onAnimationRepeat(Animator animation) { }
         void finish() {
+            log("Y ANIMATOR FINISHED");
             drawYPhantoms = false;
-            yAxisAlpha = 1f;
-            invalidate();
+            //yAxisAlpha = 1f;
+            //invalidate();
         }
     };
     private final Interpolator yValueInterpolator = new AccelerateDecelerateInterpolator();
@@ -138,7 +141,7 @@ public class AbsChartView extends View implements ChartUI {
             finish();
         }
         @Override public void onAnimationCancel(Animator animation) {
-            finish();
+            //finish();
         }
         @Override public void onAnimationRepeat(Animator animation) { }
         void finish() {
@@ -297,8 +300,6 @@ public class AbsChartView extends View implements ChartUI {
         int maxValue = adapter.getLocalMaximum(startXPercentage, stopXPercentage);
         float newRange = maxValue - minValue;
 
-        this.yAxisAlpha = 0.1f;
-
         this.phantomYBarStartValue = this.yBarStartValue;
         this.phantomYBarStep = this.yBarStep;
 
@@ -309,11 +310,14 @@ public class AbsChartView extends View implements ChartUI {
         if (minValue != this.minYValue || maxValue != this.maxYValue) {
             //log("Min Y value changed. Starting animator");
             ValueAnimator oldAnimator = yAxisAnimator;
-            if (oldAnimator != null) oldAnimator.cancel();
+            if (oldAnimator != null) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) oldAnimator.pause();
+                else oldAnimator.cancel();
+            }
 
             PropertyValuesHolder h1 = PropertyValuesHolder.ofFloat(MIN_Y_VALUE, minValue);
             PropertyValuesHolder h2 = PropertyValuesHolder.ofFloat(MAX_Y_VALUE, maxValue);
-            PropertyValuesHolder h3 = PropertyValuesHolder.ofFloat(Y_AXIS_ALPHA, 1f);
+            PropertyValuesHolder h3 = PropertyValuesHolder.ofFloat(Y_AXIS_ALPHA, 0.1f, 1f);
 
             ObjectAnimator newAnimator = ObjectAnimator.ofPropertyValuesHolder(this, h1, h2, h3);
             newAnimator.setInterpolator(yValueInterpolator);
@@ -324,18 +328,21 @@ public class AbsChartView extends View implements ChartUI {
         }
     }
 
-    private void animateFadedInChart(ChartData chart) {
+    private void animateFadedInChart(final ChartData chart) {
         Animator oldAnimator = this.fadedChartAnimator;
-        if (oldAnimator != null) oldAnimator.cancel();
+        if (oldAnimator != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) oldAnimator.pause();
+            else oldAnimator.cancel();
+        }
 
-        fadedChart = chart;
-        fadedChartAlpha = 0f;
         PropertyValuesHolder holder = PropertyValuesHolder.ofFloat(FADED_CHART_ALPHA, 1f);
         ObjectAnimator animator = ObjectAnimator.ofPropertyValuesHolder(this, holder);
         animator.setDuration(ANIM_DURATION);
         animator.setInterpolator(yValueInterpolator);
         animator.addListener(new Animator.AnimatorListener() {
-            @Override public void onAnimationStart(Animator animation) { }
+            @Override public void onAnimationStart(Animator animation) {
+                fadedChart = chart;
+            }
             @Override public void onAnimationEnd(Animator animation) {
                 finish();
             }
@@ -345,7 +352,6 @@ public class AbsChartView extends View implements ChartUI {
             @Override public void onAnimationRepeat(Animator animation) { }
             void finish() {
                 fadedChart = null;
-                fadedChartAlpha = 1f;
                 invalidate();
             }
         });
@@ -353,18 +359,21 @@ public class AbsChartView extends View implements ChartUI {
         animator.start();
     }
 
-    private void animateFadedOutChart(ChartData chart) {
+    private void animateFadedOutChart(final ChartData chart) {
         Animator oldAnimator = this.fadedChartAnimator;
-        if (oldAnimator != null) oldAnimator.cancel();
+        if (oldAnimator != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) oldAnimator.pause();
+            else oldAnimator.cancel();
+        }
 
-        fadedChart = chart;
-        fadedChartAlpha = 1f;
         PropertyValuesHolder holder = PropertyValuesHolder.ofFloat(FADED_CHART_ALPHA, 0f);
         ObjectAnimator animator = ObjectAnimator.ofPropertyValuesHolder(this, holder);
         animator.setDuration(ANIM_DURATION);
         animator.setInterpolator(yValueInterpolator);
         animator.addListener(new Animator.AnimatorListener() {
-            @Override public void onAnimationStart(Animator animation) { }
+            @Override public void onAnimationStart(Animator animation) {
+                fadedChart = chart;
+            }
             @Override public void onAnimationEnd(Animator animation) {
                 finish();
             }
@@ -374,7 +383,6 @@ public class AbsChartView extends View implements ChartUI {
             @Override public void onAnimationRepeat(Animator animation) { }
             void finish() {
                 fadedChart = null;
-                fadedChartAlpha = 0f;
                 invalidate();
             }
         });
@@ -393,13 +401,23 @@ public class AbsChartView extends View implements ChartUI {
         // TO DO: draw phantom and actual stamps on X axis
     }
 
+    private void drawYBarWithStamp(Canvas canvas, float value, int startX, int stopX, Paint barPaint, Paint textPaint) {
+        float yFadeOut = getYCoor(value) - (axisStrokeWidth / 2 + 1);
+        // bar line
+        canvas.drawLine(startX, yFadeOut, stopX, yFadeOut, barPaint);
+
+        // bar text
+        String text = adapter.getYStampText((int) value);
+        //textPaint.getTextBounds(text, 0, text.length(), stampTextBounds);
+        canvas.drawText(text, startX, yFadeOut, textPaint);
+    }
+
     /**
      * Draws Y axis bars with Y stamps;
      * @param canvas canvas
      */
     protected void drawYAxis(Canvas canvas) {
-        //log("Drawing Y axis");
-        ChartAdapter adapter = getAdapter();
+        ChartAdapter adapter = this.adapter;
         if (adapter == null) return;
 
         int startX = getPaddingLeft();
@@ -407,26 +425,18 @@ public class AbsChartView extends View implements ChartUI {
 
         int fadeInAlpha = (int) (255 * yAxisAlpha);
         int fadeOutAlpha = (int) (255 * (1 - yAxisAlpha));
-        //int fadeInAlpha = (int) (255 * (1 - yAxisAlpha));
-        //int fadeOutAlpha = (int) (255 * yAxisAlpha);
 
         int phantomYBarStartValue = this.phantomYBarStartValue;
         int phantomYBarStep = this.phantomYBarStep;
 
+        log("DRAWING Y AXIS. DRAW_PHANTOMS=" + drawYPhantoms);
         if (drawYPhantoms) {
             // Drawing fading out bars
             yAxisPaint.setAlpha(fadeOutAlpha);
             yAxisTextPaint.setAlpha(fadeOutAlpha);
             for (int i = 0; i < yAxisStampCount; i++) {
                 float value = phantomYBarStartValue + i * phantomYBarStep;
-                float yFadeOut = getYCoor(value) - (axisStrokeWidth / 2 + 1);
-                // bar line
-                canvas.drawLine(startX, yFadeOut, stopX, yFadeOut, yAxisPaint);
-
-                // bar text
-                String text = adapter.getYStampText((int) value);
-                yAxisTextPaint.getTextBounds(text, 0, text.length(), stampTextBounds);
-                canvas.drawText(text, startX, yFadeOut, yAxisTextPaint);
+                drawYBarWithStamp(canvas, value, startX, stopX, yAxisPaint, yAxisTextPaint);
             }
         }
 
@@ -437,15 +447,8 @@ public class AbsChartView extends View implements ChartUI {
         yAxisPaint.setAlpha(fadeInAlpha);
         yAxisTextPaint.setAlpha(fadeInAlpha);
         for (int i = 0; i < yAxisStampCount; i++) {
-            //float y = getMeasuredHeight() - getPaddingBottom() - i * yAxisBarStep - (axisStrokeWidth / 2 + 1);
             float value = yBarStartValue + i * yBarStep;
-            float yFadeIn = getYCoor(value) - (axisStrokeWidth / 2 + 1);
-            canvas.drawLine(startX, yFadeIn, stopX, yFadeIn, yAxisPaint);
-
-            // bar text
-            String text = adapter.getYStampText((int) value);
-            yAxisTextPaint.getTextBounds(text, 0, text.length(), stampTextBounds);
-            canvas.drawText(text, startX, yFadeIn, yAxisTextPaint);
+            drawYBarWithStamp(canvas, value, startX, stopX, yAxisPaint, yAxisTextPaint);
         }
     }
 
