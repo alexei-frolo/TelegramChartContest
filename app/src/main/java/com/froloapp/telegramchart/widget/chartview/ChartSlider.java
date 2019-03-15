@@ -116,13 +116,7 @@ public class ChartSlider extends AbsChartView {
         }
     }
 
-    public void setBorderPositions(float start, float stop) {
-        this.leftBorderXPosition = start;
-        this.rightBorderXPosition = stop;
-        invalidate();
-    }
-
-    private float checkPosition(float value) {
+    private float checkPercentage(float value) {
         if (value < 0)
             return 0;
         if (value > 1)
@@ -153,17 +147,12 @@ public class ChartSlider extends AbsChartView {
     }
 
     private boolean canCompressFrame(float startXPosition, float stopXPosition) {
-        //return true;
-        return stopXPosition - startXPosition >= maxFrameCompression; // just fifth part. Change it if you need
+        return stopXPosition - startXPosition >= maxFrameCompression;
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        // draw charts in background
-        drawCharts(canvas);
-
         int width = getMeasuredWidth() - getPaddingLeft() - getPaddingRight();
-        //int height = getMeasuredHeight() - getPaddingTop() - getPaddingBottom();
 
         float left = getPaddingLeft();
         float top = getPaddingTop();
@@ -173,12 +162,19 @@ public class ChartSlider extends AbsChartView {
         float leftBorder = getPaddingLeft() + width * leftBorderXPosition;
         float rightBorder = getPaddingLeft() + width * rightBorderXPosition;
 
-        // drawing left overlay
-        canvas.drawRect(left, top, leftBorder + frameHorizontalBorderWidth, bottom, overlayPaint);
-        // drawing right overlay
-        canvas.drawRect(rightBorder - frameHorizontalBorderWidth, top, right, bottom, overlayPaint);
+        drawFrame(canvas, leftBorder, rightBorder);
+        drawCharts(canvas);
+        drawOverlay(canvas, left, top, right, bottom, leftBorder, rightBorder);
+    }
 
-        // FRAME
+    private void drawOverlay(Canvas canvas, float left, float top, float right, float bottom, float leftBorder, float rightBorder) {
+        // drawing left overlay
+        canvas.drawRect(left, top, leftBorder, bottom, overlayPaint);
+        // drawing right overlay
+        canvas.drawRect(rightBorder, top, right, bottom, overlayPaint);
+    }
+
+    private void drawFrame(Canvas canvas, float leftBorder, float rightBorder) {
         framePaint.setStrokeWidth(frameHorizontalBorderWidth);
         // Left border
         canvas.drawLine(leftBorder + frameHorizontalBorderWidth / 2, getPaddingTop(),
@@ -202,20 +198,17 @@ public class ChartSlider extends AbsChartView {
         int action = event.getAction();
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
-                 // Detect if user starts dragging frame of one of frame borders
+                 // Detect if user starts dragging frame or one of frame borders
                 float x = event.getX();
                 xDragPos = x;
                 if (isFrameLeftBorderTouched(x)) {
                     scrollState = SCROLL_STATE_LEFT_BORDER_DRAGGING;
-                    //log("Started dragging left border");
                     return true;
                 } else if (isFrameRightBorderTouched(x)) {
                     scrollState = SCROLL_STATE_RIGHT_BORDER_DRAGGING;
-                    //log("Started dragging right border");
                     return true;
                 } else if (isFrameTouched(x)) {
                     scrollState = SCROLL_STATE_FRAME_DRAGGING;
-                    //log("Started dragging frame");
                     return true;
                 } else return super.onTouchEvent(event);
             }
@@ -224,10 +217,9 @@ public class ChartSlider extends AbsChartView {
                     float x = event.getX();
                     float frameScrollRel = (x - xDragPos) / getViewContentWith();
                     xDragPos = x;
-                    float newStartXPosition = checkPosition(leftBorderXPosition + frameScrollRel);
+                    float newStartXPosition = checkPercentage(leftBorderXPosition + frameScrollRel);
                     if (canCompressFrame(newStartXPosition, rightBorderXPosition)) {
                         leftBorderXPosition = newStartXPosition;
-                        //log("Left border dragged");
                         dispatchScrolled(leftBorderXPosition, rightBorderXPosition);
                         invalidate();
                     }
@@ -236,10 +228,9 @@ public class ChartSlider extends AbsChartView {
                     float x = event.getX();
                     float frameScrollRel = (x - xDragPos) / getViewContentWith();
                     xDragPos = x;
-                    float newStopXPosition = checkPosition(rightBorderXPosition + frameScrollRel);
+                    float newStopXPosition = checkPercentage(rightBorderXPosition + frameScrollRel);
                     if (canCompressFrame(leftBorderXPosition, newStopXPosition)) {
                         rightBorderXPosition = newStopXPosition;
-                        //log("Right border dragged");
                         dispatchScrolled(leftBorderXPosition, rightBorderXPosition);
                         invalidate();
                     }
@@ -252,10 +243,9 @@ public class ChartSlider extends AbsChartView {
                     } else {
                         frameScrollRel = -Math.min(leftBorderXPosition, -frameScrollRel);
                     }
-                    leftBorderXPosition = checkPosition(leftBorderXPosition + frameScrollRel);
-                    rightBorderXPosition = checkPosition(rightBorderXPosition + frameScrollRel);
+                    leftBorderXPosition = checkPercentage(leftBorderXPosition + frameScrollRel);
+                    rightBorderXPosition = checkPercentage(rightBorderXPosition + frameScrollRel);
                     xDragPos = x;
-                    //log("Frame dragged");
                     dispatchScrolled(leftBorderXPosition, rightBorderXPosition);
                     invalidate();
                     return true;
@@ -274,6 +264,25 @@ public class ChartSlider extends AbsChartView {
     @Override
     public void setAdapter(ChartAdapter adapter) {
         super.setAdapter(adapter);
-        setXPositions(0f, 1f);
+        super.setXPositions(0f, 1f);
+    }
+
+    @Override
+    public void setStartXPosition(float p) {
+        this.leftBorderXPosition = p;
+        super.setStartXPosition(0f);
+    }
+
+    @Override
+    public void setStopXPosition(float p) {
+        this.rightBorderXPosition = p;
+        super.setStopXPosition(1f);
+    }
+
+    @Override
+    public void setXPositions(float start, float stop) {
+        this.leftBorderXPosition = start;
+        this.rightBorderXPosition = stop;
+        super.setXPositions(0f, 1f);
     }
 }

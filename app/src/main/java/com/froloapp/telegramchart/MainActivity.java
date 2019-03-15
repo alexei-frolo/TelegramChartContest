@@ -151,7 +151,7 @@ public class MainActivity extends Activity implements ChartSlider.OnScrollListen
         chartView.setXPositions(startXPosition, stopXPosition);
 
         chartSlider.setAdapter(adapter);
-        chartSlider.setBorderPositions(startXPosition, stopXPosition);
+        chartSlider.setXPositions(startXPosition, stopXPosition);
         chartSlider.setOnScrollListener(MainActivity.this);
     }
 
