@@ -103,12 +103,6 @@ public class ChartSlider extends AbsChartView {
         touchBorderThreshold = Utils.dpToPx(5f, context);
     }
 
-    private void log(String msg) {
-        if (BuildConfig.DEBUG) {
-            Log.d("ChartSlider", msg);
-        }
-    }
-
     public interface OnScrollListener {
         void onScroll(ChartSlider slider, float startStampRel, float endStampRel);
     }
@@ -186,20 +180,22 @@ public class ChartSlider extends AbsChartView {
         // drawing right overlay
         canvas.drawRect(rightBorder - frameHorizontalBorderWidth, top, right, bottom, overlayPaint);
 
-        // drawing frame
+        // FRAME
         framePaint.setStrokeWidth(frameHorizontalBorderWidth);
+        // Left border
         canvas.drawLine(leftBorder + frameHorizontalBorderWidth / 2, getPaddingTop(),
                 leftBorder + frameHorizontalBorderWidth / 2, getMeasuredHeight() - getPaddingBottom(), framePaint);
+        // Right border
         canvas.drawLine(rightBorder - frameHorizontalBorderWidth / 2, getPaddingTop(),
                 rightBorder - frameHorizontalBorderWidth / 2, getMeasuredHeight() - getPaddingBottom(), framePaint);
 
         framePaint.setStrokeWidth(frameVerticalBorderWidth);
+        // Top border
         canvas.drawLine(leftBorder, getPaddingTop() + frameVerticalBorderWidth / 2,
                 rightBorder, getPaddingTop() + frameVerticalBorderWidth / 2, framePaint);
+        // Bottom border
         canvas.drawLine(leftBorder, getMeasuredHeight() - getPaddingBottom() - frameVerticalBorderWidth / 2,
                 rightBorder, getMeasuredHeight() - getPaddingBottom() - frameVerticalBorderWidth / 2, framePaint);
-//        canvas.drawRect(width * leftBorderXPosition + frameBorderWidth / 2, 0,
-//                width * rightBorderXPosition - frameBorderWidth / 2, height, framePaint);
     }
 
     @SuppressLint("ClickableViewAccessibility")

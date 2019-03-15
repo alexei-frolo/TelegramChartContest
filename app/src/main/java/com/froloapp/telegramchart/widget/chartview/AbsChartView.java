@@ -114,7 +114,6 @@ public class AbsChartView extends View implements ChartUI {
     };
     private final ValueAnimator.AnimatorListener yAxisAnimListener = new Animator.AnimatorListener() {
         @Override public void onAnimationStart(Animator animation) {
-            log("Y ANIMATOR STARTED");
             drawYPhantoms = true;
         }
         @Override public void onAnimationEnd(Animator animation) {
@@ -125,10 +124,7 @@ public class AbsChartView extends View implements ChartUI {
         }
         @Override public void onAnimationRepeat(Animator animation) { }
         void finish() {
-            log("Y ANIMATOR FINISHED");
             drawYPhantoms = false;
-            //yAxisAlpha = 1f;
-            //invalidate();
         }
     };
     private final Interpolator yValueInterpolator = new AccelerateDecelerateInterpolator();
