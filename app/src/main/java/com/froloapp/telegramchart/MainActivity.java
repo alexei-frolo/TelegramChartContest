@@ -5,8 +5,13 @@ import android.content.res.AssetManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.froloapp.telegramchart.widget.chartview.ChartAdapter;
@@ -18,6 +23,7 @@ import java.io.InputStream;
 
 public class MainActivity extends Activity implements ChartSlider.OnScrollListener, ChartView.OnStampClickListener {
 
+    private Spinner spinnerChartSelector;
     private ChartView chartView;
     private ChartAdapter adapter;
     private ChartSlider chartSlider;
@@ -45,6 +51,7 @@ public class MainActivity extends Activity implements ChartSlider.OnScrollListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        spinnerChartSelector = findViewById(R.id.spinnerChartSelector);
         chartView = findViewById(R.id.chartView);
         chartSlider = findViewById(R.id.chartSlider);
         checkboxFirst = findViewById(R.id.checkboxFirst);
@@ -99,29 +106,10 @@ public class MainActivity extends Activity implements ChartSlider.OnScrollListen
                 Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
             }
             @Override public void onResult(ChartAdapter[] adapters) {
-                ChartAdapter adapter = adapters[0];
-                MainActivity.this.adapter = adapter;
-
-                if (adapter.getChartCount() >= 2) {
-                    ChartData first = adapter.getChart(0);
-                    checkboxFirst.setHighlightColor(first.getColor());
-                    firstChart = first;
-
-                    ChartData second = adapter.getChart(1);
-                    checkboxSecond.setHighlightColor(second.getColor());
-                    secondChart = second;
+                initSpinner(adapters);
+                if (adapters.length >= 1) {
+                    spinnerChartSelector.setSelection(0);
                 }
-
-                float startXPosition = 0.0f;
-                float stopXPosition = 0.3f;
-
-                chartView.setOnStampClickListener(MainActivity.this);
-                chartView.setAdapter(adapter);
-                chartView.setXPositions(startXPosition, stopXPosition);
-
-                chartSlider.setAdapter(adapter);
-                chartSlider.setBorderPositions(startXPosition, stopXPosition);
-                chartSlider.setOnScrollListener(MainActivity.this);
             }
             @Override
             public void onCancelled() {
@@ -135,6 +123,44 @@ public class MainActivity extends Activity implements ChartSlider.OnScrollListen
         } catch (Throwable e) {
             log(e);
         }
+    }
+
+    private void initSpinner(final ChartAdapter[] adapters) {
+        ArrayAdapter<ChartAdapter> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item);
+        adapter.addAll(adapters);
+        spinnerChartSelector.setAdapter(adapter);
+        spinnerChartSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                ChartAdapter a = adapters[position];
+                initChart(a);
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) { }
+        });
+    }
+
+    private void initChart(ChartAdapter adapter) {
+        MainActivity.this.adapter = adapter;
+
+        if (adapter.getChartCount() >= 2) {
+            ChartData first = adapter.getChart(0);
+            checkboxFirst.setHighlightColor(first.getColor());
+            firstChart = first;
+
+            ChartData second = adapter.getChart(1);
+            checkboxSecond.setHighlightColor(second.getColor());
+            secondChart = second;
+        }
+
+        float startXPosition = 0.0f;
+        float stopXPosition = 0.3f;
+
+        chartView.setOnStampClickListener(MainActivity.this);
+        chartView.setAdapter(adapter);
+        chartView.setXPositions(startXPosition, stopXPosition);
+
+        chartSlider.setAdapter(adapter);
+        chartSlider.setBorderPositions(startXPosition, stopXPosition);
+        chartSlider.setOnScrollListener(MainActivity.this);
     }
 
     @Override

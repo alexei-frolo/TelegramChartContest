@@ -6,8 +6,17 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class SimpleChartAdapter implements ChartAdapter {
+    private static AtomicInteger chartId = new AtomicInteger(0);
+
+    private static int nextChartId() {
+        return chartId.getAndAdd(1);
+    }
+
+    private final int id;
+
     private List<Long> timestamps;
 
     private List<ChartHolder> chartHolders;
@@ -24,6 +33,7 @@ public class SimpleChartAdapter implements ChartAdapter {
     }
 
     public SimpleChartAdapter(List<Long> timestamps, List<ChartData> charts) {
+        id = nextChartId();
         this.timestamps = timestamps;
         Collections.sort(timestamps); // default sort
         this.chartHolders = new ArrayList<>(charts.size());
@@ -366,5 +376,10 @@ public class SimpleChartAdapter implements ChartAdapter {
     @Override
     public String getXStampText(long timestamp) {
         return String.valueOf(timestamp);
+    }
+
+    @Override
+    public String toString() {
+        return "Chart #" + String.valueOf(id);
     }
 }
