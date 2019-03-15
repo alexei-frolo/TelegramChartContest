@@ -84,10 +84,11 @@ class SimpleLineChartAdapter implements LineChartAdapter {
         long minTimestamp = timestamps.get(0);
         long maxTimestamp = timestamps.get(timestamps.size() - 1);
         long approximatelyTimestamp = minTimestamp + (long) ((maxTimestamp - minTimestamp) * toXPosition);
-        for (int i = timestamps.size() - 1; i >=0; i--) {
-            long axis = timestamps.get(i);
-            if (axis < approximatelyTimestamp)
-                return i;
+        for (int i = 0; i < timestamps.size(); i++) {
+            long timestamp = timestamps.get(i);
+            if (timestamp >= approximatelyTimestamp) {
+                return Math.max(0, i - 2); // it's a hack. Must be Math.max(0, i - 1)
+            }
         }
         return 0;
     }

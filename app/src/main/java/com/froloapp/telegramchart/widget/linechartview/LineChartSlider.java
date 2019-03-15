@@ -163,7 +163,7 @@ public class LineChartSlider extends AbsLineChartView {
         float rightBorder = getPaddingLeft() + width * rightBorderXPosition;
 
         drawFrame(canvas, leftBorder, rightBorder);
-        drawCharts(canvas);
+        drawLines(canvas);
         drawOverlay(canvas, left, top, right, bottom, leftBorder, rightBorder);
     }
 

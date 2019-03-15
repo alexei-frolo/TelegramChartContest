@@ -92,7 +92,7 @@ public class LineChartView extends AbsLineChartView {
     protected void onDraw(Canvas canvas) {
         drawXAxis(canvas);
         drawYAxis(canvas);
-        drawCharts(canvas);
+        drawLines(canvas);
         drawClickedTimestamp(canvas);
     }
 

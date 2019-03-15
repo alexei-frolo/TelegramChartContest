@@ -437,14 +437,14 @@ public class AbsLineChartView extends View implements LineChartUI {
     }
 
     /**
-     * Draws charts;
+     * Draws lines;
      * For optimization, the logic of rendering is next:
      * 1) Find the previous timestamp that goes before {@link AbsLineChartView#startXPercentage} value;
      * 2) Create a path of Y values for each chart until reached timestamp that goes after {@link AbsLineChartView#stopXPercentage} value;
      * 3) Draw each path on canvas using appropriate colors;
      * @param canvas canvas
      */
-    protected void drawCharts(Canvas canvas) {
+    protected void drawLines(Canvas canvas) {
         LineChartAdapter adapter = this.adapter;
         if (adapter == null)
             return; // early return
@@ -463,6 +463,7 @@ public class AbsLineChartView extends View implements LineChartUI {
 
             float timestampPosX = startTimestampPosX;
             int timestampIndex = startTimestampIndex;
+            boolean outsideBounds = false;
 
             int value = data.getValueAt(timestampIndex);
 
@@ -480,8 +481,14 @@ public class AbsLineChartView extends View implements LineChartUI {
                 yCoor = getYCoor(value);
                 bufferPath.lineTo(xCoor, yCoor);
 
+                if (outsideBounds) {
+                    break;
+                }
+
                 if (timestampPosX > stopXPercentage) {
-                    break; // It's enough. No need to draw lines after this timestamp as they will be invisible
+                    // It's enough. No need to draw lines after next timestamp as they will be invisible.
+                    // So allow to draw one part more and exit;
+                    outsideBounds = true;
                 }
             }
 
