@@ -127,7 +127,8 @@ public class ChartView extends AbsChartView {
                     stampInfoPaint.setStyle(Paint.Style.FILL);
                     stampInfoPaint.setColor(chart.getColor());
                     stampInfoPaint.setAlpha((int) (alpha * 255));
-                    long value = chart.getValue(xAxis);
+                    int index = adapter.getTimestampIndex(xAxis);
+                    long value = chart.getValueAt(index);
                     float y = getYCoor(value);
                     canvas.drawCircle(x, y, stampInfoBigDotRadius, stampInfoPaint);
                     stampInfoPaint.setColor(Color.WHITE);

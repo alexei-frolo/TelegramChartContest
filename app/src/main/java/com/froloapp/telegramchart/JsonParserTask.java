@@ -124,16 +124,21 @@ public class JsonParserTask extends AsyncTask<InputStream, Void, Object> {
             String chartCode = columns.get(0).toString();
             if (chartCode.equals("x")) { // continue
             } else {
+                List<Integer> values = new ArrayList<>();
                 Map<Long, Integer> map = new LinkedHashMap<>();
                 for (int j = 1; j < columns.length(); j++) {
                     int value = columns.getInt(j);
                     long stamp = timestamps.get(j - 1);
                     map.put(stamp, value);
+                    //
+                    values.add(value);
                 }
                 String type = typesJson.getString(chartCode); // what to do with this??
                 String name = namesJson.getString(chartCode);
                 String color = colorsJson.getString(chartCode);
-                ChartData data = Charts.create(map, Color.parseColor(color), name);
+                //ChartData data = Charts.create(map, Color.parseColor(color), name);
+                //charts.add(data);
+                ChartData data = Charts.create(values, Color.parseColor(color), name);
                 charts.add(data);
             }
         }

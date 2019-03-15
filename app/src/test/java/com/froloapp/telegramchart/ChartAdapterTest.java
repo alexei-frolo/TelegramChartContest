@@ -34,14 +34,14 @@ public class ChartAdapterTest {
         for (long t : timestampsSrc) timestamps.add(t);
 
         // init chart 1
-        Map<Long, Integer> map1 = new HashMap<>();
-        for (int i = 0; i < timestamps.size(); i++) map1.put(timestamps.get(i), chart1src[i]);
-        chart1 = Charts.create(map1, 0xFFFFFF, "Chart 1");
+        List<Integer> values1 = new ArrayList<>();
+        for (int i = 0; i < timestamps.size(); i++) values1.add(chart1src[i]);
+        chart1 = Charts.create(values1, 0xFFFFFF, "Chart 1");
 
         // init chart 1
-        Map<Long, Integer> map2 = new HashMap<>();
-        for (int i = 0; i < timestamps.size(); i++) map2.put(timestamps.get(i), chart2src[i]);
-        chart2 = Charts.create(map2, 0xFFFFFF, "Chart 2");
+        List<Integer> values2 = new ArrayList<>();
+        for (int i = 0; i < timestamps.size(); i++) values2.add(chart2src[i]);
+        chart2 = Charts.create(values2, 0xFFFFFF, "Chart 2");
 
         adapter = ChartAdapters.create(timestamps, chart1, chart2);
     }

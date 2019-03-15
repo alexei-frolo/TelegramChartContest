@@ -449,6 +449,7 @@ public class AbsChartView extends View implements ChartUI {
         if (adapter == null)
             return; // early return
 
+        final int timestampCount = adapter.getTimestampCount();
         final float avTimestampPosXStep = 1f / adapter.getTimestampCount(); // average step
         final long startTimestamp = adapter.getPreviousTimestamp(startXPercentage);
         final float startTimestampPosX = adapter.getPreviousTimestampPosition(startXPercentage);
@@ -460,27 +461,28 @@ public class AbsChartView extends View implements ChartUI {
                     continue;
             }
 
-            long timestamp = startTimestamp;
             float timestampPosX = startTimestampPosX;
+            int timestampIndex = adapter.getTimestampIndex(startTimestamp);
 
-            int value = data.getValue(timestamp);
+            int value = data.getValueAt(timestampIndex);
 
             bufferPath.reset();
             int xCoor = getXCoor(timestampPosX);
             int yCoor = getYCoor(value);
             bufferPath.moveTo(xCoor, yCoor);
 
-            while (adapter.hasNextTimestamp(timestamp)) {
-                timestamp = adapter.getNextTimestamp(timestamp);
+            while (timestampIndex < timestampCount - 1) {
                 timestampPosX += avTimestampPosXStep;
+                timestampIndex++;
 
-                value = data.getValue(timestamp);
+                value = data.getValueAt(timestampIndex);
                 xCoor = getXCoor(timestampPosX);
                 yCoor = getYCoor(value);
                 bufferPath.lineTo(xCoor, yCoor);
 
-                if (timestampPosX > stopXPercentage)
+                if (timestampPosX > stopXPercentage) {
                     break; // It's enough. No need to draw lines after this timestamp as they will be invisible
+                }
             }
 
             chartPaint.setColor(data.getColor());

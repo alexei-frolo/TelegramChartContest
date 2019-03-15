@@ -3,7 +3,7 @@ package com.froloapp.telegramchart.widget.chartview.factory;
 
 import com.froloapp.telegramchart.widget.chartview.ChartData;
 
-import java.util.Map;
+import java.util.List;
 
 public final class Charts {
     private Charts() {
@@ -24,41 +24,18 @@ public final class Charts {
         }
     }
 
-    private static class MappedData extends AbsChartData {
-        final Map<Long, Integer> data;
-        MappedData(Map<Long, Integer> data, int color, String name) {
+    private static class IndexedData extends AbsChartData {
+        final List<Integer> data;
+        IndexedData(List<Integer> data, int color, String name) {
             super(color, name);
             this.data = data;
         }
-        @Override public int getValue(long x) {
-            Integer value = data.get(x);
-            if (value == null) {
-                throw new IllegalArgumentException("No such x axis found: " + x);
-            }
-            return value;
+        @Override public int getValueAt(int index) {
+            return data.get(index);
         }
     }
 
-    public interface Function {
-        int get(long stamp);
-    }
-
-    private static class FuncData extends AbsChartData {
-        final Function func;
-        FuncData(Function func, int color, String name) {
-            super(color, name);
-            this.func = func;
-        }
-        @Override public int getValue(long x) {
-            return func.get(x);
-        }
-    }
-
-    public static ChartData create(Map<Long, Integer> data, int color, String name) {
-        return new MappedData(data, color, name);
-    }
-
-    public static ChartData create(Function func, int color, String name) {
-        return new FuncData(func, color, name);
+    public static ChartData create(List<Integer> data, int color, String name) {
+        return new IndexedData(data, color, name);
     }
 }

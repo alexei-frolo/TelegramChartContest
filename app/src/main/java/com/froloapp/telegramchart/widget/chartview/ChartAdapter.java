@@ -12,20 +12,14 @@ public interface ChartAdapter {
     long getLastTimestamp();
     int getTimestampCount();
 
+    int getTimestampIndex(long timestamp);
+
     float getClosestTimestampPosition(float toXPosition);
     long getClosestTimestamp(float toXPosition);
 
     boolean hasPreviousTimestamp(float beforeTimestampPosition);
     long getPreviousTimestamp(float beforeTimestampPosition);
     float getPreviousTimestampPosition(float beforeTimestampPosition);
-
-    boolean hasNextTimestamp(float afterTimestampPosition);
-    long getNextTimestamp(float afterTimestampPosition);
-    @Deprecated
-    float getNextTimestampPosition(float afterTimestampPosition);
-
-    boolean hasNextTimestamp(long afterTimestamp);
-    long getNextTimestamp(long afterTimestamp);
 
     int getLocalMinimum(float fromTimestampPosition, float toTimestampPosition);
     int getLocalMaximum(float fromTimestampPosition, float toTimestampPosition);

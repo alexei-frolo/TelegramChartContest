@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+
 class SimpleChartAdapter implements ChartAdapter {
     private static AtomicInteger chartId = new AtomicInteger(0);
 
@@ -60,8 +61,8 @@ class SimpleChartAdapter implements ChartAdapter {
         localMaximums.clear();
         for (int i = 0; i < timestamps.size(); i++) {
             long timestamp = timestamps.get(i);
-            int minValue = findMinValue(timestamp);
-            int maxValue = findMaxValue(timestamp);
+            int minValue = findMinValueAt(i);
+            int maxValue = findMaxValueAt(i);
             localMinimums.put(timestamp, minValue);
             localMaximums.put(timestamp, maxValue);
         }
@@ -80,6 +81,11 @@ class SimpleChartAdapter implements ChartAdapter {
     @Override
     public int getTimestampCount() {
         return timestamps.size();
+    }
+
+    @Override
+    public int getTimestampIndex(long timestamp) {
+        return timestamps.indexOf(timestamp);
     }
 
     @Override
@@ -134,25 +140,13 @@ class SimpleChartAdapter implements ChartAdapter {
         throw new IllegalArgumentException("Invalid timestamp rel: " + toXPosition);
     }
 
-    @Override
-    public boolean hasNextTimestamp(long afterXAxis) {
-        int index = timestamps.indexOf(afterXAxis);
-        return index >= 0 && index < timestamps.size() - 1;
-    }
-
-    @Override
-    public long getNextTimestamp(long afterXAxis) {
-        int index = timestamps.indexOf(afterXAxis);
-        return timestamps.get(index + 1);
-    }
-
     // finds min value for the given timestamp
-    private int findMinValue(long timestamp) {
+    private int findMinValueAt(int index) {
         int min = Integer.MAX_VALUE;
         for (ChartHolder holder : chartHolders) {
             if (!holder.visible) continue;
 
-            int value = holder.data.getValue(timestamp);
+            int value = holder.data.getValueAt(index);
             if (value < min) {
                 min = value;
             }
@@ -161,12 +155,12 @@ class SimpleChartAdapter implements ChartAdapter {
     }
 
     // finds max value for the given timestamp
-    private int findMaxValue(long timestamp) {
+    private int findMaxValueAt(int index) {
         int max = Integer.MIN_VALUE;
         for (ChartHolder holder : chartHolders) {
             if (!holder.visible) continue;
 
-            int value = holder.data.getValue(timestamp);
+            int value = holder.data.getValueAt(index);
             if (value > max) {
                 max = value;
             }
@@ -179,7 +173,8 @@ class SimpleChartAdapter implements ChartAdapter {
         if (v != null) {
             return v;
         } else {
-            int min = findMaxValue(timestamp);
+            int index = getTimestampIndex(timestamp);
+            int min = findMaxValueAt(index);
             localMinimums.put(timestamp, min);
             return min;
         }
@@ -190,7 +185,8 @@ class SimpleChartAdapter implements ChartAdapter {
         if (v != null) {
             return v;
         } else {
-            int max = findMaxValue(timestamp);
+            int index = getTimestampIndex(timestamp);
+            int max = findMaxValueAt(index);
             localMaximums.put(timestamp, max);
             return max;
         }
@@ -299,38 +295,6 @@ class SimpleChartAdapter implements ChartAdapter {
                 return ((float) (axis - minAxis)) / (maxAxis - minAxis);
         }
         return 0f;
-    }
-
-    @Override
-    public boolean hasNextTimestamp(float timestampRel) {
-        return timestampRel < 1f;
-    }
-
-    @Override
-    public long getNextTimestamp(float timestampRel) {
-        long minAxis = timestamps.get(0);
-        long maxAxis = timestamps.get(timestamps.size() - 1);
-        //long desiredAxis = (minAxis + (long) ((maxAxis - minAxis) * timestampRel)) + 1;
-        float approximatelyDesiredAxis = (minAxis + ((maxAxis - minAxis) * timestampRel));
-        for (long axis : timestamps) {
-            if (axis > approximatelyDesiredAxis)
-                return axis;
-        }
-        throw new IllegalArgumentException("Invalid timestamp rel: " + timestampRel);
-    }
-
-    @Deprecated
-    @Override
-    public float getNextTimestampPosition(float timestampRel) {
-        long minAxis = timestamps.get(0);
-        long maxAxis = timestamps.get(timestamps.size() - 1);
-        //long desiredAxis = (minAxis + (long) ((maxAxis - minAxis) * timestampRel)) + 1;
-        float approximatelyDesiredAxis = (minAxis + ((maxAxis - minAxis) * timestampRel));
-        for (long axis : timestamps) {
-            if (axis > approximatelyDesiredAxis)
-                return ((float) (axis - minAxis)) / (maxAxis - minAxis);
-        }
-        throw new IllegalArgumentException("Invalid timestamp rel: " + timestampRel);
     }
 
     @Override
