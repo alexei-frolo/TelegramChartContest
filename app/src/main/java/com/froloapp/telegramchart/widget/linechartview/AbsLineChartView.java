@@ -140,8 +140,6 @@ public class AbsLineChartView extends View implements LineChartUI {
         @Override public void onAnimationRepeat(Animator animation) { }
         void finish() {
             drawXPhantoms = false;
-            xAxisAlpha = 1f;
-            invalidate();
         }
     };
     private final Interpolator xValueInterpolator = new AccelerateDecelerateInterpolator();
@@ -202,10 +200,17 @@ public class AbsLineChartView extends View implements LineChartUI {
         // color for y axis bars and x axis stamps
         yAxisPaint.setColor(yAxisColor);
 
-        yAxisTextPaint.setStyle(Paint.Style.FILL);
+
         float textSize = Utils.spToPx(DEFAULT_TEXT_HEIGHT_IN_SP, context);
+        yAxisTextPaint.setStyle(Paint.Style.FILL);
         yAxisTextPaint.setTextSize(textSize);
         yAxisTextPaint.setColor(yAxisColor);
+
+        // x axis
+        xAxisStampCount = 5;
+        xAxisTextPaint.setStyle(Paint.Style.FILL);
+        xAxisTextPaint.setTextSize(textSize);
+        xAxisTextPaint.setColor(xAxisColor);
     }
 
     public int getXAxisColor() {
@@ -272,6 +277,18 @@ public class AbsLineChartView extends View implements LineChartUI {
         } else {
             minYValue = 0f;
             maxYValue = 0f;
+        }
+    }
+
+    private void checkIfStartOrStopXPositionChanged(float oldStartXPosition, float oldStopXPosition) {
+        LineChartAdapter adapter = this.adapter;
+        if (adapter == null) return;
+
+        float xPosRange = stopXPercentage - startXPercentage;
+        if ((oldStopXPosition - oldStartXPosition) != xPosRange) {
+            float timestampCountInRange = adapter.getTimestampCount() * (stopXPercentage - startXPercentage);
+            xAxisStepCount = (int) (timestampCountInRange / xAxisStampCount) + 1;
+            invalidate();
         }
     }
 
@@ -384,6 +401,29 @@ public class AbsLineChartView extends View implements LineChartUI {
         LineChartAdapter adapter = getAdapter();
         if (adapter == null) return;
         // TO DO: draw phantom and actual stamps on X axis
+
+        int index = adapter.getLeftClosestTimestampIndex(startXPercentage);
+        index = (index / xAxisStepCount) * xAxisStepCount;
+
+        final int timestampCount = adapter.getTimestampCount();
+        final float avTimestampPosXStep = 1f / adapter.getTimestampCount(); // average step
+        int timestampIndex = (index / xAxisStepCount) * xAxisStepCount;
+        float timestampPosX = adapter.getTimestampRelPositionAt(timestampIndex);
+
+        final float y = getMeasuredHeight() - getPaddingBottom();
+
+        while (timestampIndex < timestampCount) {
+            String text = adapter.getXStampText(timestampIndex);
+            float x = getXCoor(timestampPosX);
+            canvas.drawText(text, x, y, xAxisTextPaint);
+
+            if (timestampPosX > stopXPercentage) {
+                break;
+            }
+
+            timestampIndex += xAxisStepCount;
+            timestampPosX += xAxisStepCount * avTimestampPosXStep;
+        }
     }
 
     private void drawYBarWithStamp(Canvas canvas, float value, int startX, int stopX, Paint barPaint, Paint textPaint) {
@@ -525,6 +565,8 @@ public class AbsLineChartView extends View implements LineChartUI {
     @Override
     public void setStartXPosition(float p) {
         if (startXPercentage != p) {
+            float oldStartXPos = this.startXPercentage;
+            checkIfStartOrStopXPositionChanged(oldStartXPos, stopXPercentage);
             this.startXPercentage = p;
             checkIfMinOrMaxValueChanged();
             invalidate();
@@ -534,7 +576,9 @@ public class AbsLineChartView extends View implements LineChartUI {
     @Override
     public void setStopXPosition(float p) {
         if (stopXPercentage != p) {
+            float oldStopXPos = this.stopXPercentage;
             this.stopXPercentage = p;
+            checkIfStartOrStopXPositionChanged(startXPercentage, oldStopXPos);
             checkIfMinOrMaxValueChanged();
             invalidate();
         }
@@ -543,8 +587,11 @@ public class AbsLineChartView extends View implements LineChartUI {
     @Override
     public void setXPositions(float start, float stop) {
         if (this.startXPercentage != start || this.stopXPercentage != stop) {
+            float oldStartXPos = this.startXPercentage;
+            float oldStopXPos = this.stopXPercentage;
             this.startXPercentage = start;
             this.stopXPercentage = stop;
+            checkIfStartOrStopXPositionChanged(oldStartXPos, oldStopXPos);
             checkIfMinOrMaxValueChanged();
             invalidate();
         }
