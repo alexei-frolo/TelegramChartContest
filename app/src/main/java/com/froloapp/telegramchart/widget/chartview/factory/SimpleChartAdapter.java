@@ -1,5 +1,8 @@
-package com.froloapp.telegramchart.widget.chartview;
+package com.froloapp.telegramchart.widget.chartview.factory;
 
+
+import com.froloapp.telegramchart.widget.chartview.ChartAdapter;
+import com.froloapp.telegramchart.widget.chartview.ChartData;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class SimpleChartAdapter implements ChartAdapter {
+class SimpleChartAdapter implements ChartAdapter {
     private static AtomicInteger chartId = new AtomicInteger(0);
 
     private static int nextChartId() {
@@ -32,7 +35,7 @@ public class SimpleChartAdapter implements ChartAdapter {
         }
     }
 
-    public SimpleChartAdapter(List<Long> timestamps, List<ChartData> charts) {
+    SimpleChartAdapter(List<Long> timestamps, List<ChartData> charts) {
         id = nextChartId();
         this.timestamps = timestamps;
         Collections.sort(timestamps); // default sort
@@ -57,7 +60,7 @@ public class SimpleChartAdapter implements ChartAdapter {
         }
     }
 
-    public static class SimpleData implements ChartData {
+    static class SimpleData implements ChartData {
         private Map<Long, Integer> data;
         private int color;
         private String name;
@@ -380,6 +383,6 @@ public class SimpleChartAdapter implements ChartAdapter {
 
     @Override
     public String toString() {
-        return "Chart #" + String.valueOf(id);
+        return "Simple chart #" + String.valueOf(id);
     }
 }

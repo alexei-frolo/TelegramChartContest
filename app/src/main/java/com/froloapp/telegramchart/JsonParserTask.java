@@ -6,7 +6,8 @@ import android.os.AsyncTask;
 
 import com.froloapp.telegramchart.widget.chartview.ChartAdapter;
 import com.froloapp.telegramchart.widget.chartview.ChartData;
-import com.froloapp.telegramchart.widget.chartview.SimpleChartAdapter;
+import com.froloapp.telegramchart.widget.chartview.factory.ChartAdapters;
+import com.froloapp.telegramchart.widget.chartview.factory.Charts;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -61,7 +62,7 @@ public class JsonParserTask extends AsyncTask<InputStream, Void, Object> {
         try {
             final InputStream is = streams[0];
             String json = parseJson(is);
-            SimpleChartAdapter[] adapters = parseAdapters(json);
+            ChartAdapter[] adapters = parseAdapters(json);
             return adapters;
         } catch (Throwable t) {
             return t;
@@ -84,10 +85,10 @@ public class JsonParserTask extends AsyncTask<InputStream, Void, Object> {
     }
 
     // parses json string into chart adapters
-    private SimpleChartAdapter[] parseAdapters(String json) throws Throwable {
+    private ChartAdapter[] parseAdapters(String json) throws Throwable {
         JSONArray array = new JSONArray(json);
         int count = array.length();
-        SimpleChartAdapter[] adapters = new SimpleChartAdapter[count];
+        ChartAdapter[] adapters = new ChartAdapter[count];
         for (int i = 0; i < count; i++) {
             JSONObject obj = array.getJSONObject(i);
             adapters[i] = parseAdapter(obj);
@@ -96,7 +97,7 @@ public class JsonParserTask extends AsyncTask<InputStream, Void, Object> {
     }
 
     // parses json object into chart adapter
-    private SimpleChartAdapter parseAdapter(JSONObject obj) throws Throwable {
+    private ChartAdapter parseAdapter(JSONObject obj) throws Throwable {
         JSONArray columnsJson = obj.getJSONArray("columns");
         JSONObject typesJson = obj.getJSONObject("types");
         JSONObject namesJson = obj.getJSONObject("names");
@@ -132,10 +133,10 @@ public class JsonParserTask extends AsyncTask<InputStream, Void, Object> {
                 String type = typesJson.getString(chartCode); // what to do with this??
                 String name = namesJson.getString(chartCode);
                 String color = colorsJson.getString(chartCode);
-                ChartData data = new SimpleChartAdapter.SimpleData(map, Color.parseColor(color), name);
+                ChartData data = Charts.create(map, Color.parseColor(color), name);
                 charts.add(data);
             }
         }
-        return new SimpleChartAdapter(timestamps, charts);
+        return ChartAdapters.create(timestamps, charts);
     }
 }
