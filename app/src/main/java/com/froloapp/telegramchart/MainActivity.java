@@ -6,14 +6,17 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.froloapp.telegramchart.widget.Utils;
 import com.froloapp.telegramchart.widget.chartview.ChartAdapter;
 import com.froloapp.telegramchart.widget.chartview.ChartData;
 import com.froloapp.telegramchart.widget.chartview.ChartSlider;
@@ -25,14 +28,10 @@ public class MainActivity extends Activity implements ChartSlider.OnScrollListen
 
     private Spinner spinnerChartSelector;
     private ChartView chartView;
-    private ChartAdapter adapter;
     private ChartSlider chartSlider;
-    private CheckBox checkboxFirst;
-    private CheckBox checkboxSecond;
+    private LinearLayout layoutCheckboxes;
 
-    private ChartData firstChart;
-    private ChartData secondChart;
-
+    // hold task to cancel if needed
     private JsonParserTask jsonParserTask;
 
     private void log(String msg) {
@@ -54,34 +53,7 @@ public class MainActivity extends Activity implements ChartSlider.OnScrollListen
         spinnerChartSelector = findViewById(R.id.spinnerChartSelector);
         chartView = findViewById(R.id.chartView);
         chartSlider = findViewById(R.id.chartSlider);
-        checkboxFirst = findViewById(R.id.checkboxFirst);
-        checkboxSecond = findViewById(R.id.checkboxSecond);
-
-        checkboxFirst.setChecked(true);
-        checkboxFirst.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    chartView.show(firstChart);
-                    chartSlider.show(firstChart);
-                } else {
-                    chartView.hide(firstChart);
-                    chartSlider.hide(firstChart);
-                }
-            }
-        });
-
-        checkboxSecond.setChecked(true);
-        checkboxSecond.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    chartView.show(secondChart);
-                    chartSlider.show(secondChart);
-                } else {
-                    chartView.hide(secondChart);
-                    chartSlider.hide(secondChart);
-                }
-            }
-        });
+        layoutCheckboxes = findViewById(R.id.layoutCheckboxes);
 
         loadCharts();
     }
@@ -138,21 +110,42 @@ public class MainActivity extends Activity implements ChartSlider.OnScrollListen
         });
     }
 
-    private void initChart(ChartAdapter adapter) {
-        MainActivity.this.adapter = adapter;
-
-        if (adapter.getChartCount() >= 2) {
-            ChartData first = adapter.getChart(0);
-            checkboxFirst.setHighlightColor(first.getColor());
-            firstChart = first;
-
-            ChartData second = adapter.getChart(1);
-            checkboxSecond.setHighlightColor(second.getColor());
-            secondChart = second;
+    private void initCheckboxes(final ChartAdapter adapter) {
+        layoutCheckboxes.removeAllViews();
+        // adding checkboxes dynamic
+        for (int i = 0; i < adapter.getChartCount(); i++) {
+            final ChartData chart = adapter.getChart(i);
+            CheckBox checkBox = new CheckBox(this);
+            checkBox.setText(chart.getName());
+            checkBox.setChecked(adapter.isVisible(chart));
+            checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (isChecked) {
+                        chartView.show(chart);
+                        chartSlider.show(chart);
+                    } else {
+                        chartView.hide(chart);
+                        chartSlider.hide(chart);
+                    }
+                }
+            });
+            ViewGroup.MarginLayoutParams lp = new ViewGroup.MarginLayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
+            int m = (int) Utils.dpToPx(5f, this);
+            lp.leftMargin = m;
+            lp.topMargin = m;
+            lp.rightMargin = m;
+            lp.bottomMargin = m;
+            layoutCheckboxes.addView(checkBox, lp);
         }
+    }
 
-        float startXPosition = 0.0f;
-        float stopXPosition = 0.3f;
+    private void initChart(ChartAdapter adapter) {
+        initCheckboxes(adapter);
+
+        final float startXPosition = 0.0f;
+        final float stopXPosition = 0.3f;
 
         chartView.setOnStampClickListener(MainActivity.this);
         chartView.setAdapter(adapter);
