@@ -9,8 +9,6 @@ import java.util.Map;
 
 public class SimpleChartAdapter implements ChartAdapter {
     private List<Long> timestamps;
-    private long mixXAxis;
-    private long maxXAxis;
 
     private List<ChartHolder> chartHolders;
     private final Map<Long, Integer> localMinimums = new HashMap<>();
@@ -28,8 +26,6 @@ public class SimpleChartAdapter implements ChartAdapter {
     public SimpleChartAdapter(List<Long> timestamps, List<ChartData> charts) {
         this.timestamps = timestamps;
         Collections.sort(timestamps); // default sort
-        this.mixXAxis = timestamps.get(0);
-        this.maxXAxis = timestamps.get(timestamps.size() - 1);
         this.chartHolders = new ArrayList<>(charts.size());
         for (ChartData data : charts) {
             chartHolders.add(new ChartHolder(data, true));
@@ -77,21 +73,6 @@ public class SimpleChartAdapter implements ChartAdapter {
         @Override public String getName() {
             return name;
         }
-    }
-
-    @Override
-    public long getMinTimestamp() {
-        return mixXAxis;
-    }
-
-    @Override
-    public long getMaxTimestamp() {
-        return maxXAxis;
-    }
-
-    @Override
-    public long[] getTimestamps(float fromXPosition, float toXPosition) {
-        return new long[0];
     }
 
     @Override
@@ -209,7 +190,7 @@ public class SimpleChartAdapter implements ChartAdapter {
     }
 
     @Override
-    public int getMinYValue(float fromXAxisRel, float toXAxisRel) {
+    public int getLocalMinimum(float fromXAxisRel, float toXAxisRel) {
         long startTimestamp = timestamps.get(0);
         long stopTimestamp = timestamps.get(timestamps.size() - 1);
         long fromTimestamp = (long) (startTimestamp + (stopTimestamp - startTimestamp) * fromXAxisRel) - 1;
@@ -246,7 +227,7 @@ public class SimpleChartAdapter implements ChartAdapter {
     }
 
     @Override
-    public int getMaxXValue(float fromXAxisRel, float toXAxisRel) {
+    public int getLocalMaximum(float fromXAxisRel, float toXAxisRel) {
         long startTimestamp = timestamps.get(0);
         long stopTimestamp = timestamps.get(timestamps.size() - 1);
         long fromTimestamp = (long) (startTimestamp + (stopTimestamp - startTimestamp) * fromXAxisRel) - 1;
@@ -378,7 +359,7 @@ public class SimpleChartAdapter implements ChartAdapter {
     }
 
     @Override
-    public String getYBarText(int value) {
+    public String getYStampText(int value) {
         return String.valueOf(value);
     }
 

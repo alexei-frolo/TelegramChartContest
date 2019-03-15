@@ -276,8 +276,8 @@ public class AbsChartView extends View implements ChartUI {
         // update important values here
         ChartAdapter adapter = this.adapter;
         if (adapter != null) {
-            minYValue = adapter.getMinYValue(startXPercentage, stopXPercentage);
-            maxYValue = adapter.getMaxXValue(startXPercentage, stopXPercentage);
+            minYValue = adapter.getLocalMinimum(startXPercentage, stopXPercentage);
+            maxYValue = adapter.getLocalMaximum(startXPercentage, stopXPercentage);
         } else {
             minYValue = 0f;
             maxYValue = 0f;
@@ -293,8 +293,8 @@ public class AbsChartView extends View implements ChartUI {
         ChartAdapter adapter = this.adapter;
         if (adapter == null) return;
 
-        int minValue = adapter.getMinYValue(startXPercentage, stopXPercentage);
-        int maxValue = adapter.getMaxXValue(startXPercentage, stopXPercentage);
+        int minValue = adapter.getLocalMinimum(startXPercentage, stopXPercentage);
+        int maxValue = adapter.getLocalMaximum(startXPercentage, stopXPercentage);
         float newRange = maxValue - minValue;
 
         this.yAxisAlpha = 0.1f;
@@ -424,7 +424,7 @@ public class AbsChartView extends View implements ChartUI {
                 canvas.drawLine(startX, yFadeOut, stopX, yFadeOut, yAxisPaint);
 
                 // bar text
-                String text = adapter.getYBarText((int) value);
+                String text = adapter.getYStampText((int) value);
                 yAxisTextPaint.getTextBounds(text, 0, text.length(), stampTextBounds);
                 canvas.drawText(text, startX, yFadeOut, yAxisTextPaint);
             }
@@ -443,7 +443,7 @@ public class AbsChartView extends View implements ChartUI {
             canvas.drawLine(startX, yFadeIn, stopX, yFadeIn, yAxisPaint);
 
             // bar text
-            String text = adapter.getYBarText((int) value);
+            String text = adapter.getYStampText((int) value);
             yAxisTextPaint.getTextBounds(text, 0, text.length(), stampTextBounds);
             canvas.drawText(text, startX, yFadeIn, yAxisTextPaint);
         }

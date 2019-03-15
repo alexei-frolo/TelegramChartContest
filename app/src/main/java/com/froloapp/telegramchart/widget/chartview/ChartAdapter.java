@@ -1,16 +1,12 @@
 package com.froloapp.telegramchart.widget.chartview;
 
 
+// Should be as effective as possible
 public interface ChartAdapter {
     int getChartCount();
     ChartData getChart(int index);
     boolean isVisible(ChartData chart);
     void setVisible(ChartData chart, boolean visible);
-
-    long getMinTimestamp();
-    long getMaxTimestamp();
-
-    long[] getTimestamps(float fromXPosition, float toXPosition);
 
     float getClosestTimestampPosition(float toXPosition);
     long getClosestTimestamp(float toXPosition);
@@ -26,9 +22,9 @@ public interface ChartAdapter {
     boolean hasNextTimestamp(long afterTimestamp);
     long getNextTimestamp(long afterTimestamp);
 
-    int getMinYValue(float fromTimestampPosition, float toTimestampPosition);
-    int getMaxXValue(float fromTimestampPosition, float toTimestampPosition);
+    int getLocalMinimum(float fromTimestampPosition, float toTimestampPosition);
+    int getLocalMaximum(float fromTimestampPosition, float toTimestampPosition);
 
-    String getYBarText(int value);
+    String getYStampText(int value);
     String getXStampText(long timestamp);
 }
