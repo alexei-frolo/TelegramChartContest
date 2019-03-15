@@ -21,8 +21,10 @@ class SimpleChartAdapter implements ChartAdapter {
     private final int id;
 
     private List<Long> timestamps;
+    private long firstTimestamp;
+    private long lastTimestamp;
 
-    private List<ChartHolder> chartHolders;
+    private List<ChartHolder> chartHolders = new ArrayList<>();
     private final Map<Long, Integer> localMinimums = new HashMap<>();
     private final Map<Long, Integer> localMaximums = new HashMap<>();
 
@@ -37,11 +39,16 @@ class SimpleChartAdapter implements ChartAdapter {
 
     SimpleChartAdapter(List<Long> timestamps, List<ChartData> charts) {
         id = nextChartId();
-        this.timestamps = timestamps;
-        Collections.sort(timestamps); // default sort
-        this.chartHolders = new ArrayList<>(charts.size());
-        for (ChartData data : charts) {
-            chartHolders.add(new ChartHolder(data, true));
+
+        chartHolders.clear();
+        if (!timestamps.isEmpty()) {
+            this.timestamps = timestamps;
+            this.firstTimestamp = timestamps.get(0);
+            this.lastTimestamp = timestamps.get(timestamps.size() - 1);
+            Collections.sort(timestamps); // default sort
+            for (ChartData data : charts) {
+                chartHolders.add(new ChartHolder(data, true));
+            }
         }
 
         // save local minimums nad maximums
@@ -60,32 +67,19 @@ class SimpleChartAdapter implements ChartAdapter {
         }
     }
 
-    static class SimpleData implements ChartData {
-        private Map<Long, Integer> data;
-        private int color;
-        private String name;
+    @Override
+    public long getFirstTimestamp() {
+        return firstTimestamp;
+    }
 
-        public SimpleData(Map<Long, Integer> data, int color, String name) {
-            this.data = data;
-            this.color = color;
-            this.name = name;
-        }
+    @Override
+    public long getLastTimestamp() {
+        return lastTimestamp;
+    }
 
-        @Override public int getColor() {
-            return color;
-        }
-
-        @Override public int getValue(long x) {
-            Integer value = data.get(x);
-            if (value == null) {
-                throw new IllegalArgumentException("No such x axis found");
-            }
-            return value;
-        }
-
-        @Override public String getName() {
-            return name;
-        }
+    @Override
+    public int getTimestampCount() {
+        return timestamps.size();
     }
 
     @Override
@@ -325,6 +319,7 @@ class SimpleChartAdapter implements ChartAdapter {
         throw new IllegalArgumentException("Invalid timestamp rel: " + timestampRel);
     }
 
+    @Deprecated
     @Override
     public float getNextTimestampPosition(float timestampRel) {
         long minAxis = timestamps.get(0);

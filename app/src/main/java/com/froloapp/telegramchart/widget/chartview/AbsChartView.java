@@ -462,6 +462,10 @@ public class AbsChartView extends View implements ChartUI {
         if (adapter == null)
             return; // early return
 
+        final float timestampPosXStep = ((float) (adapter.getLastTimestamp() - adapter.getFirstTimestamp())) / adapter.getTimestampCount();
+        final long startTimestamp = adapter.getPreviousTimestamp(startXPercentage);
+        final float startTimestampPosX = adapter.getPreviousTimestampPosition(startXPercentage);
+
         for (int i = 0; i < adapter.getChartCount(); i++) {
             ChartData data = adapter.getChart(i);
             if (!adapter.isVisible(data)) {
@@ -469,9 +473,8 @@ public class AbsChartView extends View implements ChartUI {
                     continue;
             }
 
-            // Find the first timestamp;
-            long timestamp = adapter.getPreviousTimestamp(startXPercentage);
-            float timestampPosX = adapter.getPreviousTimestampPosition(startXPercentage);
+            long timestamp = startTimestamp;
+            float timestampPosX = startTimestampPosX;
 
             int value = data.getValue(timestamp);
 

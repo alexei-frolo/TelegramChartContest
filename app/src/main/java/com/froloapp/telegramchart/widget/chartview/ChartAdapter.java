@@ -8,6 +8,10 @@ public interface ChartAdapter {
     boolean isVisible(ChartData chart);
     void setVisible(ChartData chart, boolean visible);
 
+    long getFirstTimestamp();
+    long getLastTimestamp();
+    int getTimestampCount();
+
     float getClosestTimestampPosition(float toXPosition);
     long getClosestTimestamp(float toXPosition);
 
@@ -17,6 +21,7 @@ public interface ChartAdapter {
 
     boolean hasNextTimestamp(float afterTimestampPosition);
     long getNextTimestamp(float afterTimestampPosition);
+    @Deprecated
     float getNextTimestampPosition(float afterTimestampPosition);
 
     boolean hasNextTimestamp(long afterTimestamp);
