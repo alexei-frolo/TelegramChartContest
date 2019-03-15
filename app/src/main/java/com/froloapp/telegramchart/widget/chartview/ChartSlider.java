@@ -213,15 +213,15 @@ public class ChartSlider extends AbsChartView {
                 xDragPos = x;
                 if (isFrameLeftBorderTouched(x)) {
                     scrollState = SCROLL_STATE_LEFT_BORDER_DRAGGING;
-                    log("Started dragging left border");
+                    //log("Started dragging left border");
                     return true;
                 } else if (isFrameRightBorderTouched(x)) {
                     scrollState = SCROLL_STATE_RIGHT_BORDER_DRAGGING;
-                    log("Started dragging right border");
+                    //log("Started dragging right border");
                     return true;
                 } else if (isFrameTouched(x)) {
                     scrollState = SCROLL_STATE_FRAME_DRAGGING;
-                    log("Started dragging frame");
+                    //log("Started dragging frame");
                     return true;
                 } else return super.onTouchEvent(event);
             }
@@ -233,7 +233,7 @@ public class ChartSlider extends AbsChartView {
                     float newStartXPosition = checkPosition(leftBorderXPosition + frameScrollRel);
                     if (canCompressFrame(newStartXPosition, rightBorderXPosition)) {
                         leftBorderXPosition = newStartXPosition;
-                        log("Left border dragged");
+                        //log("Left border dragged");
                         dispatchScrolled(leftBorderXPosition, rightBorderXPosition);
                         invalidate();
                     }
@@ -245,7 +245,7 @@ public class ChartSlider extends AbsChartView {
                     float newStopXPosition = checkPosition(rightBorderXPosition + frameScrollRel);
                     if (canCompressFrame(leftBorderXPosition, newStopXPosition)) {
                         rightBorderXPosition = newStopXPosition;
-                        log("Right border dragged");
+                        //log("Right border dragged");
                         dispatchScrolled(leftBorderXPosition, rightBorderXPosition);
                         invalidate();
                     }
@@ -261,7 +261,7 @@ public class ChartSlider extends AbsChartView {
                     leftBorderXPosition = checkPosition(leftBorderXPosition + frameScrollRel);
                     rightBorderXPosition = checkPosition(rightBorderXPosition + frameScrollRel);
                     xDragPos = x;
-                    log("Frame dragged");
+                    //log("Frame dragged");
                     dispatchScrolled(leftBorderXPosition, rightBorderXPosition);
                     invalidate();
                     return true;
