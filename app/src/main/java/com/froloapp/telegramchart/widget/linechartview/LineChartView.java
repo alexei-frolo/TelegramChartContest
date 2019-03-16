@@ -6,10 +6,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 
-import com.froloapp.telegramchart.BuildConfig;
 import com.froloapp.telegramchart.widget.Utils;
 
 
@@ -70,28 +68,9 @@ public class LineChartView extends AbsLineChartView {
      ********** HELPER METHODS *********
      ***********************************/
 
-    private void log(String msg) {
-        if (BuildConfig.DEBUG) {
-            Log.d("ChartView", msg);
-        }
-    }
-
-    @Override
-    final float getFooterHeightInPercentage() {
-        return 0.04f;
-    }
-
     @Override
     boolean drawFooter() {
         return true;
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        // update important values here
-        //yAxisStep = ((float) (getMeasuredHeight() - getPaddingTop() - getPaddingBottom())) / yAxisStampCount;
-        log("View measured");
     }
 
     /* *******************************
@@ -177,7 +156,7 @@ public class LineChartView extends AbsLineChartView {
                 float y = event.getY();
                 if (Math.abs(lastTouchedDownX - x) < touchStampThreshold
                     && Math.abs(lastTouchedDownY - y) < touchStampThreshold) {
-                    log("Clicked at (" + x + ", " + y + ")");
+                    //log("Clicked at (" + x + ", " + y + ")");
                     // handle click here
                     handleClick(x, y, event.getRawX(), event.getRawY());
                 }

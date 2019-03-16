@@ -235,10 +235,6 @@ public class AbsLineChartView extends View implements LineChartUI {
      ********** HELPER METHODS *********
      ***********************************/
 
-    /*abstract*/ float getFooterHeightInPercentage() {
-        return 0f;
-    }
-
     /*abstract*/ boolean drawFooter() {
         return false;
     }
@@ -279,12 +275,14 @@ public class AbsLineChartView extends View implements LineChartUI {
         final int measuredWidth = resolveSizeAndState(defWidth, widthMeasureSpec, 0);
         final int measuredHeight = resolveSizeAndState(defHeight, heightMeasureSpec, 0);
         setMeasuredDimension(measuredWidth, measuredHeight);
+
         // update important values here
-//        footerHeight = (int) ((getMeasuredHeight() - getPaddingTop() - getPaddingBottom()) *
-//                getFooterHeightInPercentage());
-        xAxisTextPaint.getTextBounds("|", 0, 1, stampTextBounds);
-        footerHeight = stampTextBounds.height();
-        //Utils.defineTextSize(xAxisTextPaint, footerHeight, "|");
+        if (drawFooter()) {
+            xAxisTextPaint.getTextBounds("|", 0, 1, stampTextBounds);
+            footerHeight = stampTextBounds.height();
+        } else {
+            footerHeight = 0;
+        }
 
         LineChartAdapter adapter = this.adapter;
         if (adapter != null) {
