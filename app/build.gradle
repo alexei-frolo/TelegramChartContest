@@ -25,6 +25,7 @@ android {
             resValue "string", "app_name", "Telegram Chart Dev"
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             versionNameSuffix "-D"
+            applicationIdSuffix ".dev"
         }
         release {
             resValue "string", "app_name", "Telegram Chart"
