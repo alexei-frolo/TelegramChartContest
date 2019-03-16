@@ -2,6 +2,7 @@ package com.froloapp.telegramchart.widget;
 
 
 import android.content.Context;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -43,5 +44,14 @@ public final class Utils {
         location.right = location.left + v.getWidth();
         location.bottom = location.top + v.getHeight();
         return location;
+    }
+
+    public static void defineTextSize(Paint paint, float desiredHeight, String text) {
+        final float testTextSize = 48f;
+        paint.setTextSize(testTextSize);
+        Rect bounds = new Rect();
+        paint.getTextBounds(text, 0, text.length(), bounds);
+        float desiredTextSize = testTextSize * desiredHeight / bounds.height();
+        paint.setTextSize(desiredTextSize);
     }
 }

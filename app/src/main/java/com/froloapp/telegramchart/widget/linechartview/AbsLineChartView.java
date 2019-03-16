@@ -47,6 +47,7 @@ public class AbsLineChartView extends View implements LineChartUI {
     private final Path bufferPath = new Path(); // buffer path to avoid allocating to many paths for multiple charts
     private final Rect stampTextBounds = new Rect(); // here we store bounds for stamp text height
     private float axisStrokeWidth;
+    private int footerHeight; // for x axis stamps
 
     // adapter
     private LineChartAdapter adapter;
@@ -74,6 +75,7 @@ public class AbsLineChartView extends View implements LineChartUI {
     /* *********************************
      *** X AXIS PROPERTIES INTERFACE ***
      **********************************/
+    private float xAxisStampTextSize;
     private int xAxisStampCount;
     private int xAxisStepCount; // stamp are drawn through this step
     private int xAxisColor;
@@ -233,6 +235,14 @@ public class AbsLineChartView extends View implements LineChartUI {
      ********** HELPER METHODS *********
      ***********************************/
 
+    /*abstract*/ float getFooterHeightInPercentage() {
+        return 0f;
+    }
+
+    /*abstract*/ boolean drawFooter() {
+        return false;
+    }
+
     /*package-private*/ /*nullable*/ LineChartAdapter getAdapter() {
         return adapter;
     }
@@ -257,9 +267,9 @@ public class AbsLineChartView extends View implements LineChartUI {
     }
 
     /*package-private*/ int getYCoor(float value) {
-        int contentHeight = getMeasuredHeight() - getPaddingTop() - getPaddingBottom();
+        int contentHeight = getMeasuredHeight() - getPaddingTop() - getPaddingBottom() - footerHeight;
         float yRelative = (value - minYValue) / (maxYValue - minYValue);
-        return (int) (getMeasuredHeight() - getPaddingTop() - yRelative * contentHeight);
+        return (int) (getMeasuredHeight() - getPaddingTop() - footerHeight - yRelative * contentHeight);
     }
 
     @Override
@@ -270,6 +280,12 @@ public class AbsLineChartView extends View implements LineChartUI {
         final int measuredHeight = resolveSizeAndState(defHeight, heightMeasureSpec, 0);
         setMeasuredDimension(measuredWidth, measuredHeight);
         // update important values here
+//        footerHeight = (int) ((getMeasuredHeight() - getPaddingTop() - getPaddingBottom()) *
+//                getFooterHeightInPercentage());
+        xAxisTextPaint.getTextBounds("|", 0, 1, stampTextBounds);
+        footerHeight = stampTextBounds.height();
+        //Utils.defineTextSize(xAxisTextPaint, footerHeight, "|");
+
         LineChartAdapter adapter = this.adapter;
         if (adapter != null) {
             minYValue = adapter.getLocalMinimum(startXPercentage, stopXPercentage);

@@ -77,6 +77,16 @@ public class LineChartView extends AbsLineChartView {
     }
 
     @Override
+    final float getFooterHeightInPercentage() {
+        return 0.04f;
+    }
+
+    @Override
+    boolean drawFooter() {
+        return true;
+    }
+
+    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         // update important values here
