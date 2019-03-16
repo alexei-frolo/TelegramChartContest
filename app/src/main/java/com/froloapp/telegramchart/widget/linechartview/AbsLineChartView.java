@@ -29,7 +29,7 @@ public class AbsLineChartView extends View implements LineChartUI {
     // static
     private static final int DEFAULT_WIDTH_IN_DP = 200;
     private static final int DEFAULT_HEIGHT_IN_DP = 100;
-    private static final int DEFAULT_TEXT_HEIGHT_IN_SP = 15;
+    private static final int DEFAULT_TEXT_HEIGHT_IN_SP = 12;
     private static final long ANIM_DURATION = 180L; // I think 180 ms is the best duration
 
     private static final int DEFAULT_X_AXIS_STAMP_COUNT = 5;
@@ -441,14 +441,13 @@ public class AbsLineChartView extends View implements LineChartUI {
     }
 
     private void drawYBarWithStamp(Canvas canvas, float value, int startX, int stopX, Paint barPaint, Paint textPaint) {
-        float yFadeOut = getYCoor(value) - (axisStrokeWidth / 2 + 1);
+        float y = getYCoor(value) - axisStrokeWidth / 2;
         // bar line
-        canvas.drawLine(startX, yFadeOut, stopX, yFadeOut, barPaint);
+        canvas.drawLine(startX, y, stopX, y, barPaint);
 
         // bar text
         String text = adapter.getYStampText((int) value);
-        //textPaint.getTextBounds(text, 0, text.length(), stampTextBounds);
-        canvas.drawText(text, startX, yFadeOut, textPaint);
+        canvas.drawText(text, startX, y - 5, textPaint); // y - 5 to make a margin between stamp and bar
     }
 
     /**
