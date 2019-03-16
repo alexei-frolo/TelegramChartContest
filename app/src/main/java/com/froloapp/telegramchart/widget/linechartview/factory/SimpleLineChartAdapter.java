@@ -3,12 +3,17 @@ package com.froloapp.telegramchart.widget.linechartview.factory;
 
 import android.util.SparseIntArray;
 
+import com.froloapp.telegramchart.widget.Utils;
 import com.froloapp.telegramchart.widget.linechartview.Line;
 import com.froloapp.telegramchart.widget.linechartview.LineChartAdapter;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -26,6 +31,7 @@ class SimpleLineChartAdapter implements LineChartAdapter {
     private final int id;
 
     private final List<Long> timestamps = new ArrayList<>();
+    private final List<String> timestampTexts = new ArrayList<>();
 
     private List<LineHolder> lineHolders = new ArrayList<>();
     private final SparseIntArray localMinimums = new SparseIntArray(); // local minimums at indexes
@@ -54,6 +60,20 @@ class SimpleLineChartAdapter implements LineChartAdapter {
 
         // save local minimums nad maximums
         calcMinimumsAndMaximums();
+        obtainTimestampTexts();
+    }
+
+    private void obtainTimestampTexts() {
+        timestampTexts.clear();
+        for (int i = 0; i < timestamps.size(); i++) {
+            long timestamp = timestamps.get(i);
+            Calendar c = Calendar.getInstance();
+            c.setTimeInMillis(timestamp);
+            int month = c.get(Calendar.MONTH);
+            int day = c.get(Calendar.DAY_OF_MONTH);
+            String text = Utils.getMonthString(month) + ' ' + day;
+            timestampTexts.add(text);
+        }
     }
 
     private void calcMinimumsAndMaximums() {
@@ -307,8 +327,8 @@ class SimpleLineChartAdapter implements LineChartAdapter {
     }
 
     @Override
-    public String getXStampText(long timestamp) {
-        return String.valueOf(timestamp);
+    public String getXStampTextAt(int index) {
+        return timestampTexts.get(index);
     }
 
     @Override

@@ -21,5 +21,5 @@ public interface LineChartAdapter {
     int getLocalMaximum(float fromTimestampPosition, float toTimestampPosition);
 
     String getYStampText(int value);
-    String getXStampText(long timestamp);
+    String getXStampTextAt(int index);
 }

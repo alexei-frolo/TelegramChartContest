@@ -427,7 +427,7 @@ public class AbsLineChartView extends View implements LineChartUI {
         final float y = getMeasuredHeight() - getPaddingBottom();
 
         while (timestampIndex < timestampCount) {
-            String text = adapter.getXStampText(timestampIndex);
+            String text = adapter.getXStampTextAt(timestampIndex);
             float x = getXCoor(timestampPosX);
             canvas.drawText(text, x, y, xAxisTextPaint);
 
