@@ -1,9 +1,8 @@
 package com.froloapp.telegramchart;
 
-import com.froloapp.telegramchart.widget.linechartview.LineChartAdapter;
 import com.froloapp.telegramchart.widget.linechartview.Line;
+import com.froloapp.telegramchart.widget.linechartview.LineChartAdapter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 

@@ -1,15 +1,18 @@
 package com.froloapp.telegramchart;
 
-import android.app.Activity;
 import android.content.res.AssetManager;
+import android.content.res.ColorStateList;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.widget.CompoundButtonCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatCheckBox;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -23,7 +26,8 @@ import com.froloapp.telegramchart.widget.linechartview.LineChartView;
 
 import java.io.InputStream;
 
-public class MainActivity extends Activity implements LineChartSlider.OnScrollListener, LineChartView.OnStampClickListener {
+public class MainActivity extends AppCompatActivity
+        implements LineChartSlider.OnScrollListener, LineChartView.OnStampClickListener {
 
     private Spinner spinnerChartSelector;
     private LineChartView chartView;
@@ -107,18 +111,24 @@ public class MainActivity extends Activity implements LineChartSlider.OnScrollLi
         layoutCheckboxes.removeAllViews();
         // adding checkboxes dynamic
         for (int i = 0; i < adapter.getLineCount(); i++) {
-            final Line chart = adapter.getLineAt(i);
-            CheckBox checkBox = new CheckBox(this);
-            checkBox.setText(chart.getName());
-            checkBox.setChecked(adapter.isLineEnabled(chart));
+            final Line line = adapter.getLineAt(i);
+            final int color = line.getColor();
+            AppCompatCheckBox checkBox = new AppCompatCheckBox(this);
+            if (Build.VERSION.SDK_INT < 21) {
+                CompoundButtonCompat.setButtonTintList(checkBox, ColorStateList.valueOf(color));
+            } else {
+                checkBox.setButtonTintList(ColorStateList.valueOf(color));
+            }
+            checkBox.setText(line.getName());
+            checkBox.setChecked(adapter.isLineEnabled(line));
             checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if (isChecked) {
-                        chartView.show(chart);
-                        chartSlider.show(chart);
+                        chartView.show(line);
+                        chartSlider.show(line);
                     } else {
-                        chartView.hide(chart);
-                        chartSlider.hide(chart);
+                        chartView.hide(line);
+                        chartSlider.hide(line);
                     }
                 }
             });
@@ -130,6 +140,7 @@ public class MainActivity extends Activity implements LineChartSlider.OnScrollLi
             lp.topMargin = m;
             lp.rightMargin = m;
             lp.bottomMargin = m;
+            checkBox.setMinimumWidth((int) Utils.dpToPx(70f, this));
             layoutCheckboxes.addView(checkBox, lp);
         }
     }
