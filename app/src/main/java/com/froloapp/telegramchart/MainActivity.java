@@ -7,8 +7,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.widget.CompoundButtonCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.AppCompatCheckBox;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -175,5 +178,34 @@ public class MainActivity extends AppCompatActivity
 //            popUp.setFocusable(true);
 //            popUp.setOutsideTouchable(true);
 //            popUp.showAtLocation(this, Gravity.END, -(int) x, +(int) y);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.actionSwitchDatNightMode: {
+                switchDayNightMode();
+                return true;
+            }
+            default: return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void switchDayNightMode() {
+        PrefManager manager = PrefManager.getInstance(this);
+        boolean nightModeEnabled = manager.isNightModeEnabled();
+        manager.setNightModeEnabled(!nightModeEnabled);
+        @AppCompatDelegate.NightMode int nextMode = nightModeEnabled ?
+                AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO;
+        AppCompatDelegate delegate = getDelegate();
+        delegate.setLocalNightMode(nextMode);
+        delegate.applyDayNight();
+        recreate();
     }
 }
