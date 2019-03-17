@@ -4,6 +4,8 @@
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
 
+    <color name="night_background">#25283F</color>
+
     <color name="white">#FFFFFF</color>
     <color name="lt_gray">#E2E2E2</color>
     <color name="gray">#C3C3C3</color>

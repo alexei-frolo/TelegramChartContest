@@ -40,6 +40,12 @@ public class MainActivity extends AppCompatActivity
     // hold task to cancel if needed
     private JsonParserTask jsonParserTask;
 
+    private void log(String msg) {
+        if (BuildConfig.DEBUG) {
+            Log.d("ChartViewMainActivity", msg);
+        }
+    }
+
     private void log(Throwable e) {
         if (BuildConfig.DEBUG) {
             Log.e("ChartViewMainActivity", "", e);
@@ -48,6 +54,11 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // first check if night mode enabled
+//        PrefManager manager = PrefManager.getInstance(this);
+//        boolean nightModeEnabled = manager.isNightModeEnabled();
+//        applyDayNightMode(nightModeEnabled);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         spinnerChartSelector = findViewById(R.id.spinnerChartSelector);
@@ -198,14 +209,19 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void switchDayNightMode() {
+        log("Switching DayNight mode");
         PrefManager manager = PrefManager.getInstance(this);
         boolean nightModeEnabled = manager.isNightModeEnabled();
         manager.setNightModeEnabled(!nightModeEnabled);
-        @AppCompatDelegate.NightMode int nextMode = nightModeEnabled ?
+        applyDayNightMode(!nightModeEnabled);
+    }
+
+    private void applyDayNightMode(boolean nightModeEnabled) {
+        log("Applying DayNight mode: [night=" + nightModeEnabled + "]");
+        @AppCompatDelegate.NightMode int mode = nightModeEnabled ?
                 AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO;
         AppCompatDelegate delegate = getDelegate();
-        delegate.setLocalNightMode(nextMode);
+        delegate.setLocalNightMode(mode);
         delegate.applyDayNight();
-        recreate();
     }
 }
