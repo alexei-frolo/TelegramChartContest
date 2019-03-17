@@ -75,8 +75,9 @@ public class AbsLineChartView extends View implements LineChartUI {
     /* *********************************
      *** X AXIS PROPERTIES INTERFACE ***
      **********************************/
-    private float xAxisStampTextSize;
+    //private float xAxisStampTextSize;
     private int xAxisStampCount;
+    private int xAxisStampCountInRange;
     private int xAxisStepCount; // stamp are drawn through this step
     private int xAxisColor;
     private float xAxisAlpha;
@@ -294,16 +295,13 @@ public class AbsLineChartView extends View implements LineChartUI {
         }
     }
 
-    private void checkIfStartOrStopXPositionChanged(float oldStartXPosition, float oldStopXPosition) {
+    private void checkIfStartOrStopXPositionChanged() {
         LineChartAdapter adapter = this.adapter;
         if (adapter == null) return;
 
-        float xPosRange = stopXPercentage - startXPercentage;
-        if ((oldStopXPosition - oldStartXPosition) != xPosRange) {
-            float timestampCountInRange = adapter.getTimestampCount() * (stopXPercentage - startXPercentage);
-            xAxisStepCount = (int) (timestampCountInRange / xAxisStampCount) + 1;
-            invalidate();
-        }
+        float timestampCountInRange = adapter.getTimestampCount() * (stopXPercentage - startXPercentage);
+        xAxisStepCount = (int) (timestampCountInRange / xAxisStampCount) + 1;
+        invalidate();
     }
 
     /**
@@ -578,9 +576,8 @@ public class AbsLineChartView extends View implements LineChartUI {
     @Override
     public void setStartXPosition(float p) {
         if (startXPercentage != p) {
-            float oldStartXPos = this.startXPercentage;
-            checkIfStartOrStopXPositionChanged(oldStartXPos, stopXPercentage);
             this.startXPercentage = p;
+            checkIfStartOrStopXPositionChanged();
             checkIfMinOrMaxValueChanged();
             invalidate();
         }
@@ -589,9 +586,8 @@ public class AbsLineChartView extends View implements LineChartUI {
     @Override
     public void setStopXPosition(float p) {
         if (stopXPercentage != p) {
-            float oldStopXPos = this.stopXPercentage;
             this.stopXPercentage = p;
-            checkIfStartOrStopXPositionChanged(startXPercentage, oldStopXPos);
+            checkIfStartOrStopXPositionChanged();
             checkIfMinOrMaxValueChanged();
             invalidate();
         }
@@ -600,11 +596,9 @@ public class AbsLineChartView extends View implements LineChartUI {
     @Override
     public void setXPositions(float start, float stop) {
         if (this.startXPercentage != start || this.stopXPercentage != stop) {
-            float oldStartXPos = this.startXPercentage;
-            float oldStopXPos = this.stopXPercentage;
             this.startXPercentage = start;
             this.stopXPercentage = stop;
-            checkIfStartOrStopXPositionChanged(oldStartXPos, oldStopXPos);
+            checkIfStartOrStopXPositionChanged();
             checkIfMinOrMaxValueChanged();
             invalidate();
         }
