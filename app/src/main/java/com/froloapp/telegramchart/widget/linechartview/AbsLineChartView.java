@@ -307,7 +307,7 @@ public class AbsLineChartView extends View implements LineChartUI {
         }
     }
 
-    private void checkIfStartOrStopXPositionChanged() {
+    private void checkIfXAxisStepCountChanged() {
         LineChartAdapter adapter = this.adapter;
         if (adapter == null) return;
 
@@ -611,6 +611,7 @@ public class AbsLineChartView extends View implements LineChartUI {
     @Override
     public void setAdapter(LineChartAdapter adapter) {
         this.adapter = adapter;
+        checkIfXAxisStepCountChanged();
         checkIfMinOrMaxValueChanged();
         invalidate();
     }
@@ -629,7 +630,7 @@ public class AbsLineChartView extends View implements LineChartUI {
     public void setStartXPosition(float p) {
         if (startXPercentage != p) {
             this.startXPercentage = p;
-            checkIfStartOrStopXPositionChanged();
+            checkIfXAxisStepCountChanged();
             checkIfMinOrMaxValueChanged();
             invalidate();
         }
@@ -639,7 +640,7 @@ public class AbsLineChartView extends View implements LineChartUI {
     public void setStopXPosition(float p) {
         if (stopXPercentage != p) {
             this.stopXPercentage = p;
-            checkIfStartOrStopXPositionChanged();
+            checkIfXAxisStepCountChanged();
             checkIfMinOrMaxValueChanged();
             invalidate();
         }
@@ -650,7 +651,7 @@ public class AbsLineChartView extends View implements LineChartUI {
         if (this.startXPercentage != start || this.stopXPercentage != stop) {
             this.startXPercentage = start;
             this.stopXPercentage = stop;
-            checkIfStartOrStopXPositionChanged();
+            checkIfXAxisStepCountChanged();
             checkIfMinOrMaxValueChanged();
             invalidate();
         }
