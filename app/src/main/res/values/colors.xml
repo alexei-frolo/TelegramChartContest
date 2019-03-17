@@ -1,16 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#008577</color>
-    <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#D81B60</color>
-
-    <color name="night_background">#25283F</color>
-
     <color name="white">#FFFFFF</color>
     <color name="lt_gray">#E2E2E2</color>
     <color name="gray">#C3C3C3</color>
 
-    <color name="slider_overlay">#AAF5F8F9</color>
-    <color name="slider_frame">#CADDE7EF</color>
-    <color name="chart_axis">#C6CED6</color>
+    <color name="night_dark">#1A242E</color>
+    <color name="night_toolbar">#212D3B</color>
+    <color name="night_background">#1D2733</color>
+    <color name="night_slider_overlay">#A61C1E2C</color>
+    <color name="night_slider_frame">#CC2B4256</color>
+    <color name="night_chart_axis">#C6CED6</color>
+
+    <color name="day_dark">#426382</color>
+    <color name="day_toolbar">#517DA2</color>
+    <color name="day_background">#FFFFFF</color>
+    <color name="day_slider_overlay">#AAF5F8F9</color>
+    <color name="day_slider_frame">#CADDE7EF</color>
+    <color name="day_chart_axis">#C6CED6</color>
 </resources>

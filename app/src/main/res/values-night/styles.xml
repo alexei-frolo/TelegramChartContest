@@ -2,7 +2,13 @@
 <resources>
 
     <style name="AppTheme" parent="Theme.AppCompat.DayNight.DarkActionBar">
+        <item name="colorPrimary">@color/night_toolbar</item>
+        <item name="colorPrimaryDark">@color/night_dark</item>
         <item name="android:windowBackground">@color/night_background</item>
+        <item name="overlayColor">@color/night_slider_overlay</item>
+        <item name="xAxisColor">@color/night_chart_axis</item>
+        <item name="yAxisColor">@color/night_chart_axis</item>
+        <item name="frameBorderColor">@color/night_slider_frame</item>
     </style>
 
 </resources>

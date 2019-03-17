@@ -6,8 +6,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
     <com.froloapp.telegramchart.widget.linechartview.LineChartView
-        app:xAxisColor="@color/chart_axis"
-        app:yAxisColor="@color/chart_axis"
         app:chartStrokeWidth="1.5dp"
         app:axisStrokeWidth="0.3dp"
         android:padding="5dp"
@@ -17,8 +15,6 @@
 
     <com.froloapp.telegramchart.widget.linechartview.LineChartSlider
         app:chartStrokeWidth="1dp"
-        app:overlayColor="@color/slider_overlay"
-        app:frameBorderColor="@color/slider_frame"
         app:frameHorizontalBorderWidth="7dp"
         app:frameVerticalBorderWidth="1dp"
         app:maxFrameCompression="0.2"
