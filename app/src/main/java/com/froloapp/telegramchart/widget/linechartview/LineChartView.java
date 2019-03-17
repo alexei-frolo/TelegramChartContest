@@ -69,7 +69,7 @@ public class LineChartView extends AbsLineChartView {
      ***********************************/
 
     @Override
-    boolean drawFooter() {
+    final boolean drawFooter() {
         return true;
     }
 
