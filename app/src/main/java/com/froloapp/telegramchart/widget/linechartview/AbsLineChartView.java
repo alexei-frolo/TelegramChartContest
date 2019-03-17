@@ -298,7 +298,7 @@ public class AbsLineChartView extends View implements LineChartUI {
         // update important values here
         if (drawFooter()) {
             xAxisTextPaint.getTextBounds("|", 0, 1, stampTextBounds);
-            footerHeight = stampTextBounds.height();
+            footerHeight = stampTextBounds.height() + 5; // + 5 to make a margin between stamps and the first y bar
         } else {
             footerHeight = 0;
         }
