@@ -63,6 +63,7 @@ public class AbsLineChartView extends View implements LineChartUI {
      **********************************/
     private int yAxisStampCount;
     private int yAxisColor;
+    private int yAxisTextColor;
     private float yAxisAlpha;
     // actual stamps
     private int yBarStartValue; // from this value, y axis bars are drawn
@@ -78,6 +79,7 @@ public class AbsLineChartView extends View implements LineChartUI {
     private int xAxisStampCount;
     private int xAxisStepCount; // stamp are drawn through this step
     private int xAxisColor;
+    private int xAxisTextColor;
     private float xAxisAlpha;
     private int phantomXAxisStepCount; // phantom stamp are drawn through this step
     private boolean drawXPhantoms;
@@ -192,7 +194,9 @@ public class AbsLineChartView extends View implements LineChartUI {
             xAxisStampCount = typedArray.getColor(R.styleable.AbsLineChartView_xAxisStampCount, DEFAULT_X_AXIS_STAMP_COUNT);
             yAxisStampCount = typedArray.getInteger(R.styleable.AbsLineChartView_yAxisStampCount, DEFAULT_Y_AXIS_BAR_COUNT);
             xAxisColor = typedArray.getColor(R.styleable.AbsLineChartView_xAxisColor, Color.LTGRAY);
+            xAxisTextColor = typedArray.getColor(R.styleable.AbsLineChartView_xAxisTextColor, Color.LTGRAY);
             yAxisColor = typedArray.getColor(R.styleable.AbsLineChartView_yAxisColor, Color.LTGRAY);
+            yAxisTextColor = typedArray.getColor(R.styleable.AbsLineChartView_yAxisTextColor, Color.LTGRAY);
             typedArray.recycle();
         } else {
             chartLineWidth = Utils.dpToPx(DEFAULT_CHART_LINE_WIDTH_IN_DP, context);
@@ -200,7 +204,9 @@ public class AbsLineChartView extends View implements LineChartUI {
             xAxisStampCount = DEFAULT_X_AXIS_STAMP_COUNT;
             yAxisStampCount = DEFAULT_Y_AXIS_BAR_COUNT;
             xAxisColor = Color.LTGRAY;
+            xAxisTextColor = Color.LTGRAY;
             yAxisColor = Color.LTGRAY;
+            yAxisTextColor = Color.LTGRAY;
         }
 
         // chart paint
@@ -216,13 +222,13 @@ public class AbsLineChartView extends View implements LineChartUI {
         float textSize = Utils.spToPx(DEFAULT_TEXT_HEIGHT_IN_SP, context);
         yAxisTextPaint.setStyle(Paint.Style.FILL);
         yAxisTextPaint.setTextSize(textSize);
-        yAxisTextPaint.setColor(yAxisColor);
+        yAxisTextPaint.setColor(yAxisTextColor);
 
         // x axis
         xAxisStampCount = 5;
         xAxisTextPaint.setStyle(Paint.Style.FILL);
         xAxisTextPaint.setTextSize(textSize);
-        xAxisTextPaint.setColor(xAxisColor);
+        xAxisTextPaint.setColor(xAxisTextColor);
     }
 
     public int getXAxisColor() {

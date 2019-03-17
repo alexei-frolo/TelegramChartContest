@@ -6,7 +6,9 @@
         <attr name="xAxisStampCount" format="integer"/>
         <attr name="yAxisStampCount" format="integer"/>
         <attr name="xAxisColor" format="color|reference"/>
+        <attr name="xAxisTextColor" format="color|reference"/>
         <attr name="yAxisColor" format="color|reference"/>
+        <attr name="yAxisTextColor" format="color|reference"/>
     </declare-styleable>
 
     <declare-styleable name="LineChartSlider">
