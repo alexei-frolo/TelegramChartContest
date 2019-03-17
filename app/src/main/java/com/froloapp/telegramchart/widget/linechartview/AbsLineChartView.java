@@ -75,16 +75,16 @@ public class AbsLineChartView extends View implements LineChartUI {
     /* *********************************
      *** X AXIS PROPERTIES INTERFACE ***
      **********************************/
-    //private float xAxisStampTextSize;
     private int xAxisStampCount;
-    private int xAxisStampCountInRange;
     private int xAxisStepCount; // stamp are drawn through this step
     private int xAxisColor;
     private float xAxisAlpha;
+    private int phantomXAxisStepCount; // phantom stamp are drawn through this step
     private boolean drawXPhantoms;
 
     // Animators
     private ValueAnimator yAxisAnimator;
+    private ValueAnimator xAxisAnimator;
 
     private final static Property<AbsLineChartView, Float> MIN_Y_VALUE = new Property<AbsLineChartView, Float>(float.class, "minYValue") {
         @Override public Float get(AbsLineChartView object) {
@@ -110,6 +110,15 @@ public class AbsLineChartView extends View implements LineChartUI {
         }
         @Override public void set(AbsLineChartView object, Float value) {
             object.yAxisAlpha = value;
+            object.invalidate();
+        }
+    };
+    private final static Property<AbsLineChartView, Float> X_AXIS_ALPHA = new Property<AbsLineChartView, Float>(float.class, "xAxisAlpha") {
+        @Override public Float get(AbsLineChartView object) {
+            return object.xAxisAlpha;
+        }
+        @Override public void set(AbsLineChartView object, Float value) {
+            object.xAxisAlpha = value;
             object.invalidate();
         }
     };
@@ -225,11 +234,14 @@ public class AbsLineChartView extends View implements LineChartUI {
         super.onDetachedFromWindow();
         // We need to cancel all animations here
 
-        ValueAnimator a1 = yAxisAnimator;
+        ValueAnimator a1 = xAxisAnimator;
         if (a1 != null) a1.cancel();
 
-        ValueAnimator a2 = fadedChartAnimator;
+        ValueAnimator a2 = yAxisAnimator;
         if (a2 != null) a2.cancel();
+
+        ValueAnimator a3 = fadedChartAnimator;
+        if (a3 != null) a3.cancel();
     }
 
     /* *********************************
@@ -300,8 +312,25 @@ public class AbsLineChartView extends View implements LineChartUI {
         if (adapter == null) return;
 
         float timestampCountInRange = adapter.getTimestampCount() * (stopXPercentage - startXPercentage);
-        xAxisStepCount = (int) (timestampCountInRange / xAxisStampCount) + 1;
-        invalidate();
+        int newXAxisStepCount = (int) (timestampCountInRange / xAxisStampCount) + 1;
+        if (xAxisStepCount != newXAxisStepCount) {
+            phantomXAxisStepCount = xAxisStepCount != 0 ? xAxisStepCount : 1; // do not allow it to be zero
+            xAxisStepCount = newXAxisStepCount != 0 ? newXAxisStepCount : 1; // do not allow it to be zero
+
+            ValueAnimator oldAnimator = xAxisAnimator;
+            if (oldAnimator != null) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) oldAnimator.pause();
+                else oldAnimator.cancel();
+            }
+
+            PropertyValuesHolder h = PropertyValuesHolder.ofFloat(X_AXIS_ALPHA, 0.1f, 1f);
+            ObjectAnimator newAnimator = ObjectAnimator.ofPropertyValuesHolder(this, h);
+            newAnimator.setDuration(ANIM_DURATION);
+            newAnimator.setInterpolator(xValueInterpolator);
+            newAnimator.addListener(xAxisAnimListener);
+            xAxisAnimator = newAnimator;
+            newAnimator.start();
+        }
     }
 
     /**
@@ -414,15 +443,38 @@ public class AbsLineChartView extends View implements LineChartUI {
         if (adapter == null) return;
         // TO DO: draw phantom and actual stamps on X axis
 
-        int index = adapter.getLeftClosestTimestampIndex(startXPercentage);
-        index = (index / xAxisStepCount) * xAxisStepCount;
+        final float y = getMeasuredHeight() - getPaddingBottom();
 
         final int timestampCount = adapter.getTimestampCount();
         final float avTimestampPosXStep = 1f / adapter.getTimestampCount(); // average step
+
+        if (drawXPhantoms) {
+            xAxisTextPaint.setAlpha((int) ((1 - xAxisAlpha) * 255));
+            int index = adapter.getLeftClosestTimestampIndex(startXPercentage);
+            index = (index / phantomXAxisStepCount) * phantomXAxisStepCount; // normalize
+
+            int timestampIndex = (index / phantomXAxisStepCount) * phantomXAxisStepCount;
+            float timestampPosX = adapter.getTimestampRelPositionAt(timestampIndex);
+
+            while (timestampIndex < timestampCount) {
+                String text = adapter.getXStampTextAt(timestampIndex);
+                float x = getXCoor(timestampPosX);
+                canvas.drawText(text, x, y, xAxisTextPaint);
+                if (timestampPosX > stopXPercentage) {
+                    break;
+                }
+                timestampIndex += phantomXAxisStepCount;
+                timestampPosX += phantomXAxisStepCount * avTimestampPosXStep;
+            }
+        }
+
+        xAxisTextPaint.setAlpha((int) (xAxisAlpha * 255));
+
+        int index = adapter.getLeftClosestTimestampIndex(startXPercentage);
+        index = (index / xAxisStepCount) * xAxisStepCount; // normalize
+
         int timestampIndex = (index / xAxisStepCount) * xAxisStepCount;
         float timestampPosX = adapter.getTimestampRelPositionAt(timestampIndex);
-
-        final float y = getMeasuredHeight() - getPaddingBottom();
 
         while (timestampIndex < timestampCount) {
             String text = adapter.getXStampTextAt(timestampIndex);
