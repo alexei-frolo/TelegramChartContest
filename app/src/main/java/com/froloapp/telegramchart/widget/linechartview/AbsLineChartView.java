@@ -42,7 +42,7 @@ public class AbsLineChartView extends View implements LineChartUI {
     private final Paint chartPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint yAxisPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint yAxisTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final Paint xAxisPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    //private final Paint xAxisPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint xAxisTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Path bufferPath = new Path(); // buffer path to avoid allocating to many paths for multiple charts
     private final Rect stampTextBounds = new Rect(); // here we store bounds for stamp text height

@@ -12,7 +12,6 @@ import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.AppCompatCheckBox;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
