@@ -385,7 +385,7 @@ public class AbsLineChartView extends View implements LineChartUI {
             else oldAnimator.cancel();
         }
 
-        PropertyValuesHolder holder = PropertyValuesHolder.ofFloat(FADED_CHART_ALPHA, 1f);
+        PropertyValuesHolder holder = PropertyValuesHolder.ofFloat(FADED_CHART_ALPHA, 0f, 1f);
         ObjectAnimator animator = ObjectAnimator.ofPropertyValuesHolder(this, holder);
         animator.setDuration(ANIM_DURATION);
         animator.setInterpolator(yValueInterpolator);
@@ -416,7 +416,7 @@ public class AbsLineChartView extends View implements LineChartUI {
             else oldAnimator.cancel();
         }
 
-        PropertyValuesHolder holder = PropertyValuesHolder.ofFloat(FADED_CHART_ALPHA, 0f);
+        PropertyValuesHolder holder = PropertyValuesHolder.ofFloat(FADED_CHART_ALPHA, 1f, 0f);
         ObjectAnimator animator = ObjectAnimator.ofPropertyValuesHolder(this, holder);
         animator.setDuration(ANIM_DURATION);
         animator.setInterpolator(yValueInterpolator);
