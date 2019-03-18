@@ -7,6 +7,7 @@ public interface LineChartAdapter {
     Line getLineAt(int index);
     boolean isLineEnabled(Line line);
     void setLineEnabled(Line line, boolean enabled);
+    boolean hasEnabledLines();
 
     int getTimestampCount();
     long getTimestampAt(int index);

@@ -680,6 +680,7 @@ public class AbsLineChartView extends View implements LineChartUI {
         LineChartAdapter adapter = this.adapter;
         if (adapter != null) {
             adapter.setLineEnabled(chart, false);
+            // if (adapter.hasEnabledLines()) // maybe do not check for new local min and max if adapter has no enabled lines
             checkIfMinOrMaxValueChanged();
             animateFadedOutChart(chart);
             invalidate();
