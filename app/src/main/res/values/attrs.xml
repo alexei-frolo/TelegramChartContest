@@ -20,5 +20,6 @@
     </declare-styleable>
 
     <declare-styleable name="LineChartView">
+        <attr name="clickedStampSmallDotColor" format="color|reference"/>
     </declare-styleable>
 </resources>

@@ -3,6 +3,7 @@ package com.froloapp.telegramchart.widget.linechartview;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
@@ -27,6 +28,7 @@ public class LineChartView extends AbsLineChartView {
     private final Paint stampInfoPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private float stampInfoBigDotRadius;
     private float stampInfoSmallDotRadius;
+    private int stampInfoSmallDotColor;
 
     // touch
     private float touchStampThreshold;
@@ -67,6 +69,14 @@ public class LineChartView extends AbsLineChartView {
     private void init(Context context, AttributeSet attrs) {
         // touch
         touchStampThreshold = Utils.dpToPx(TOUCH_STAMP_THRESHOLD_IN_DP, context);
+
+        if (attrs != null) {
+            TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.LineChartView, 0, 0);
+            stampInfoSmallDotColor = typedArray.getColor(R.styleable.LineChartView_clickedStampSmallDotColor, getXAxisColor());
+            typedArray.recycle();
+        } else {
+            stampInfoSmallDotColor = getXAxisColor();
+        }
 
         // stamp info paint
         stampInfoPaint.setStrokeWidth(Utils.dpToPx(1f, context));
@@ -152,22 +162,11 @@ public class LineChartView extends AbsLineChartView {
                     long value = chart.getValueAt(index);
                     float y = getYCoor(value);
                     canvas.drawCircle(x, y, stampInfoBigDotRadius, stampInfoPaint);
-                    stampInfoPaint.setColor(getXAxisColor());
+                    stampInfoPaint.setColor(stampInfoSmallDotColor);
                     stampInfoPaint.setAlpha((int) (alpha * 255));
                     canvas.drawCircle(x, y, stampInfoSmallDotRadius, stampInfoPaint);
                 }
             }
-
-//            // drawing info window
-//            final int y = getPaddingTop();
-//            final int xm = 10;
-//            final int windowW = 100;
-//            final int windowH = 100;
-//            Drawable stampInfoBackground = this.stampInfoBackground;
-//            if (stampInfoBackground != null) { // this condition must always be met
-//                stampInfoBackground.setBounds((int) (x + xm), y, (int) (x + xm + windowW), y + windowH);
-//                stampInfoBackground.draw(canvas);
-//            }
         }
     }
 

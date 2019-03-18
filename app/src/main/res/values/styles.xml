@@ -11,6 +11,7 @@
         <item name="yAxisColor">@color/day_chart_axis</item>
         <item name="yAxisTextColor">@color/day_chart_axis_text</item>
         <item name="frameBorderColor">@color/day_slider_frame</item>
+        <item name="clickedStampSmallDotColor">@color/white</item>
     </style>
 
 </resources>
