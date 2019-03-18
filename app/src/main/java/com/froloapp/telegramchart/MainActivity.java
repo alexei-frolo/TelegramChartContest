@@ -228,7 +228,7 @@ public class MainActivity extends AppCompatActivity
             // early return. Shouldn't happen
             return;
         }
-        popUp.setTouchable(true);
+        popUp.setTouchable(false);
         popUp.setFocusable(true);
         popUp.setOutsideTouchable(true);
         popUp.setOnDismissListener(new PopupWindow.OnDismissListener() {
