@@ -11,6 +11,7 @@ public interface LineChartAdapter {
     int getTimestampCount();
     long getTimestampAt(int index);
     int getLeftClosestTimestampIndex(float toXPosition);
+    float getTimestampRelPosition(long timestamp);
     float getTimestampRelPositionAt(int index);
     int getTimestampIndex(long timestamp);
 

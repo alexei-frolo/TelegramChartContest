@@ -170,10 +170,11 @@ public class LineChartView extends AbsLineChartView {
         LineChartAdapter adapter = getAdapter();
         if (adapter != null) {
             float xPosition = getXPosition(x);
-            this.clickedXPosition = adapter.getClosestTimestampPosition(xPosition);
+            //this.clickedXPosition = adapter.getClosestTimestampPosition(xPosition);
             // looking for the closest X axis stamp
-            long closestXAxis = adapter.getClosestTimestamp(xPosition);
-            this.clickedXAxis = closestXAxis;
+            long closestTimestamp = adapter.getClosestTimestamp(xPosition);
+            this.clickedXAxis = closestTimestamp;
+            this.clickedXPosition = adapter.getTimestampRelPosition(closestTimestamp);
             //dispatchClicked(x, y, rawX, rawY, closestXAxis);
 
             this.clickedStamp = true;

@@ -271,7 +271,7 @@ public class AbsLineChartView extends View implements LineChartUI {
     }
 
     /*package-private*/ float getXPosition(float x) {
-        float rel = (x - getPaddingLeft()) / (getMeasuredWidth() - getPaddingRight());
+        float rel = (x - getPaddingLeft()) / (getMeasuredWidth() - getPaddingLeft() - getPaddingRight());
         return startXPercentage + (stopXPercentage - startXPercentage) * rel;
     }
 
@@ -549,7 +549,7 @@ public class AbsLineChartView extends View implements LineChartUI {
      * Draws lines;
      * For optimization, the logic of rendering is next:
      * 1) Find the previous timestamp that goes before {@link AbsLineChartView#startXPercentage} value;
-     * 2) Create a path of Y values for each chart until reached timestamp that goes after {@link AbsLineChartView#stopXPercentage} value;
+     * 2) Create a path of Y values for each line until reached timestamp that goes after {@link AbsLineChartView#stopXPercentage} value;
      * 3) Draw each path on canvas using appropriate colors;
      * @param canvas canvas
      */
@@ -559,7 +559,6 @@ public class AbsLineChartView extends View implements LineChartUI {
             return; // early return
 
         final int timestampCount = adapter.getTimestampCount();
-        final float avTimestampPosXStep = 1f / adapter.getTimestampCount(); // average step
         final int startTimestampIndex = adapter.getLeftClosestTimestampIndex(startXPercentage);
         final float startTimestampPosX = adapter.getTimestampRelPositionAt(startTimestampIndex);
 
@@ -582,8 +581,8 @@ public class AbsLineChartView extends View implements LineChartUI {
             bufferPath.moveTo(xCoor, yCoor);
 
             while (timestampIndex < timestampCount - 1) {
-                timestampPosX += avTimestampPosXStep;
                 timestampIndex++;
+                timestampPosX = adapter.getTimestampRelPositionAt(timestampIndex); // i think it could be optimized
 
                 value = data.getValueAt(timestampIndex);
                 xCoor = getXCoor(timestampPosX);

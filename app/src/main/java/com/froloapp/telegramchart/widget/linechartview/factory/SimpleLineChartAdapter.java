@@ -111,6 +111,12 @@ class SimpleLineChartAdapter implements LineChartAdapter {
     }
 
     @Override
+    public float getTimestampRelPosition(long timestamp) {
+        int index = timestamps.indexOf(timestamp);
+        return getTimestampRelPositionAt(index);
+    }
+
+    @Override
     public float getTimestampRelPositionAt(int index) {
         long timestamp = timestamps.get(index);
         long minTimestamp = timestamps.get(0);
@@ -153,22 +159,21 @@ class SimpleLineChartAdapter implements LineChartAdapter {
     public long getClosestTimestamp(float toXPosition) {
         long minAxis = timestamps.get(0);
         long maxAxis = timestamps.get(timestamps.size() - 1);
-        //long desiredAxis = (minAxis + (long) ((maxAxis - minAxis) * timestampRel)) + 1;
-        float approximatelyDesiredAxis = (minAxis + ((maxAxis - minAxis) * toXPosition));
+        float approximateTimestamp = (minAxis + ((maxAxis - minAxis) * toXPosition));
         for (int i = 0; i < timestamps.size(); i++) {
-            long axis = timestamps.get(i);
-            if (axis > approximatelyDesiredAxis) {
-                float next = ((float) (axis - minAxis)) / (maxAxis - minAxis);
+            long timestamp = timestamps.get(i);
+            if (timestamp > approximateTimestamp) {
                 if (i > 0) {
-                    long previousAxis = timestamps.get(i - 1);
-                    float previous = ((float) (previousAxis - minAxis)) / (maxAxis - minAxis);
-                    if (Math.abs(previous - toXPosition) < Math.abs(next - toXPosition)) {
-                        return previousAxis;
+                    float timestampXPosition = ((float) (timestamp - minAxis)) / (maxAxis - minAxis);
+                    long previousTimestamp = timestamps.get(i - 1);
+                    float previousTimestampXPosition = ((float) (previousTimestamp - minAxis)) / (maxAxis - minAxis);
+                    if (Math.abs(previousTimestampXPosition - toXPosition) < Math.abs(timestampXPosition - toXPosition)) {
+                        return previousTimestamp;
                     } else {
-                        return axis;
+                        return timestamp;
                     }
                 } else {
-                    return axis;
+                    return timestamp;
                 }
             }
         }
