@@ -72,4 +72,18 @@ public final class Utils {
             default: return null;
         }
     }
+
+    public static String getDayOfWeekString(int dayOfWeek) {
+        switch (dayOfWeek) {
+            case 0: return "Mon";
+            case 1: return "Tue";
+            case 2: return "Wed";
+            case 3: return "Apr";
+            case 4: return "Thu";
+            case 5: return "Fri";
+            case 6: return "Sat";
+            case 7: return "Sun";
+            default: return null;
+        }
+    }
 }

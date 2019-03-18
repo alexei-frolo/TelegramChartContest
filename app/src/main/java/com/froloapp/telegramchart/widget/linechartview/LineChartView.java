@@ -1,13 +1,22 @@
 package com.froloapp.telegramchart.widget.linechartview;
 
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
+import android.util.Property;
 import android.view.MotionEvent;
+import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Interpolator;
+import android.widget.TextView;
 
+import com.froloapp.telegramchart.R;
 import com.froloapp.telegramchart.widget.Utils;
 
 
@@ -26,10 +35,24 @@ public class LineChartView extends AbsLineChartView {
     private float touchStampThreshold;
     private float lastTouchedDownX = 0f;
     private float lastTouchedDownY = 0f;
-    private boolean clickedStamp = false;
-    private long clickedXAxis;
+    private boolean wasClickedStamp = false;
+    private long clickedStamp;
     private float clickedXPosition;
+    private float clickedStampAlpha;
+    private Drawable stampInfoBackground;
     private OnStampClickListener onStampClickListener;
+    private ValueAnimator clickedStampAnimator;
+    private final Interpolator clickedStampInterpolator = new AccelerateDecelerateInterpolator();
+
+    private final static Property<LineChartView, Float> CLICKED_STAMP_ALPHA = new Property<LineChartView, Float>(float.class, "clickedStampAlpha") {
+        @Override public Float get(LineChartView object) {
+            return object.clickedStampAlpha;
+        }
+        @Override public void set(LineChartView object, Float value) {
+            object.clickedStampAlpha = value;
+            object.invalidate();
+        }
+    };
 
     public LineChartView(Context context) {
         this(context, null);
@@ -54,10 +77,21 @@ public class LineChartView extends AbsLineChartView {
 
         stampInfoBigDotRadius = Utils.dpToPx(4f, context);
         stampInfoSmallDotRadius = Utils.dpToPx(2f, context);
+
+        // preparing stamp info background
+        this.stampInfoBackground = ContextCompat.getDrawable(getContext(), R.drawable.bg_stamp_info);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+
+        ValueAnimator a = clickedStampAnimator;
+        if (a != null) a.cancel();
     }
 
     public interface OnStampClickListener {
-        void onStampClick(float x, float y, float rawX, float rawY, long xAxis);
+        void onStampClick(LineChartView view, float x, float y, float rawX, float rawY, long timestamp);
     }
 
     public void setOnStampClickListener(OnStampClickListener l) {
@@ -87,8 +121,8 @@ public class LineChartView extends AbsLineChartView {
 
     private void drawClickedTimestamp(Canvas canvas) {
         LineChartAdapter adapter = getAdapter();
-        if (adapter != null && clickedStamp) {
-            long xAxis = clickedXAxis;
+        if (adapter != null && wasClickedStamp) {
+            long xAxis = clickedStamp;
             float xPosition = clickedXPosition;
             float x = getXCoor(xPosition);
             stampInfoPaint.setAlpha(255);
@@ -113,6 +147,7 @@ public class LineChartView extends AbsLineChartView {
                 }
 
                 if (needToDraw) {
+                    // drawing dots
                     stampInfoPaint.setStyle(Paint.Style.FILL);
                     stampInfoPaint.setColor(chart.getColor());
                     stampInfoPaint.setAlpha((int) (alpha * 255));
@@ -120,11 +155,22 @@ public class LineChartView extends AbsLineChartView {
                     long value = chart.getValueAt(index);
                     float y = getYCoor(value);
                     canvas.drawCircle(x, y, stampInfoBigDotRadius, stampInfoPaint);
-                    stampInfoPaint.setColor(Color.WHITE);
+                    stampInfoPaint.setColor(getXAxisColor());
                     stampInfoPaint.setAlpha((int) (alpha * 255));
                     canvas.drawCircle(x, y, stampInfoSmallDotRadius, stampInfoPaint);
                 }
             }
+
+//            // drawing info window
+//            final int y = getPaddingTop();
+//            final int xm = 10;
+//            final int windowW = 100;
+//            final int windowH = 100;
+//            Drawable stampInfoBackground = this.stampInfoBackground;
+//            if (stampInfoBackground != null) { // this condition must always be met
+//                stampInfoBackground.setBounds((int) (x + xm), y, (int) (x + xm + windowW), y + windowH);
+//                stampInfoBackground.draw(canvas);
+//            }
         }
     }
 
@@ -136,7 +182,7 @@ public class LineChartView extends AbsLineChartView {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         int action = event.getAction();
-        //clickedStamp = false;
+        //wasClickedStamp = false;
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
                 lastTouchedDownX = event.getX();
@@ -173,11 +219,12 @@ public class LineChartView extends AbsLineChartView {
             //this.clickedXPosition = adapter.getClosestTimestampPosition(xPosition);
             // looking for the closest X axis stamp
             long closestTimestamp = adapter.getClosestTimestamp(xPosition);
-            this.clickedXAxis = closestTimestamp;
+            this.clickedStamp = closestTimestamp;
             this.clickedXPosition = adapter.getTimestampRelPosition(closestTimestamp);
-            //dispatchClicked(x, y, rawX, rawY, closestXAxis);
+            dispatchClicked(x, y, rawX, rawY, clickedStamp);
 
-            this.clickedStamp = true;
+            // this view should know that a stamp was clicked
+            this.wasClickedStamp = true;
             invalidate();
         }
     }
@@ -185,13 +232,24 @@ public class LineChartView extends AbsLineChartView {
     private void dispatchClicked(float x, float y, float rawX, float rawY, long xAxis) {
         OnStampClickListener l = this.onStampClickListener;
         if (l != null) {
-            l.onStampClick(x, y, rawX, rawY, xAxis);
+            l.onStampClick(this, x, y, rawX, rawY, xAxis);
         }
+    }
+
+    private void fadeInClickedStamp() {
+        ValueAnimator a = clickedStampAnimator;
+        if (a != null) a.cancel();
     }
 
     @Override
     public void setAdapter(LineChartAdapter adapter) {
-        clickedStamp = false;
+        wasClickedStamp = false;
         super.setAdapter(adapter);
+    }
+
+    public void clearClickedStamp() {
+        // apply fade in to clicked timestamp here
+        wasClickedStamp = false;
+        invalidate();
     }
 }

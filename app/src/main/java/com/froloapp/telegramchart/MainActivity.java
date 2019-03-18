@@ -2,6 +2,7 @@ package com.froloapp.telegramchart;
 
 import android.content.res.AssetManager;
 import android.content.res.ColorStateList;
+import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -10,6 +11,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.AppCompatCheckBox;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,7 +21,9 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.froloapp.telegramchart.widget.Utils;
@@ -28,6 +33,8 @@ import com.froloapp.telegramchart.widget.linechartview.LineChartSlider;
 import com.froloapp.telegramchart.widget.linechartview.LineChartView;
 
 import java.io.InputStream;
+import java.util.Calendar;
+
 
 public class MainActivity extends AppCompatActivity
         implements LineChartSlider.OnScrollListener, LineChartView.OnStampClickListener {
@@ -36,6 +43,8 @@ public class MainActivity extends AppCompatActivity
     private LineChartView chartView;
     private LineChartSlider chartSlider;
     private LinearLayout layoutCheckboxes;
+
+    private LineChartAdapter adapter;
 
     // hold task to cancel if needed
     private JsonParserTask jsonParserTask;
@@ -160,6 +169,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initChart(LineChartAdapter adapter) {
+        this.adapter = adapter;
+
         initCheckboxes(adapter);
 
         final float startXPosition = 0.0f;
@@ -180,15 +191,53 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onStampClick(float x, float y, float rawX, float rawY, long xAxis) {
-//            final View v = LayoutInflater.from(getContext()).inflate(R.layout.dialog_stamp_info, null, false);
-//            ((TextView) v.findViewById(R.id.textStamp)).setText(String.valueOf(closestXAxis));
-//            final PopupWindow popUp = new PopupWindow(v, 100, 100);
-//            Rect location = Utils.getViewLocation(this);
-//            popUp.setTouchable(true);
-//            popUp.setFocusable(true);
-//            popUp.setOutsideTouchable(true);
-//            popUp.showAtLocation(this, Gravity.END, -(int) x, +(int) y);
+    public void onStampClick(final LineChartView view, float x, float y, float rawX, float rawY, long timestamp) {
+        final View v = getLayoutInflater().inflate(R.layout.dialog_stamp_info, null, false);
+        int index = adapter.getTimestampIndex(timestamp);
+
+        Calendar c = Calendar.getInstance();
+        c.setTimeInMillis(timestamp);
+        int month = c.get(Calendar.MONTH);
+        int dayOfMonth = c.get(Calendar.DAY_OF_MONTH);
+        int dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
+        String title = Utils.getDayOfWeekString(dayOfWeek) + ", " + Utils.getMonthString(month) + ' ' + dayOfMonth;
+        ((TextView) v.findViewById(R.id.textStamp)).setText(title);
+
+        LinearLayout layoutValues = v.findViewById(R.id.layoutValues);
+        for (int i = 0; i < adapter.getLineCount(); i++) {
+            Line line = adapter.getLineAt(i);
+            if (adapter.isLineEnabled(line)) {
+                final int hp = (int) Utils.dpToPx(2f, this);
+                final int vp = (int) Utils.dpToPx(2f, this);
+                final String text = line.getName() + "\n" + line.getValueAt(index);
+                TextView textView = new TextView(this);
+                textView.setTextColor(line.getColor());
+                textView.setText(text);
+                textView.setPadding(hp, vp, hp, vp);
+                layoutValues.addView(textView);
+            }
+        }
+
+        final int w = ViewGroup.LayoutParams.WRAP_CONTENT;
+        final int h = ViewGroup.LayoutParams.WRAP_CONTENT;
+        final PopupWindow popUp = new PopupWindow(v, w, h);
+        Rect location = Utils.getViewLocation(chartView);
+        if (location == null) {
+            // early return. Shouldn't happen
+            return;
+        }
+        popUp.setTouchable(true);
+        popUp.setFocusable(true);
+        popUp.setOutsideTouchable(true);
+        popUp.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override public void onDismiss() {
+                view.clearClickedStamp();
+            }
+        });
+
+        final int locX = location.left + (int) x + 15; // + 15 to make a margin between x axis bar and dialog
+        final int locY = location.top;
+        popUp.showAtLocation(chartView, Gravity.TOP | Gravity.LEFT, locX, locY);
     }
 
     @Override
