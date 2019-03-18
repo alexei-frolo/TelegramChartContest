@@ -91,7 +91,7 @@ public class LineChartView extends AbsLineChartView {
     }
 
     public interface OnStampClickListener {
-        void onStampClick(LineChartView view, float x, float y, float rawX, float rawY, long timestamp);
+        void onStampClick(LineChartView view, long timestamp, float timestampX);
     }
 
     public void setOnStampClickListener(OnStampClickListener l) {
@@ -221,7 +221,8 @@ public class LineChartView extends AbsLineChartView {
             long closestTimestamp = adapter.getClosestTimestamp(xPosition);
             this.clickedStamp = closestTimestamp;
             this.clickedXPosition = adapter.getTimestampRelPosition(closestTimestamp);
-            dispatchClicked(x, y, rawX, rawY, clickedStamp);
+            float timestampX = getXCoor(clickedXPosition);
+            dispatchClicked(clickedStamp, timestampX);
 
             // this view should know that a stamp was clicked
             this.wasClickedStamp = true;
@@ -229,10 +230,10 @@ public class LineChartView extends AbsLineChartView {
         }
     }
 
-    private void dispatchClicked(float x, float y, float rawX, float rawY, long xAxis) {
+    private void dispatchClicked(long timestamp, float timestampX) {
         OnStampClickListener l = this.onStampClickListener;
         if (l != null) {
-            l.onStampClick(this, x, y, rawX, rawY, xAxis);
+            l.onStampClick(this, timestamp, timestampX);
         }
     }
 

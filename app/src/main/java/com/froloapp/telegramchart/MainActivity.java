@@ -191,7 +191,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onStampClick(final LineChartView view, float x, float y, float rawX, float rawY, long timestamp) {
+    public void onStampClick(final LineChartView view, long timestamp, float timestampX) {
         final View v = getLayoutInflater().inflate(R.layout.dialog_stamp_info, null, false);
         int index = adapter.getTimestampIndex(timestamp);
 
@@ -235,7 +235,9 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        final int locX = location.left + (int) x + 15; // + 15 to make a margin between x axis bar and dialog
+        final int locX = location.left
+                + (int) timestampX
+                + 15; // + 15 to make a margin between x axis bar and dialog
         final int locY = location.top;
         popUp.showAtLocation(chartView, Gravity.TOP | Gravity.LEFT, locX, locY);
     }
