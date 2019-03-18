@@ -22,21 +22,10 @@
             <corners android:radius="2dp" />
         </shape>
     </item>
-    <!--<item>-->
-        <!--<shape>-->
-            <!--<padding-->
-                <!--android:bottom="1px"-->
-                <!--android:left="1px"-->
-                <!--android:right="1px"-->
-                <!--android:top="1px" />-->
-            <!--<solid android:color="#3f000000" />-->
-            <!--<corners android:radius="2dp" />-->
-        <!--</shape>-->
-    <!--</item>-->
 
     <item>
         <shape>
-            <solid android:color="@color/white" />
+            <solid android:color="@color/night_dark" />
             <corners android:radius="2dp" />
         </shape>
     </item>

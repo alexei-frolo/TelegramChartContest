@@ -64,9 +64,12 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // first check if night mode enabled
-//        PrefManager manager = PrefManager.getInstance(this);
-//        boolean nightModeEnabled = manager.isNightModeEnabled();
-//        applyDayNightMode(nightModeEnabled);
+        PrefManager manager = PrefManager.getInstance(this);
+        boolean nightModeEnabled = manager.isNightModeEnabled();
+        @AppCompatDelegate.NightMode int mode = nightModeEnabled ?
+                AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO;
+        AppCompatDelegate delegate = getDelegate();
+        delegate.setLocalNightMode(mode);
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
