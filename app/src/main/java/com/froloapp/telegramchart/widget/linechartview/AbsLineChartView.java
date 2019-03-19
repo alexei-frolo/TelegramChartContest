@@ -76,6 +76,8 @@ public class AbsLineChartView extends View implements LineChartUI {
     /* *********************************
      *** X AXIS PROPERTIES INTERFACE ***
      **********************************/
+    private final int xAxisStampMaxCount = 6;
+    private final int xAxisStampMinCount = 4;
     private int xAxisStampCount;
     private int xAxisStepCount; // stamp are drawn through this step
     private int xAxisColor;
@@ -191,7 +193,6 @@ public class AbsLineChartView extends View implements LineChartUI {
             TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.AbsLineChartView, 0, 0);
             chartLineWidth = typedArray.getDimension(R.styleable.AbsLineChartView_chartStrokeWidth, Utils.dpToPx(DEFAULT_CHART_LINE_WIDTH_IN_DP, context));
             axisStrokeWidth = typedArray.getDimension(R.styleable.AbsLineChartView_axisStrokeWidth, Utils.dpToPx(DEFAULT_AXIS_LINE_WIDTH_IN_DP, context));
-            xAxisStampCount = typedArray.getColor(R.styleable.AbsLineChartView_xAxisStampCount, DEFAULT_X_AXIS_STAMP_COUNT);
             yAxisStampCount = typedArray.getInteger(R.styleable.AbsLineChartView_yAxisStampCount, DEFAULT_Y_AXIS_BAR_COUNT);
             xAxisColor = typedArray.getColor(R.styleable.AbsLineChartView_xAxisColor, Color.LTGRAY);
             xAxisTextColor = typedArray.getColor(R.styleable.AbsLineChartView_xAxisTextColor, Color.LTGRAY);
@@ -201,7 +202,6 @@ public class AbsLineChartView extends View implements LineChartUI {
         } else {
             chartLineWidth = Utils.dpToPx(DEFAULT_CHART_LINE_WIDTH_IN_DP, context);
             axisStrokeWidth = Utils.dpToPx(DEFAULT_AXIS_LINE_WIDTH_IN_DP, context);
-            xAxisStampCount = DEFAULT_X_AXIS_STAMP_COUNT;
             yAxisStampCount = DEFAULT_Y_AXIS_BAR_COUNT;
             xAxisColor = Color.LTGRAY;
             xAxisTextColor = Color.LTGRAY;
@@ -225,7 +225,7 @@ public class AbsLineChartView extends View implements LineChartUI {
         yAxisTextPaint.setColor(yAxisTextColor);
 
         // x axis
-        xAxisStampCount = 5;
+        xAxisStampCount = 4;
         xAxisTextPaint.setStyle(Paint.Style.FILL);
         xAxisTextPaint.setTextSize(textSize);
         xAxisTextPaint.setColor(xAxisTextColor);
@@ -311,17 +311,31 @@ public class AbsLineChartView extends View implements LineChartUI {
             minYValue = 0f;
             maxYValue = 0f;
         }
+
+        xAxisStepCount = 1;
     }
 
     private void checkIfXAxisStepCountChanged() {
         LineChartAdapter adapter = this.adapter;
         if (adapter == null) return;
 
-        float timestampCountInRange = adapter.getTimestampCount() * (stopXPercentage - startXPercentage);
-        int newXAxisStepCount = (int) (timestampCountInRange / xAxisStampCount) + 1;
-        if (xAxisStepCount != newXAxisStepCount) {
+        float timestampCountInRange = adapter.getTimestampCount() * (stopXPercentage - startXPercentage) / xAxisStepCount + 1;
+        //int newXAxisStepCount = (int) (timestampCountInRange / xAxisStampCount) + 1;
+        if (timestampCountInRange > xAxisStampMaxCount || timestampCountInRange < xAxisStampMinCount) {
             phantomXAxisStepCount = xAxisStepCount != 0 ? xAxisStepCount : 1; // do not allow it to be zero
-            xAxisStepCount = newXAxisStepCount != 0 ? newXAxisStepCount : 1; // do not allow it to be zero
+
+            while (timestampCountInRange > xAxisStampMinCount) {
+                xAxisStepCount *= 2;
+                timestampCountInRange = adapter.getTimestampCount() * (stopXPercentage - startXPercentage) / xAxisStepCount + 1;
+            }
+            while (timestampCountInRange < xAxisStampMinCount) {
+                xAxisStepCount /= 2;
+                if (xAxisStepCount < 1) {
+                    xAxisStepCount = 1; // do not let it be 0 or less then 0
+                    break;
+                }
+                timestampCountInRange = adapter.getTimestampCount() * (stopXPercentage - startXPercentage) / xAxisStepCount + 1;
+            }
 
             ValueAnimator oldAnimator = xAxisAnimator;
             if (oldAnimator != null) {
