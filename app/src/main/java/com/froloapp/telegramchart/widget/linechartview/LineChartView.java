@@ -6,8 +6,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.drawable.Drawable;
-import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Property;
 import android.view.MotionEvent;
@@ -38,7 +36,6 @@ public class LineChartView extends AbsLineChartView {
     private long clickedStamp;
     private float clickedXPosition;
     private float clickedStampAlpha;
-    private Drawable stampInfoBackground;
     private OnStampClickListener onStampClickListener;
     private ValueAnimator clickedStampAnimator;
     private final Interpolator clickedStampInterpolator = new AccelerateDecelerateInterpolator();
@@ -84,9 +81,6 @@ public class LineChartView extends AbsLineChartView {
 
         stampInfoBigDotRadius = Utils.dpToPx(4f, context);
         stampInfoSmallDotRadius = Utils.dpToPx(2f, context);
-
-        // preparing stamp info background
-        this.stampInfoBackground = ContextCompat.getDrawable(getContext(), R.drawable.bg_stamp_info);
     }
 
     @Override
