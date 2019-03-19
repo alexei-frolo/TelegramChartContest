@@ -308,7 +308,8 @@ public class AbsLineChartView extends View implements LineChartUI {
 
         // update important values here
         if (drawFooter()) {
-            xAxisTextPaint.getTextBounds("|", 0, 1, buffTextBounds);
+            String test = "Mar 1.";
+            xAxisTextPaint.getTextBounds(test, 0, test.length(), buffTextBounds);
             footerHeight = buffTextBounds.height() + 5; // + 5 to make a margin between stamps and the first y bar
         } else {
             footerHeight = 0;
@@ -494,7 +495,7 @@ public class AbsLineChartView extends View implements LineChartUI {
             while (timestampIndex < timestampCount) {
                 String text = adapter.getXStampTextAt(timestampIndex);
                 float x = getXCoor(timestampPosX);
-                xAxisTextPaint.getTextBounds(text, 0, text.length() - 1, buffTextBounds);
+                //xAxisTextPaint.getTextBounds(text, 0, text.length() - 1, buffTextBounds);
                 canvas.drawText(text, x - buffTextBounds.width() / 2f, y, xAxisTextPaint);
                 if (timestampPosX > stopXPercentage) {
                     break;
@@ -513,7 +514,7 @@ public class AbsLineChartView extends View implements LineChartUI {
         while (timestampIndex < timestampCount) {
             String text = adapter.getXStampTextAt(timestampIndex);
             float x = getXCoor(timestampPosX);
-            xAxisTextPaint.getTextBounds(text, 0, text.length() - 1, buffTextBounds);
+            //xAxisTextPaint.getTextBounds(text, 0, text.length() - 1, buffTextBounds);
             canvas.drawText(text, x - buffTextBounds.width() / 2f, y, xAxisTextPaint);
 
             if (timestampPosX > stopXPercentage) {
