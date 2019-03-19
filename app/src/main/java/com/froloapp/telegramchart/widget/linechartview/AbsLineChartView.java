@@ -32,7 +32,8 @@ public class AbsLineChartView extends View implements LineChartUI {
     private static final int DEFAULT_WIDTH_IN_DP = 200;
     private static final int DEFAULT_HEIGHT_IN_DP = 100;
     private static final int DEFAULT_TEXT_HEIGHT_IN_SP = 12;
-    private static final long ANIM_DURATION = 180L; // I think 180 ms is the best duration
+    private static final long Y_AXIS_ANIM_DURATION = 180L;
+    private static final long X_AXIS_ANIM_DURATION = 300L;
 
     private static final int DEFAULT_X_AXIS_STAMP_COUNT = 5;
     private static final int DEFAULT_Y_AXIS_BAR_COUNT = 5;
@@ -365,7 +366,7 @@ public class AbsLineChartView extends View implements LineChartUI {
 
             PropertyValuesHolder h = PropertyValuesHolder.ofFloat(X_AXIS_ALPHA, 0.1f, 1f);
             ObjectAnimator newAnimator = ObjectAnimator.ofPropertyValuesHolder(this, h);
-            newAnimator.setDuration(ANIM_DURATION);
+            newAnimator.setDuration(X_AXIS_ANIM_DURATION);
             newAnimator.setInterpolator(xValueInterpolator);
             newAnimator.addListener(xAxisAnimListener);
             xAxisAnimator = newAnimator;
@@ -405,7 +406,7 @@ public class AbsLineChartView extends View implements LineChartUI {
 
             ObjectAnimator newAnimator = ObjectAnimator.ofPropertyValuesHolder(this, h1, h2, h3);
             newAnimator.setInterpolator(yValueInterpolator);
-            newAnimator.setDuration(ANIM_DURATION);
+            newAnimator.setDuration(Y_AXIS_ANIM_DURATION);
             newAnimator.addListener(yAxisAnimListener);
             yAxisAnimator = newAnimator;
             newAnimator.start();
@@ -421,7 +422,7 @@ public class AbsLineChartView extends View implements LineChartUI {
 
         PropertyValuesHolder holder = PropertyValuesHolder.ofFloat(FADED_CHART_ALPHA, 0f, 1f);
         ObjectAnimator animator = ObjectAnimator.ofPropertyValuesHolder(this, holder);
-        animator.setDuration(ANIM_DURATION);
+        animator.setDuration(Y_AXIS_ANIM_DURATION);
         animator.setInterpolator(yValueInterpolator);
         animator.addListener(new Animator.AnimatorListener() {
             @Override public void onAnimationStart(Animator animation) {
@@ -452,7 +453,7 @@ public class AbsLineChartView extends View implements LineChartUI {
 
         PropertyValuesHolder holder = PropertyValuesHolder.ofFloat(FADED_CHART_ALPHA, 1f, 0f);
         ObjectAnimator animator = ObjectAnimator.ofPropertyValuesHolder(this, holder);
-        animator.setDuration(ANIM_DURATION);
+        animator.setDuration(Y_AXIS_ANIM_DURATION);
         animator.setInterpolator(yValueInterpolator);
         animator.addListener(new Animator.AnimatorListener() {
             @Override public void onAnimationStart(Animator animation) {
