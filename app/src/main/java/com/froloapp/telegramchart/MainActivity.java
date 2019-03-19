@@ -2,11 +2,12 @@ package com.froloapp.telegramchart;
 
 import android.content.res.AssetManager;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.widget.CompoundButtonCompat;
+import android.support.v4.widget.TintableCompoundButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.AppCompatCheckBox;
@@ -62,14 +63,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // first check if night mode enabled
-        PrefManager manager = PrefManager.getInstance(this);
-        boolean nightModeEnabled = manager.isNightModeEnabled();
-        @AppCompatDelegate.NightMode int mode = nightModeEnabled ?
-                AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO;
-        AppCompatDelegate delegate = getDelegate();
-        delegate.setLocalNightMode(mode);
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         spinnerChartSelector = findViewById(R.id.spinnerChartSelector);
@@ -139,10 +132,10 @@ public class MainActivity extends AppCompatActivity
             final Line line = adapter.getLineAt(i);
             final int color = line.getColor();
             AppCompatCheckBox checkBox = new AppCompatCheckBox(this);
-            if (Build.VERSION.SDK_INT < 21) {
-                CompoundButtonCompat.setButtonTintList(checkBox, ColorStateList.valueOf(color));
-            } else {
+            if (Build.VERSION.SDK_INT >= 21) {
                 checkBox.setButtonTintList(ColorStateList.valueOf(color));
+            } else {
+                ((TintableCompoundButton) checkBox).setSupportButtonTintList(ColorStateList.valueOf(color));
             }
             checkBox.setText(line.getName());
             checkBox.setChecked(adapter.isLineEnabled(line));
@@ -264,11 +257,22 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private boolean isNightModeEnabled() {
+        int nightModeFlags = getResources().getConfiguration().uiMode &
+                        Configuration.UI_MODE_NIGHT_MASK;
+        switch (nightModeFlags) {
+            case Configuration.UI_MODE_NIGHT_YES: {
+                return true;
+            }
+            default: {
+                return false;
+            }
+        }
+    }
+
     private void switchDayNightMode() {
         log("Switching DayNight mode");
-        PrefManager manager = PrefManager.getInstance(this);
-        boolean nightModeEnabled = manager.isNightModeEnabled();
-        manager.setNightModeEnabled(!nightModeEnabled);
+        boolean nightModeEnabled = isNightModeEnabled();
         applyDayNightMode(!nightModeEnabled);
     }
 
