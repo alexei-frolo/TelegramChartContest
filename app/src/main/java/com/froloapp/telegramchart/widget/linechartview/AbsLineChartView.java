@@ -47,7 +47,7 @@ public class AbsLineChartView extends View implements LineChartUI {
     //private final Paint xAxisPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint xAxisTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Path bufferPath = new Path(); // buffer path to avoid allocating to many paths for multiple charts
-    private final Rect stampTextBounds = new Rect(); // here we store bounds for stamp text height
+    private final Rect buffTextBounds = new Rect(); // here we store bounds for stamp text height
     private float axisStrokeWidth;
     private int footerHeight; // for x axis stamps
 
@@ -304,8 +304,8 @@ public class AbsLineChartView extends View implements LineChartUI {
 
         // update important values here
         if (drawFooter()) {
-            xAxisTextPaint.getTextBounds("|", 0, 1, stampTextBounds);
-            footerHeight = stampTextBounds.height() + 5; // + 5 to make a margin between stamps and the first y bar
+            xAxisTextPaint.getTextBounds("|", 0, 1, buffTextBounds);
+            footerHeight = buffTextBounds.height() + 5; // + 5 to make a margin between stamps and the first y bar
         } else {
             footerHeight = 0;
         }
@@ -493,7 +493,8 @@ public class AbsLineChartView extends View implements LineChartUI {
             while (timestampIndex < timestampCount) {
                 String text = adapter.getXStampTextAt(timestampIndex);
                 float x = getXCoor(timestampPosX);
-                canvas.drawText(text, x, y, xAxisTextPaint);
+                xAxisTextPaint.getTextBounds(text, 0, text.length() - 1, buffTextBounds);
+                canvas.drawText(text, x - buffTextBounds.width() / 2f, y, xAxisTextPaint);
                 if (timestampPosX > stopXPercentage) {
                     break;
                 }
@@ -511,7 +512,8 @@ public class AbsLineChartView extends View implements LineChartUI {
         while (timestampIndex < timestampCount) {
             String text = adapter.getXStampTextAt(timestampIndex);
             float x = getXCoor(timestampPosX);
-            canvas.drawText(text, x, y, xAxisTextPaint);
+            xAxisTextPaint.getTextBounds(text, 0, text.length() - 1, buffTextBounds);
+            canvas.drawText(text, x - buffTextBounds.width() / 2f, y, xAxisTextPaint);
 
             if (timestampPosX > stopXPercentage) {
                 break;
