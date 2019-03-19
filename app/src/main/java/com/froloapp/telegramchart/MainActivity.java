@@ -194,6 +194,12 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onStampClick(final LineChartView view, long timestamp, float timestampX) {
+        final Rect location = Utils.getViewLocation(chartView);
+        if (location == null) {
+            // early return. Shouldn't happen
+            return;
+        }
+
         final View v = getLayoutInflater().inflate(R.layout.dialog_stamp_info, null, false);
         int index = adapter.getTimestampIndex(timestamp);
 
@@ -223,11 +229,8 @@ public class MainActivity extends AppCompatActivity
         final int w = ViewGroup.LayoutParams.WRAP_CONTENT;
         final int h = ViewGroup.LayoutParams.WRAP_CONTENT;
         final PopupWindow popUp = new PopupWindow(v, w, h);
-        Rect location = Utils.getViewLocation(chartView);
-        if (location == null) {
-            // early return. Shouldn't happen
-            return;
-        }
+
+        popUp.setBackgroundDrawable(getResources().getDrawable(R.drawable.bg_stamp_info));
         popUp.setTouchable(false);
         popUp.setFocusable(true);
         popUp.setOutsideTouchable(true);
