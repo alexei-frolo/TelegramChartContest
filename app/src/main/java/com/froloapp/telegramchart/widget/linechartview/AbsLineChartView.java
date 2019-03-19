@@ -78,15 +78,15 @@ public class AbsLineChartView extends View implements LineChartUI {
     /* *********************************
      *** X AXIS PROPERTIES INTERFACE ***
      **********************************/
-    private final int xAxisStampMaxCount = 7;
-    private final int xAxisStampMinCount = 5;
+    // IMPORTANT: xAxisStampMaxCount / xAxisStampMinCount = 2 ALWAYS!!!
+    private final float xAxisStampMaxCount = 6;
+    private final float xAxisStampMinCount = 3;
     private int xAxisStampIndexStepCount; // stamp are drawn through this step
     private int xAxisColor;
     private int xAxisTextColor;
     private float xAxisAlpha;
-    private int phantomXAxisStepCount; // phantom stamp are drawn through this step
+    private int phantomXAxisStampIndexStepCount; // phantom stamp are drawn through this step
     private boolean drawXPhantoms;
-    private TypeOfFading phantomXTypeOfFading = TypeOfFading.NONE;
 
     // Animators
     private ValueAnimator yAxisAnimator;
@@ -327,33 +327,31 @@ public class AbsLineChartView extends View implements LineChartUI {
         if (adapter == null) return;
 
         boolean changed = false;
-        float timestampCountInRange = adapter.getTimestampCount() * (stopXPercentage - startXPercentage) / xAxisStampIndexStepCount + 1;
+        float timestampCountInRange = adapter.getTimestampCount() * (stopXPercentage - startXPercentage) / xAxisStampIndexStepCount;
+        log("Timestamp count in current range: " + timestampCountInRange);
         if (timestampCountInRange > xAxisStampMaxCount) {
-            phantomXAxisStepCount = xAxisStampIndexStepCount > 0 ? xAxisStampIndexStepCount : 1; // do not allow it to be zero
+            phantomXAxisStampIndexStepCount = xAxisStampIndexStepCount > 0 ? xAxisStampIndexStepCount : 1;
             while (timestampCountInRange > xAxisStampMaxCount) {
                 xAxisStampIndexStepCount *= 2;
-                timestampCountInRange = adapter.getTimestampCount() * (stopXPercentage - startXPercentage) / xAxisStampIndexStepCount + 1;
+                timestampCountInRange = adapter.getTimestampCount() * (stopXPercentage - startXPercentage) / xAxisStampIndexStepCount;
             }
-            phantomXTypeOfFading = TypeOfFading.FADE_IN;
             changed = true;
-        }
-
-        if (timestampCountInRange < xAxisStampMinCount) {
+        } else if (timestampCountInRange < xAxisStampMinCount) {
             while (timestampCountInRange < xAxisStampMinCount) {
-                phantomXAxisStepCount = xAxisStampIndexStepCount > 0 ? xAxisStampIndexStepCount : 1; // do not allow it to be zero
+                phantomXAxisStampIndexStepCount = xAxisStampIndexStepCount > 0 ? xAxisStampIndexStepCount : 1;
                 xAxisStampIndexStepCount /= 2;
                 if (xAxisStampIndexStepCount < 1) {
-                    xAxisStampIndexStepCount = 1; // do not let it be 0 or less then 0
+                    xAxisStampIndexStepCount = 1;
                     break;
                 }
-                timestampCountInRange = adapter.getTimestampCount() * (stopXPercentage - startXPercentage) / xAxisStampIndexStepCount + 1;
+                timestampCountInRange = adapter.getTimestampCount() * (stopXPercentage - startXPercentage) / xAxisStampIndexStepCount;
             }
-            phantomXTypeOfFading = TypeOfFading.FADE_OUT;
             changed = true;
         }
 
         if (changed) {
-            log("X axis step count changed. Curr step count: " + xAxisStampIndexStepCount + ", phantom step count: " + phantomXAxisStepCount);
+            log("X axis step count changed. Curr index step count: " + xAxisStampIndexStepCount
+                    + ", phantom index step count: " + phantomXAxisStampIndexStepCount);
 
             ValueAnimator oldAnimator = xAxisAnimator;
             if (oldAnimator != null) {
@@ -489,7 +487,7 @@ public class AbsLineChartView extends View implements LineChartUI {
         if (drawXPhantoms) {
             xAxisTextPaint.setAlpha((int) ((1 - xAxisAlpha) * 255));
             int index = adapter.getLeftClosestTimestampIndex(startXPercentage);
-            int timestampIndex = (index / phantomXAxisStepCount) * phantomXAxisStepCount; // normalize
+            int timestampIndex = (index / phantomXAxisStampIndexStepCount) * phantomXAxisStampIndexStepCount; // normalize
             float timestampPosX = adapter.getTimestampRelPositionAt(timestampIndex);
 
             while (timestampIndex < timestampCount) {
@@ -499,8 +497,8 @@ public class AbsLineChartView extends View implements LineChartUI {
                 if (timestampPosX > stopXPercentage) {
                     break;
                 }
-                timestampIndex += phantomXAxisStepCount;
-                timestampPosX += phantomXAxisStepCount * avTimestampPosXStep;
+                timestampIndex += phantomXAxisStampIndexStepCount;
+                timestampPosX += phantomXAxisStampIndexStepCount * avTimestampPosXStep;
             }
         }
 
