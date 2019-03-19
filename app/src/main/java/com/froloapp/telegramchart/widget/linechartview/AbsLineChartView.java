@@ -32,10 +32,9 @@ public class AbsLineChartView extends View implements LineChartUI {
     private static final int DEFAULT_WIDTH_IN_DP = 200;
     private static final int DEFAULT_HEIGHT_IN_DP = 100;
     private static final int DEFAULT_TEXT_HEIGHT_IN_SP = 12;
-    private static final long Y_AXIS_ANIM_DURATION = 180L;
-    private static final long X_AXIS_ANIM_DURATION = 300L;
+    private static final long Y_AXIS_ANIM_DURATION = 400L;
+    private static final long X_AXIS_ANIM_DURATION = 250L;
 
-    private static final int DEFAULT_X_AXIS_STAMP_COUNT = 5;
     private static final int DEFAULT_Y_AXIS_BAR_COUNT = 5;
 
     private static final float DEFAULT_CHART_LINE_WIDTH_IN_DP = 1f;
@@ -333,7 +332,6 @@ public class AbsLineChartView extends View implements LineChartUI {
 
         boolean changed = false;
         float timestampCountInRange = adapter.getTimestampCount() * (stopXPercentage - startXPercentage) / xAxisStampIndexStepCount;
-        log("Timestamp count in current range: " + timestampCountInRange);
         if (timestampCountInRange > xAxisStampMaxCount) {
             phantomXAxisStampIndexStepCount = xAxisStampIndexStepCount > 0 ? xAxisStampIndexStepCount : 1;
             while (timestampCountInRange > xAxisStampMaxCount) {
@@ -355,9 +353,6 @@ public class AbsLineChartView extends View implements LineChartUI {
         }
 
         if (changed) {
-            log("X axis step count changed. Curr index step count: " + xAxisStampIndexStepCount
-                    + ", phantom index step count: " + phantomXAxisStampIndexStepCount);
-
             ValueAnimator oldAnimator = xAxisAnimator;
             if (oldAnimator != null) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) oldAnimator.pause();
@@ -382,29 +377,30 @@ public class AbsLineChartView extends View implements LineChartUI {
         LineChartAdapter adapter = this.adapter;
         if (adapter == null) return;
 
-        int minValue = adapter.getLocalMinimum(startXPercentage, stopXPercentage);
-        int maxValue = adapter.getLocalMaximum(startXPercentage, stopXPercentage);
-        float newRange = maxValue - minValue;
+        final int newMinValue = adapter.getLocalMinimum(startXPercentage, stopXPercentage);
+        final int newMaxValue = adapter.getLocalMaximum(startXPercentage, stopXPercentage);
+        float newRange = newMaxValue - newMinValue;
 
         this.phantomYBarStartValue = this.yBarStartValue;
         this.phantomYBarStep = this.yBarStep;
 
-        this.yBarStartValue = minValue;
+        this.yBarStartValue = newMinValue;
         this.yBarStep = (int) (newRange / yAxisStampCount);
 
         // check min value
-        if (minValue != this.minYValue || maxValue != this.maxYValue) {
+        if (newMinValue != this.minYValue || newMaxValue != this.maxYValue) {
+            log(String.format("Y axis changed. Curr[minValue=%s, maxValue=%s], New[minValue=%s, maxValue=%s]", minYValue, maxYValue, newMinValue, newMaxValue));
             ValueAnimator oldAnimator = yAxisAnimator;
             if (oldAnimator != null) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) oldAnimator.pause();
                 else oldAnimator.cancel();
             }
 
-            PropertyValuesHolder h1 = PropertyValuesHolder.ofFloat(MIN_Y_VALUE, minValue);
-            PropertyValuesHolder h2 = PropertyValuesHolder.ofFloat(MAX_Y_VALUE, maxValue);
+            PropertyValuesHolder h1 = PropertyValuesHolder.ofFloat(MIN_Y_VALUE, newMinValue);
+            PropertyValuesHolder h2 = PropertyValuesHolder.ofFloat(MAX_Y_VALUE, newMaxValue);
             PropertyValuesHolder h3 = PropertyValuesHolder.ofFloat(Y_AXIS_ALPHA, 0.1f, 1f);
 
-            ObjectAnimator newAnimator = ObjectAnimator.ofPropertyValuesHolder(this, h1, h2, h3);
+            ObjectAnimator newAnimator = ObjectAnimator.ofPropertyValuesHolder(AbsLineChartView.this, h1, h2, h3);
             newAnimator.setInterpolator(yValueInterpolator);
             newAnimator.setDuration(Y_AXIS_ANIM_DURATION);
             newAnimator.addListener(yAxisAnimListener);
