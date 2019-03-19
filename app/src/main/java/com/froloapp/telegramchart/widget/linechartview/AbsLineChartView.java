@@ -265,6 +265,10 @@ public class AbsLineChartView extends View implements LineChartUI {
         return false;
     }
 
+    /*abstract*/ int getFooterHeight() {
+        return footerHeight;
+    }
+
     /*package-private*/ /*nullable*/ LineChartAdapter getAdapter() {
         return adapter;
     }

@@ -115,21 +115,30 @@ public class LineChartView extends AbsLineChartView {
     @Override
     protected void onDraw(Canvas canvas) {
         drawXAxis(canvas);
+        drawClickedTimestampBar(canvas);
         drawYAxis(canvas);
         drawLines(canvas);
-        drawClickedTimestamp(canvas);
+        drawClickedTimestampDots(canvas);
     }
 
-    private void drawClickedTimestamp(Canvas canvas) {
+    private void drawClickedTimestampBar(Canvas canvas) {
         LineChartAdapter adapter = getAdapter();
         if (adapter != null && wasClickedStamp) {
-            long xAxis = clickedStamp;
             float xPosition = clickedXPosition;
             float x = getXCoor(xPosition);
             stampInfoPaint.setAlpha(255);
             stampInfoPaint.setStyle(Paint.Style.STROKE);
             stampInfoPaint.setColor(getXAxisColor());
-            canvas.drawLine(x, getPaddingTop(), x, getMeasuredHeight() - getPaddingBottom(), stampInfoPaint);
+            canvas.drawLine(x, getPaddingTop(), x, getMeasuredHeight() - getPaddingBottom() - getFooterHeight(), stampInfoPaint);
+        }
+    }
+
+    private void drawClickedTimestampDots(Canvas canvas) {
+        LineChartAdapter adapter = getAdapter();
+        if (adapter != null && wasClickedStamp) {
+            long xAxis = clickedStamp;
+            float xPosition = clickedXPosition;
+            float x = getXCoor(xPosition);
 
             Line fadedChart = getFadedChart();
             for (int i = 0; i < adapter.getLineCount(); i++) {
