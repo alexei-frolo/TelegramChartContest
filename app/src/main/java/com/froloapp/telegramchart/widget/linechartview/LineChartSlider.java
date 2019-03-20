@@ -203,12 +203,15 @@ public class LineChartSlider extends AbsLineChartView {
                 xDragPos = x;
                 if (isFrameLeftBorderTouched(x)) {
                     scrollState = SCROLL_STATE_LEFT_BORDER_DRAGGING;
+                    getParent().requestDisallowInterceptTouchEvent(true);
                     return true;
                 } else if (isFrameRightBorderTouched(x)) {
                     scrollState = SCROLL_STATE_RIGHT_BORDER_DRAGGING;
+                    getParent().requestDisallowInterceptTouchEvent(true);
                     return true;
                 } else if (isFrameTouched(x)) {
                     scrollState = SCROLL_STATE_FRAME_DRAGGING;
+                    getParent().requestDisallowInterceptTouchEvent(true);
                     return true;
                 } else return super.onTouchEvent(event);
             }
@@ -255,6 +258,7 @@ public class LineChartSlider extends AbsLineChartView {
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP: {
                 scrollState = SCROLL_STATE_IDLE;
+                getParent().requestDisallowInterceptTouchEvent(false);
                 return true;
             }
         }

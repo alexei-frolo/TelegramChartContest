@@ -257,7 +257,7 @@ public class AbsLineChartView extends View implements LineChartUI {
 
     private void log(String msg) {
         if (BuildConfig.DEBUG) {
-            Log.d("AbsLineChartView", msg);
+            Log.d(this.getClass().getSimpleName(), msg);
         }
     }
 
@@ -324,7 +324,7 @@ public class AbsLineChartView extends View implements LineChartUI {
             maxYValue = 0f;
         }
 
-        xAxisStampIndexStepCount = 1;
+        checkIfXAxisStepCountChanged();
     }
 
     private void checkIfXAxisStepCountChanged() {
@@ -332,6 +332,10 @@ public class AbsLineChartView extends View implements LineChartUI {
         if (adapter == null) return;
 
         boolean changed = false;
+        if (xAxisStampIndexStepCount < 1) {
+            xAxisStampIndexStepCount = 1; // invalidating
+            changed = true;
+        }
         float timestampCountInRange = adapter.getTimestampCount() * (stopXPercentage - startXPercentage) / xAxisStampIndexStepCount;
         if (timestampCountInRange > xAxisStampMaxCount) {
             phantomXAxisStampIndexStepCount = xAxisStampIndexStepCount > 0 ? xAxisStampIndexStepCount : 1;
@@ -390,7 +394,6 @@ public class AbsLineChartView extends View implements LineChartUI {
 
         // check min value
         if (newMinValue != this.minYValue || newMaxValue != this.maxYValue) {
-            log(String.format("Y axis changed. Curr[minValue=%s, maxValue=%s], New[minValue=%s, maxValue=%s]", minYValue, maxYValue, newMinValue, newMaxValue));
             ValueAnimator oldAnimator = yAxisAnimator;
             if (oldAnimator != null) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) oldAnimator.pause();
