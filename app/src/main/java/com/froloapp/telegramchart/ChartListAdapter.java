@@ -94,11 +94,11 @@ class ChartListAdapter extends BaseAdapter {
             final float stopXPosition = 0.3f;
 
             chartView.setOnStampClickListener(this);
-            chartView.setAdapter(adapter);
-            chartView.setXPositions(startXPosition, stopXPosition);
+            chartView.setAdapter(adapter, false);
+            chartView.setXPositions(startXPosition, stopXPosition, false);
 
-            chartSlider.setAdapter(adapter);
-            chartSlider.setXPositions(startXPosition, stopXPosition);
+            chartSlider.setAdapter(adapter, false);
+            chartSlider.setXPositions(startXPosition, stopXPosition, false);
             chartSlider.setOnScrollListener(this);
         }
 
@@ -119,11 +119,11 @@ class ChartListAdapter extends BaseAdapter {
                 checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                         if (isChecked) {
-                            chartView.show(line);
-                            chartSlider.show(line);
+                            chartView.show(line, true);
+                            chartSlider.show(line, true);
                         } else {
-                            chartView.hide(line);
-                            chartSlider.hide(line);
+                            chartView.hide(line, true);
+                            chartSlider.hide(line, true);
                         }
                     }
                 });
@@ -142,7 +142,7 @@ class ChartListAdapter extends BaseAdapter {
 
         @Override
         public void onScroll(LineChartSlider slider, float startStampRel, float endStampRel) {
-            chartView.setXPositions(startStampRel, endStampRel);
+            chartView.setXPositions(startStampRel, endStampRel, true);
         }
 
         @Override

@@ -266,27 +266,15 @@ public class LineChartSlider extends AbsLineChartView {
     }
 
     @Override
-    public void setAdapter(LineChartAdapter adapter) {
-        super.setAdapter(adapter);
-        super.setXPositions(0f, 1f);
+    public void setAdapter(LineChartAdapter adapter, boolean animate) {
+        super.setAdapter(adapter, animate);
+        super.setXPositions(0f, 1f, animate);
     }
 
     @Override
-    public void setStartXPosition(float p) {
-        this.leftBorderXPosition = p;
-        super.setStartXPosition(0f);
-    }
-
-    @Override
-    public void setStopXPosition(float p) {
-        this.rightBorderXPosition = p;
-        super.setStopXPosition(1f);
-    }
-
-    @Override
-    public void setXPositions(float start, float stop) {
+    public void setXPositions(float start, float stop, boolean animate) {
         this.leftBorderXPosition = start;
         this.rightBorderXPosition = stop;
-        super.setXPositions(0f, 1f);
+        super.setXPositions(0f, 1f, animate);
     }
 }

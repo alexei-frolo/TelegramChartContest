@@ -241,9 +241,9 @@ public class LineChartView extends AbsLineChartView {
     }
 
     @Override
-    public void setAdapter(LineChartAdapter adapter) {
+    public void setAdapter(LineChartAdapter adapter, boolean animate) {
         wasClickedStamp = false;
-        super.setAdapter(adapter);
+        super.setAdapter(adapter, animate);
     }
 
     public void clearClickedStamp() {

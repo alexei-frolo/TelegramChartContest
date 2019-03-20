@@ -81,7 +81,7 @@ public class AbsLineChartView extends View implements LineChartUI {
     // IMPORTANT: xAxisStampMaxCount / xAxisStampMinCount = 2 ALWAYS!!!
     private final float xAxisStampMaxCount = 6;
     private final float xAxisStampMinCount = 3;
-    private int xAxisStampIndexStepCount; // stamp are drawn through this step
+    private int xAxisStampIndexStepCount = 5; // stamp are drawn through this step
     private int xAxisColor;
     private int xAxisTextColor;
     private float xAxisAlpha;
@@ -325,10 +325,10 @@ public class AbsLineChartView extends View implements LineChartUI {
             maxYValue = 0f;
         }
 
-        checkIfXAxisStepCountChanged();
+        checkIfXAxisStepCountChanged(false);
     }
 
-    private void checkIfXAxisStepCountChanged() {
+    private void checkIfXAxisStepCountChanged(boolean animate) {
         LineChartAdapter adapter = this.adapter;
         if (adapter == null) return;
 
@@ -365,13 +365,18 @@ public class AbsLineChartView extends View implements LineChartUI {
                 else oldAnimator.cancel();
             }
 
-            PropertyValuesHolder h = PropertyValuesHolder.ofFloat(X_AXIS_ALPHA, 0.1f, 1f);
-            ObjectAnimator newAnimator = ObjectAnimator.ofPropertyValuesHolder(this, h);
-            newAnimator.setDuration(X_AXIS_ANIM_DURATION);
-            newAnimator.setInterpolator(xValueInterpolator);
-            newAnimator.addListener(xAxisAnimListener);
-            xAxisAnimator = newAnimator;
-            newAnimator.start();
+            if (animate) {
+                PropertyValuesHolder h = PropertyValuesHolder.ofFloat(X_AXIS_ALPHA, 0.1f, 1f);
+                ObjectAnimator newAnimator = ObjectAnimator.ofPropertyValuesHolder(this, h);
+                newAnimator.setDuration(X_AXIS_ANIM_DURATION);
+                newAnimator.setInterpolator(xValueInterpolator);
+                newAnimator.addListener(xAxisAnimListener);
+                xAxisAnimator = newAnimator;
+                newAnimator.start();
+            } else {
+                xAxisAlpha = 1f;
+                invalidate();
+            }
         }
     }
 
@@ -379,7 +384,7 @@ public class AbsLineChartView extends View implements LineChartUI {
      * Checks if min or max value on Y axis has changed;
      * If so then it does phantom magic with current Y axis bars;
      */
-    private void checkIfMinOrMaxValueChanged() {
+    private void checkIfMinOrMaxValueChanged(boolean animate) {
         LineChartAdapter adapter = this.adapter;
         if (adapter == null) return;
 
@@ -402,16 +407,23 @@ public class AbsLineChartView extends View implements LineChartUI {
                 else oldAnimator.cancel();
             }
 
-            PropertyValuesHolder h1 = PropertyValuesHolder.ofFloat(MIN_Y_VALUE, newMinValue);
-            PropertyValuesHolder h2 = PropertyValuesHolder.ofFloat(MAX_Y_VALUE, newMaxValue);
-            PropertyValuesHolder h3 = PropertyValuesHolder.ofFloat(Y_AXIS_ALPHA, 0.1f, 1f);
+            if (animate) {
+                PropertyValuesHolder h1 = PropertyValuesHolder.ofFloat(MIN_Y_VALUE, newMinValue);
+                PropertyValuesHolder h2 = PropertyValuesHolder.ofFloat(MAX_Y_VALUE, newMaxValue);
+                PropertyValuesHolder h3 = PropertyValuesHolder.ofFloat(Y_AXIS_ALPHA, 0.1f, 1f);
 
-            ObjectAnimator newAnimator = ObjectAnimator.ofPropertyValuesHolder(AbsLineChartView.this, h1, h2, h3);
-            newAnimator.setInterpolator(yValueInterpolator);
-            newAnimator.setDuration(Y_AXIS_ANIM_DURATION);
-            newAnimator.addListener(yAxisAnimListener);
-            yAxisAnimator = newAnimator;
-            newAnimator.start();
+                ObjectAnimator newAnimator = ObjectAnimator.ofPropertyValuesHolder(AbsLineChartView.this, h1, h2, h3);
+                newAnimator.setInterpolator(yValueInterpolator);
+                newAnimator.setDuration(Y_AXIS_ANIM_DURATION);
+                newAnimator.addListener(yAxisAnimListener);
+                yAxisAnimator = newAnimator;
+                newAnimator.start();
+            } else {
+                minYValue = newMinValue;
+                maxYValue = newMaxValue;
+                yAxisAlpha = 1f;
+                invalidate();
+            }
         }
     }
 
@@ -649,74 +661,44 @@ public class AbsLineChartView extends View implements LineChartUI {
      **********************************/
 
     @Override
-    public void setAdapter(LineChartAdapter adapter) {
+    public void setAdapter(LineChartAdapter adapter, boolean animate) {
         this.adapter = adapter;
-        checkIfXAxisStepCountChanged();
-        checkIfMinOrMaxValueChanged();
+        checkIfXAxisStepCountChanged(animate);
+        checkIfMinOrMaxValueChanged(animate);
         invalidate();
     }
 
     @Override
-    public float getStartXPosition() {
-        return startXPercentage;
-    }
-
-    @Override
-    public float getStopXPosition() {
-        return stopXPercentage;
-    }
-
-    @Override
-    public void setStartXPosition(float p) {
-        if (startXPercentage != p) {
-            this.startXPercentage = p;
-            checkIfXAxisStepCountChanged();
-            checkIfMinOrMaxValueChanged();
-            invalidate();
-        }
-    }
-
-    @Override
-    public void setStopXPosition(float p) {
-        if (stopXPercentage != p) {
-            this.stopXPercentage = p;
-            checkIfXAxisStepCountChanged();
-            checkIfMinOrMaxValueChanged();
-            invalidate();
-        }
-    }
-
-    @Override
-    public void setXPositions(float start, float stop) {
+    public void setXPositions(float start, float stop, boolean animate) {
         if (this.startXPercentage != start || this.stopXPercentage != stop) {
             this.startXPercentage = start;
             this.stopXPercentage = stop;
-            checkIfXAxisStepCountChanged();
-            checkIfMinOrMaxValueChanged();
+            checkIfXAxisStepCountChanged(animate);
+            checkIfMinOrMaxValueChanged(animate);
             invalidate();
         }
     }
 
     @Override
-    public void show(Line chart) {
+    public void show(Line chart, boolean animate) {
         // showing a chart here
         LineChartAdapter adapter = this.adapter;
         if (adapter != null) {
-            adapter.setLineEnabled(chart, true);
-            checkIfMinOrMaxValueChanged();
+            adapter.setLineEnabled(chart, animate);
+            checkIfMinOrMaxValueChanged(animate);
             animateFadedInChart(chart);
             invalidate();
         }
     }
 
     @Override
-    public void hide(Line chart) {
+    public void hide(Line chart, boolean animate) {
         // hiding a chart here
         LineChartAdapter adapter = this.adapter;
         if (adapter != null) {
-            adapter.setLineEnabled(chart, false);
+            adapter.setLineEnabled(chart, animate);
             // if (adapter.hasEnabledLines()) // maybe do not check for new local min and max if adapter has no enabled lines
-            checkIfMinOrMaxValueChanged();
+            checkIfMinOrMaxValueChanged(animate);
             animateFadedOutChart(chart);
             invalidate();
         }
