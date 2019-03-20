@@ -19,9 +19,13 @@ public interface LineChartAdapter {
     float getClosestTimestampPosition(float toXPosition);
     long getClosestTimestamp(float toXPosition);
 
-    int getLocalMinimum(float fromTimestampPosition, float toTimestampPosition);
-    int getLocalMaximum(float fromTimestampPosition, float toTimestampPosition);
+    MinMaxValue getLocalMinMax(float fromTimestampPosition, float toTimestampPosition);
 
     String getYStampText(int value);
     String getXStampTextAt(int index);
+
+    class MinMaxValue {
+        public int min;
+        public int max;
+    }
 }

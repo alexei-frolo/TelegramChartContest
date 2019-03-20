@@ -36,6 +36,8 @@ class SimpleLineChartAdapter implements LineChartAdapter {
     private final List<Integer> localMinimums = new ArrayList<>(); // local minimums at indexes
     private final List<Integer> localMaximums = new ArrayList<>(); // local maximums at indexes
 
+    private final MinMaxValue minMaxValueHolder = new MinMaxValue();
+
     private static class LineHolder {
         final Line data;
         boolean visible;
@@ -225,12 +227,13 @@ class SimpleLineChartAdapter implements LineChartAdapter {
     }
 
     @Override
-    public int getLocalMinimum(float fromXAxisRel, float toXAxisRel) {
+    public MinMaxValue getLocalMinMax(float fromTimestampPosition, float toTimestampPosition) {
         long startTimestamp = timestamps.get(0);
         long stopTimestamp = timestamps.get(timestamps.size() - 1);
-        long fromTimestamp = (long) (startTimestamp + (stopTimestamp - startTimestamp) * fromXAxisRel) - 1;
-        long toTimestamp = (long) (startTimestamp + (stopTimestamp - startTimestamp) * toXAxisRel) + 1;
+        long fromTimestamp = (long) (startTimestamp + (stopTimestamp - startTimestamp) * fromTimestampPosition) - 1;
+        long toTimestamp = (long) (startTimestamp + (stopTimestamp - startTimestamp) * toTimestampPosition) + 1;
         int min = Integer.MAX_VALUE;
+        int max = Integer.MIN_VALUE;
         for (int i = 0; i < timestamps.size(); i++) {
             long timestamp = timestamps.get(i);
             if (timestamp < fromTimestamp) {
@@ -242,39 +245,6 @@ class SimpleLineChartAdapter implements LineChartAdapter {
                         if (localMin < min) {
                             min = localMin;
                         }
-                    }
-                }
-                continue;
-            }
-            if (timestamp > toTimestamp) {
-                int localMin = getMinValueAt(i);
-                if (localMin < min) {
-                    min = localMin;
-                }
-                break;
-            }
-            int localMin = getMinValueAt(i);
-            if (localMin < min) {
-                min = localMin;
-            }
-        }
-        return min;
-    }
-
-    @Override
-    public int getLocalMaximum(float fromXAxisRel, float toXAxisRel) {
-        long startTimestamp = timestamps.get(0);
-        long stopTimestamp = timestamps.get(timestamps.size() - 1);
-        long fromTimestamp = (long) (startTimestamp + (stopTimestamp - startTimestamp) * fromXAxisRel) - 1;
-        long toTimestamp = (long) (startTimestamp + (stopTimestamp - startTimestamp) * toXAxisRel) + 1;
-        int max = Integer.MIN_VALUE;
-        for (int i = 0; i < timestamps.size(); i++) {
-            long timestamp = timestamps.get(i);
-            if (timestamp < fromTimestamp) {
-                if (i < timestamps.size() - 1) {
-                    // check if the next axis is in the bounds
-                    long nextTimestamp = timestamps.get(i + 1);
-                    if (nextTimestamp >= fromTimestamp) {
                         int localMax = getMaxValueAt(i);
                         if (localMax > max) {
                             max = localMax;
@@ -284,18 +254,28 @@ class SimpleLineChartAdapter implements LineChartAdapter {
                 continue;
             }
             if (timestamp > toTimestamp) {
+                int localMin = getMinValueAt(i);
+                if (localMin < min) {
+                    min = localMin;
+                }
                 int localMax = getMaxValueAt(i);
                 if (localMax > max) {
                     max = localMax;
                 }
                 break;
             }
+            int localMin = getMinValueAt(i);
+            if (localMin < min) {
+                min = localMin;
+            }
             int localMax = getMaxValueAt(i);
             if (localMax > max) {
                 max = localMax;
             }
         }
-        return max;
+        minMaxValueHolder.min = min;
+        minMaxValueHolder.max = max;
+        return minMaxValueHolder;
     }
 
     @Override

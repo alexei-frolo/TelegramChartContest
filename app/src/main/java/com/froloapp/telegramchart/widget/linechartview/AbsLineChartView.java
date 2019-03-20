@@ -317,8 +317,9 @@ public class AbsLineChartView extends View implements LineChartUI {
 
         LineChartAdapter adapter = this.adapter;
         if (adapter != null) {
-            minYValue = adapter.getLocalMinimum(startXPercentage, stopXPercentage);
-            maxYValue = adapter.getLocalMaximum(startXPercentage, stopXPercentage);
+            LineChartAdapter.MinMaxValue minMaxValue = adapter.getLocalMinMax(startXPercentage, stopXPercentage);
+            minYValue = minMaxValue.min;
+            maxYValue = minMaxValue.max;
         } else {
             minYValue = 0f;
             maxYValue = 0f;
@@ -382,8 +383,9 @@ public class AbsLineChartView extends View implements LineChartUI {
         LineChartAdapter adapter = this.adapter;
         if (adapter == null) return;
 
-        final int newMinValue = adapter.getLocalMinimum(startXPercentage, stopXPercentage);
-        final int newMaxValue = adapter.getLocalMaximum(startXPercentage, stopXPercentage);
+        LineChartAdapter.MinMaxValue minMaxValue = adapter.getLocalMinMax(startXPercentage, stopXPercentage);
+        final int newMinValue = minMaxValue.min;
+        final int newMaxValue = minMaxValue.max;
         float newRange = newMaxValue - newMinValue;
 
         this.phantomYBarStartValue = this.yBarStartValue;
