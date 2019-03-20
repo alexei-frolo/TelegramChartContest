@@ -10,7 +10,9 @@ import com.froloapp.telegramchart.widget.linechartview.LineChartAdapter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -31,8 +33,8 @@ class SimpleLineChartAdapter implements LineChartAdapter {
     private final List<String> timestampTexts = new ArrayList<>();
 
     private List<LineHolder> lineHolders = new ArrayList<>();
-    private final SparseIntArray localMinimums = new SparseIntArray(); // local minimums at indexes
-    private final SparseIntArray localMaximums = new SparseIntArray(); // local maximums at indexes
+    private final List<Integer> localMinimums = new ArrayList<>(); // local minimums at indexes
+    private final List<Integer> localMaximums = new ArrayList<>(); // local maximums at indexes
 
     private static class LineHolder {
         final Line data;
@@ -79,8 +81,8 @@ class SimpleLineChartAdapter implements LineChartAdapter {
         for (int i = 0; i < timestamps.size(); i++) {
             int minValue = findMinValueAt(i);
             int maxValue = findMaxValueAt(i);
-            localMinimums.put(i, minValue);
-            localMaximums.put(i, maxValue);
+            localMinimums.add(minValue);
+            localMaximums.add(maxValue);
         }
     }
 
@@ -215,11 +217,11 @@ class SimpleLineChartAdapter implements LineChartAdapter {
     }
 
     private int getMinValueAt(int index) {
-        return localMinimums.get(index, DEFAULT_MIN_VALUE);
+        return localMinimums.get(index);
     }
 
     private int getMaxValueAt(int index) {
-        return localMaximums.get(index, DEFAULT_MAX_VALUE);
+        return localMaximums.get(index);
     }
 
     @Override
