@@ -47,6 +47,7 @@ public class AbsLineChartView extends View implements LineChartUI {
     //private final Paint xAxisPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint xAxisTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Path bufferPath = new Path(); // buffer path to avoid allocating to many paths for multiple charts
+    private float[] bufferLinePoints;
     private final Rect buffTextBounds = new Rect(); // here we store bounds for stamp text height
     private float axisStrokeWidth;
     private int footerHeight; // for x axis stamps
@@ -633,7 +634,7 @@ public class AbsLineChartView extends View implements LineChartUI {
             int timestampIndex = startTimestampIndex;
             boolean outsideBounds = false;
 
-            int value = data.getValueAt(timestampIndex);
+            float value = data.getValueAt(timestampIndex);
 
             bufferPath.reset();
             int xCoor = getXCoor(timestampPosX);
@@ -689,7 +690,7 @@ public class AbsLineChartView extends View implements LineChartUI {
             int timestampIndex = startTimestampIndex;
             boolean outsideBounds = false;
 
-            int value = data.getValueAt(timestampIndex);
+            float value = data.getValueAt(timestampIndex);
 
             chartPaint.setColor(data.getColor());
             if (fadedChart != null && fadedChart.equals(data)) {
@@ -698,17 +699,20 @@ public class AbsLineChartView extends View implements LineChartUI {
             chartPaint.setStyle(Paint.Style.STROKE);
             int xCoor = getXCoor(timestampPosX);
             int yCoor = getYCoor(value);
+            int k = 0;
+            bufferLinePoints[k++] = xCoor;
+            bufferLinePoints[k++] = yCoor;
 
             while (timestampIndex < timestampCount - 1) {
                 timestampIndex++;
                 timestampPosX = adapter.getTimestampRelPositionAt(timestampIndex); // i think it could be optimized
 
                 value = data.getValueAt(timestampIndex);
-                int nextXCoor = getXCoor(timestampPosX);
-                int nextYCoor = getYCoor(value);
-                canvas.drawLine(xCoor, yCoor, nextXCoor, nextYCoor, chartPaint);
-                xCoor = nextXCoor;
-                yCoor = nextYCoor;
+                xCoor = getXCoor(timestampPosX);
+                yCoor = getYCoor(value);
+                //canvas.drawLine(xCoor, yCoor, nextXCoor, nextYCoor, chartPaint);
+                bufferLinePoints[k++] = xCoor;
+                bufferLinePoints[k++] = yCoor;
 
                 if (outsideBounds) {
                     break;
@@ -719,7 +723,12 @@ public class AbsLineChartView extends View implements LineChartUI {
                     // So allow to draw one part more and exit;
                     outsideBounds = true;
                 }
+
+                bufferLinePoints[k] = bufferLinePoints[k++ - 2];
+                bufferLinePoints[k] = bufferLinePoints[k++ - 2];
             }
+
+            canvas.drawLines(bufferLinePoints, 0, k - 1, chartPaint);
         }
     }
 
@@ -730,6 +739,9 @@ public class AbsLineChartView extends View implements LineChartUI {
     @Override
     public void setAdapter(LineChartAdapter adapter, boolean animate) {
         this.adapter = adapter;
+        if (adapter != null) {
+            bufferLinePoints = new float[adapter.getTimestampCount() * 4];
+        }
         checkIfXAxisStepCountChanged(animate);
         checkIfMinOrMaxValueChanged(animate);
         invalidate();

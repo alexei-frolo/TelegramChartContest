@@ -24,17 +24,17 @@ public final class Lines {
     }
 
     private static class IndexedData extends AbsLine {
-        final List<Integer> values;
-        IndexedData(List<Integer> values, int color, String name) {
+        final int[] values;
+        IndexedData(int[] values, int color, String name) {
             super(color, name);
             this.values = values;
         }
         @Override public int getValueAt(int index) {
-            return values.get(index);
+            return values[index];
         }
     }
 
-    public static Line create(List<Integer> values, int color, String name) {
+    public static Line create(int[] values, int color, String name) {
         return new IndexedData(values, color, name);
     }
 }
