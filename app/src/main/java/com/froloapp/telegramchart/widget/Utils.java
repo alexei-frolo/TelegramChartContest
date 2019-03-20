@@ -13,14 +13,11 @@ import java.util.NavigableMap;
 import java.util.TreeMap;
 
 public final class Utils {
-    private static final NavigableMap<Long, String> BIG_NUMBER_SUFFIXES = new TreeMap<>();
+    private static final NavigableMap<Integer, String> BIG_NUMBER_SUFFIXES = new TreeMap<>();
     static {
-        BIG_NUMBER_SUFFIXES.put(1_000L, "k");
-        BIG_NUMBER_SUFFIXES.put(1_000_000L, "M");
-        BIG_NUMBER_SUFFIXES.put(1_000_000_000L, "G");
-        BIG_NUMBER_SUFFIXES.put(1_000_000_000_000L, "T");
-        BIG_NUMBER_SUFFIXES.put(1_000_000_000_000_000L, "P");
-        BIG_NUMBER_SUFFIXES.put(1_000_000_000_000_000_000L, "E");
+        BIG_NUMBER_SUFFIXES.put(1_000, "k");
+        BIG_NUMBER_SUFFIXES.put(1_000_000, "M");
+        BIG_NUMBER_SUFFIXES.put(1_000_000_000, "G");
     }
 
     private Utils() {
@@ -101,13 +98,13 @@ public final class Utils {
         }
     }
 
-    public static String format(long value) {
-        if (value == Long.MIN_VALUE) return format(Long.MIN_VALUE + 1);
+    public static String format(int value) {
+        if (value == Integer.MIN_VALUE) return format(Integer.MIN_VALUE + 1);
         if (value < 0) return "-" + format(-value);
-        if (value < 1000) return Long.toString(value); //deal with easy case
+        if (value < 1000) return Integer.toString(value); //deal with easy case
 
-        Map.Entry<Long, String> e = BIG_NUMBER_SUFFIXES.floorEntry(value);
-        Long divideBy = e.getKey();
+        Map.Entry<Integer, String> e = BIG_NUMBER_SUFFIXES.floorEntry(value);
+        int divideBy = e.getKey();
         String suffix = e.getValue();
 
         long truncated = value / (divideBy / 10); //the number part of the output times 10
