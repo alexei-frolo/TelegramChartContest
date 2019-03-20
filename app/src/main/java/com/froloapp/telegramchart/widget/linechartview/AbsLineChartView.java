@@ -684,7 +684,7 @@ public class AbsLineChartView extends View implements LineChartUI {
         // showing a chart here
         LineChartAdapter adapter = this.adapter;
         if (adapter != null) {
-            adapter.setLineEnabled(chart, animate);
+            adapter.setLineEnabled(chart, true);
             checkIfMinOrMaxValueChanged(animate);
             animateFadedInChart(chart);
             invalidate();
@@ -696,7 +696,7 @@ public class AbsLineChartView extends View implements LineChartUI {
         // hiding a chart here
         LineChartAdapter adapter = this.adapter;
         if (adapter != null) {
-            adapter.setLineEnabled(chart, animate);
+            adapter.setLineEnabled(chart, false);
             // if (adapter.hasEnabledLines()) // maybe do not check for new local min and max if adapter has no enabled lines
             checkIfMinOrMaxValueChanged(animate);
             animateFadedOutChart(chart);
