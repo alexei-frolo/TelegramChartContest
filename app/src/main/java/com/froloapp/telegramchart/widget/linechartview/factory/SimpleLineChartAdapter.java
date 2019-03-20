@@ -340,7 +340,7 @@ class SimpleLineChartAdapter implements LineChartAdapter {
 
     @Override
     public String getYStampText(int value) {
-        return String.valueOf(value);
+        return Utils.format(value);
     }
 
     @Override
