@@ -606,12 +606,13 @@ public class AbsLineChartView extends View implements LineChartUI {
         if (adapter == null)
             return; // early return
 
-        int totalStampCount = adapter.getTimestampCount();
-        if (totalStampCount > 200) {
-            drawLinesInnerWithPath(canvas);
-        } else {
-            drawLinesInnerWithLines(canvas);
-        }
+//        int totalStampCount = adapter.getTimestampCount();
+//        if (totalStampCount > 200) {
+//            drawLinesInnerWithPath(canvas);
+//        } else {
+//            drawLinesInnerWithLines(canvas);
+//        }
+        drawLinesInnerWithLines(canvas);
     }
 
     private void drawLinesInnerWithPath(Canvas canvas) {
