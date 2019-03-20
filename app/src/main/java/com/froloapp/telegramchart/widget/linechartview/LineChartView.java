@@ -29,9 +29,6 @@ public class LineChartView extends AbsLineChartView {
     private int stampInfoSmallDotColor;
 
     // touch
-    private float touchStampThreshold;
-    private float lastTouchedDownX = 0f;
-    private float lastTouchedDownY = 0f;
     private boolean wasClickedStamp = false;
     private long clickedStamp;
     private float clickedXPosition;
@@ -64,9 +61,6 @@ public class LineChartView extends AbsLineChartView {
     }
 
     private void init(Context context, AttributeSet attrs) {
-        // touch
-        touchStampThreshold = Utils.dpToPx(TOUCH_STAMP_THRESHOLD_IN_DP, context);
-
         if (attrs != null) {
             TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.LineChartView, 0, 0);
             stampInfoSmallDotColor = typedArray.getColor(R.styleable.LineChartView_clickedStampSmallDotColor, getXAxisColor());
@@ -92,7 +86,8 @@ public class LineChartView extends AbsLineChartView {
     }
 
     public interface OnStampClickListener {
-        void onStampClick(LineChartView view, long timestamp, float timestampX);
+        void onTouchDown(LineChartView view, long timestamp, float timestampX);
+        void onTouchUp(LineChartView view);
     }
 
     public void setOnStampClickListener(OnStampClickListener l) {
@@ -184,55 +179,59 @@ public class LineChartView extends AbsLineChartView {
         //wasClickedStamp = false;
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
-                lastTouchedDownX = event.getX();
-                lastTouchedDownY = event.getY();
+                getParent().requestDisallowInterceptTouchEvent(true);
+                float x = event.getX();
+                handleTouch(x);
                 return true;
             }
             case MotionEvent.ACTION_MOVE: {
                 float x = event.getX();
-                float y = event.getY();
-                if (Math.abs(lastTouchedDownX - x) > touchStampThreshold
-                        || Math.abs(lastTouchedDownY - y) > touchStampThreshold)
-                    return false;
+                handleTouch(x);
                 break;
             }
             case MotionEvent.ACTION_UP: {
-                float x = event.getX();
-                float y = event.getY();
-                if (Math.abs(lastTouchedDownX - x) < touchStampThreshold
-                    && Math.abs(lastTouchedDownY - y) < touchStampThreshold) {
-                    //log("Clicked at (" + x + ", " + y + ")");
-                    // handle click here
-                    handleClick(x, y, event.getRawX(), event.getRawY());
-                }
+                wasClickedStamp = false;
+                getParent().requestDisallowInterceptTouchEvent(false);
+                dispatchTouchUp();
+                invalidate();
                 break;
             }
         }
         return super.onTouchEvent(event);
     }
 
-    private void handleClick(float x, float y, float rawX, float rawY) {
+    private void handleTouch(float x) {
         LineChartAdapter adapter = getAdapter();
         if (adapter != null) {
             float xPosition = getXPosition(x);
             //this.clickedXPosition = adapter.getClosestTimestampPosition(xPosition);
             // looking for the closest X axis stamp
             long closestTimestamp = adapter.getClosestTimestamp(xPosition);
-            this.clickedStamp = closestTimestamp;
-            this.clickedXPosition = adapter.getTimestampRelPosition(closestTimestamp);
-            float timestampX = getXCoor(clickedXPosition);
-            dispatchClicked(clickedStamp, timestampX);
+            if (clickedStamp != closestTimestamp) { // has changed
+                this.clickedStamp = closestTimestamp;
+                this.clickedXPosition = adapter.getTimestampRelPosition(closestTimestamp);
 
-            // this view should know that a stamp was clicked
-            this.wasClickedStamp = true;
-            invalidate();
+                float left = getXCoor(clickedXPosition) + 10; // x coor of clicked timestamp + margin(10 by default)
+                dispatchTouchDown(closestTimestamp, left);
+
+                // this view should know that a stamp was clicked
+                this.wasClickedStamp = true;
+                invalidate();
+            }
         }
     }
 
-    private void dispatchClicked(long timestamp, float timestampX) {
+    private void dispatchTouchDown(long timestamp, float timestampX) {
         OnStampClickListener l = this.onStampClickListener;
         if (l != null) {
-            l.onStampClick(this, timestamp, timestampX);
+            l.onTouchDown(this, timestamp, timestampX);
+        }
+    }
+
+    private void dispatchTouchUp() {
+        OnStampClickListener l = this.onStampClickListener;
+        if (l != null) {
+            l.onTouchUp(this);
         }
     }
 

@@ -330,12 +330,14 @@ class SimpleLineChartAdapter implements LineChartAdapter {
     }
 
     @Override
-    public boolean hasEnabledLines() {
+    public int getEnabledLineCount() {
+        int count = 0;
         for (LineHolder holder : lineHolders) {
-            if (holder.visible)
-                return true;
+            if (holder.visible) {
+                count++;
+            }
         }
-        return false;
+        return count;
     }
 
     @Override
