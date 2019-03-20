@@ -196,7 +196,7 @@ class SimpleLineChartAdapter implements LineChartAdapter {
             }
         }
         if (atLeastOneLineEnabled) return min;
-        else return -10;
+        else return 0;
     }
 
     // finds max value for the given timestamp
@@ -325,10 +325,31 @@ class SimpleLineChartAdapter implements LineChartAdapter {
             LineHolder holder = lineHolders.get(i);
             if (holder.data.equals(chart)) {
                 holder.visible = visible;
+                for (int j = 0; j < timestamps.size(); j++) {
+                    int value = holder.data.getValueAt(j);
+                    int currMinValue = localMinimums.get(j);
+                    int currMaxValue = localMaximums.get(j);
+                    if (visible) {
+                        if (value < currMinValue) {
+                            localMinimums.set(j, value);
+                        }
+                        if (value > currMaxValue) {
+                            localMaximums.set(j, value);
+                        }
+                    } else {
+                        if (value <= currMinValue) {
+                            int newMinValue = findMinValueAt(j);
+                            localMinimums.set(j, newMinValue);
+                        }
+                        if (value >= currMaxValue) {
+                            int newMaxValue = findMaxValueAt(j);
+                            localMaximums.set(j, newMaxValue);
+                        }
+                    }
+                }
+                break;
             }
         }
-        // TO DO: think of much more optimized way
-        calcMinimumsAndMaximums();
     }
 
     @Override
