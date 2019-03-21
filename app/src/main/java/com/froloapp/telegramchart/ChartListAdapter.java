@@ -1,7 +1,6 @@
 package com.froloapp.telegramchart;
 
 
-import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Rect;
 import android.os.Build;
@@ -15,7 +14,6 @@ import android.widget.BaseAdapter;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
-import android.widget.TextView;
 
 import com.froloapp.telegramchart.widget.Utils;
 import com.froloapp.telegramchart.widget.linechartview.Line;
@@ -23,7 +21,6 @@ import com.froloapp.telegramchart.widget.linechartview.LineChartAdapter;
 import com.froloapp.telegramchart.widget.linechartview.LineChartSlider;
 import com.froloapp.telegramchart.widget.linechartview.LineChartView;
 
-import java.util.Calendar;
 
 class ChartListAdapter extends BaseAdapter {
     private final LineChartAdapter[] adapters;
@@ -173,7 +170,7 @@ class ChartListAdapter extends BaseAdapter {
 
             final PopupWindow currPopup = this.popupWindow;
             if (currPopup == null) {
-                PopupWindow newWindow = getPopupWindow(timestamp);
+                PopupWindow newWindow = PopupHelper.createPopupWindow(rootView.getContext(), adapter, timestamp);
                 if (newWindow != null) {
                     newWindow.showAtLocation(chartView, Gravity.TOP | Gravity.LEFT, locX, locY);
                     this.popupWindow = newWindow;
@@ -182,78 +179,9 @@ class ChartListAdapter extends BaseAdapter {
                 final int w = ViewGroup.LayoutParams.WRAP_CONTENT;
                 final int h = ViewGroup.LayoutParams.WRAP_CONTENT;
                 View v = currPopup.getContentView();
-                populateWindowView(v, timestamp);
+                PopupHelper.populateWindowView(v, adapter, timestamp);
                 currPopup.update(locX, locY, w, h);
             }
-        }
-
-        private void populateWindowView(View view, long timestamp) {
-            LineChartAdapter adapter = this.adapter;
-            if (adapter == null) {
-                return;
-            }
-            final Context context = view.getContext();
-            int timestampIndex = adapter.getTimestampIndex(timestamp);
-
-            Calendar c = Calendar.getInstance();
-            c.setTimeInMillis(timestamp);
-            int month = c.get(Calendar.MONTH);
-            int dayOfMonth = c.get(Calendar.DAY_OF_MONTH);
-            int dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
-            String title = Utils.getDayOfWeekString(dayOfWeek) + ", " + Utils.getMonthString(month) + ' ' + dayOfMonth;
-            ((TextView) view.findViewById(R.id.textStamp)).setText(title);
-
-            LinearLayout layoutValues = view.findViewById(R.id.layoutValues);
-            int countDiff = adapter.getEnabledLineCount() - layoutValues.getChildCount();
-            if (countDiff > 0) {
-                while (countDiff > 0) {
-                    final int hp = (int) Utils.dpToPx(2f, context);
-                    final int vp = (int) Utils.dpToPx(2f, context);
-                    TextView textView = new TextView(context);
-                    textView.setPadding(hp, vp, hp, vp);
-                    layoutValues.addView(textView);
-                    countDiff--;
-                }
-            } else if (countDiff < 0) {
-                while (countDiff < 0) {
-                    layoutValues.removeViewAt(layoutValues.getChildCount() - 1);
-                    countDiff++;
-                }
-            }
-
-            int childIndex = 0;
-            for (int i = 0; i < adapter.getLineCount(); i++) {
-                Line line = adapter.getLineAt(i);
-                if (adapter.isLineEnabled(line)) {
-                    final String text = line.getName() + "\n" + line.getValueAt(timestampIndex);
-                    TextView textView = (TextView) layoutValues.getChildAt(childIndex);
-                    textView.setTextColor(line.getColor());
-                    textView.setText(text);
-                    childIndex++;
-                }
-            }
-        }
-
-        private PopupWindow getPopupWindow(long timestamp) {
-            LineChartAdapter adapter = this.adapter;
-            if (adapter == null) {
-                // early return. Shouldn't happen
-                return null;
-            }
-
-            final Context context = rootView.getContext();
-            final View v = LayoutInflater.from(context).inflate(R.layout.dialog_stamp_info, null, false);
-            populateWindowView(v, timestamp);
-
-            final int w = ViewGroup.LayoutParams.WRAP_CONTENT;
-            final int h = ViewGroup.LayoutParams.WRAP_CONTENT;
-            final PopupWindow popUp = new PopupWindow(v, w, h);
-
-            popUp.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.bg_stamp_info));
-            popUp.setTouchable(false);
-            popUp.setFocusable(true);
-            popUp.setOutsideTouchable(true);
-            return popUp;
         }
     }
 }
