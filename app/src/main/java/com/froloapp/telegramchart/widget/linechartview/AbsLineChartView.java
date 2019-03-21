@@ -602,11 +602,11 @@ public class AbsLineChartView extends View implements LineChartUI {
     }
 
     /**
-     * Draws lines;
      * For optimization, the logic of rendering is next:
      * 1) Find the previous timestamp that goes before {@link AbsLineChartView#startXPercentage} value;
-     * 2) Create a path of Y values for each line until reached timestamp that goes after {@link AbsLineChartView#stopXPercentage} value;
-     * 3) Draw each path on canvas using appropriate colors;
+     * 2) Collect x and y coordinates of each timestamp into a {@link AbsLineChartView#bufferLinePoints}
+     * until reached timestamp that goes after {@link AbsLineChartView#stopXPercentage} value;
+     * 3) Draw each line on canvas using appropriate colors;
      * @param canvas canvas
      */
     protected void drawLines(Canvas canvas) {
@@ -614,20 +614,6 @@ public class AbsLineChartView extends View implements LineChartUI {
         if (adapter == null)
             return; // early return
 
-//        int totalStampCount = adapter.getTimestampCount();
-//        if (totalStampCount > 200) {
-//            drawLinesInnerWithPath(canvas);
-//        } else {
-//            drawLinesInnerWithLines(canvas);
-//        }
-        drawLinesInnerWithLines(canvas);
-    }
-
-    private void drawLinesInnerWithPath(Canvas canvas) {
-        LineChartAdapter adapter = this.adapter;
-        if (adapter == null)
-            return; // early return
-
         final int timestampCount = adapter.getTimestampCount();
         final int startTimestampIndex = adapter.getLeftClosestTimestampIndex(startXPercentage);
         final float startTimestampPosX = adapter.getTimestampRelPositionAt(startTimestampIndex);
@@ -639,73 +625,19 @@ public class AbsLineChartView extends View implements LineChartUI {
                     continue;
             }
 
-            float timestampPosX = startTimestampPosX;
             int timestampIndex = startTimestampIndex;
-            boolean outsideBounds = false;
+            float timestampPosX = startTimestampPosX;
+            boolean outsideBounds = false; // make it true when the render-loop must break
 
             float value = data.getValueAt(timestampIndex);
 
-            bufferPath.reset();
-            int xCoor = getXCoor(timestampPosX);
-            int yCoor = getYCoor(value);
-            bufferPath.moveTo(xCoor, yCoor);
-
-            while (timestampIndex < timestampCount - 1) {
-                timestampIndex++;
-                timestampPosX = adapter.getTimestampRelPositionAt(timestampIndex); // i think it could be optimized
-
-                value = data.getValueAt(timestampIndex);
-                xCoor = getXCoor(timestampPosX);
-                yCoor = getYCoor(value);
-                bufferPath.lineTo(xCoor, yCoor);
-
-                if (outsideBounds) {
-                    break;
-                }
-
-                if (timestampPosX > stopXPercentage) {
-                    // It's enough. No need to draw lines after next timestamp as they will be invisible.
-                    // So allow to draw one part more and exit;
-                    outsideBounds = true;
-                }
-            }
-
+            // preparing paint tool
             chartPaint.setColor(data.getColor());
             if (fadedChart != null && fadedChart.equals(data)) {
                 chartPaint.setAlpha((int) (fadedChartAlpha * 255));
             } else chartPaint.setAlpha(255);
             chartPaint.setStyle(Paint.Style.STROKE);
-            canvas.drawPath(bufferPath, chartPaint);
-        }
-    }
 
-    private void drawLinesInnerWithLines(Canvas canvas) {
-        LineChartAdapter adapter = this.adapter;
-        if (adapter == null)
-            return; // early return
-
-        final int timestampCount = adapter.getTimestampCount();
-        final int startTimestampIndex = adapter.getLeftClosestTimestampIndex(startXPercentage);
-        final float startTimestampPosX = adapter.getTimestampRelPositionAt(startTimestampIndex);
-
-        for (int i = 0; i < adapter.getLineCount(); i++) {
-            Line data = adapter.getLineAt(i);
-            if (!adapter.isLineEnabled(data)) {
-                if (fadedChart == null || !fadedChart.equals(data))
-                    continue;
-            }
-
-            float timestampPosX = startTimestampPosX;
-            int timestampIndex = startTimestampIndex;
-            boolean outsideBounds = false;
-
-            float value = data.getValueAt(timestampIndex);
-
-            chartPaint.setColor(data.getColor());
-            if (fadedChart != null && fadedChart.equals(data)) {
-                chartPaint.setAlpha((int) (fadedChartAlpha * 255));
-            } else chartPaint.setAlpha(255);
-            chartPaint.setStyle(Paint.Style.STROKE);
             int xCoor = getXCoor(timestampPosX);
             int yCoor = getYCoor(value);
             int k = 0;

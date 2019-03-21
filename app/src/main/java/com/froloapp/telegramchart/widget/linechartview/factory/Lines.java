@@ -3,8 +3,6 @@ package com.froloapp.telegramchart.widget.linechartview.factory;
 
 import com.froloapp.telegramchart.widget.linechartview.Line;
 
-import java.util.List;
-
 public final class Lines {
     private Lines() { }
 

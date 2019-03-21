@@ -1,28 +1,17 @@
 package com.froloapp.telegramchart;
 
 import android.content.res.AssetManager;
-import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.widget.TintableCompoundButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
-import android.support.v7.widget.AppCompatCheckBox;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.froloapp.telegramchart.widget.Utils;
-import com.froloapp.telegramchart.widget.linechartview.Line;
 import com.froloapp.telegramchart.widget.linechartview.LineChartAdapter;
 
 import java.io.InputStream;

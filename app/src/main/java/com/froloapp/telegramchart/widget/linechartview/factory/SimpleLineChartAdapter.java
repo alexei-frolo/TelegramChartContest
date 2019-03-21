@@ -1,8 +1,6 @@
 package com.froloapp.telegramchart.widget.linechartview.factory;
 
 
-import android.util.SparseIntArray;
-
 import com.froloapp.telegramchart.widget.Utils;
 import com.froloapp.telegramchart.widget.linechartview.Line;
 import com.froloapp.telegramchart.widget.linechartview.LineChartAdapter;
@@ -10,9 +8,7 @@ import com.froloapp.telegramchart.widget.linechartview.LineChartAdapter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
