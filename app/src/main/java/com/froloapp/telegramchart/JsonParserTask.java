@@ -56,10 +56,13 @@ public class JsonParserTask extends AsyncTask<InputStream, Void, Object> {
     @Override
     protected Object doInBackground(InputStream... streams) {
         try {
-            final InputStream is = streams[0];
-            String json = parseJson(is);
-            LineChartAdapter[] adapters = parseAdapters(json);
-            return adapters;
+            List<LineChartAdapter> allAdapters = new ArrayList<>();
+            for (InputStream is : streams) {
+                String json = parseJson(is);
+                List<LineChartAdapter> adapters = parseAdapters(json);
+                allAdapters.addAll(adapters);
+            }
+            return allAdapters.toArray(new LineChartAdapter[] { });
         } catch (Throwable t) {
             return t;
         }
@@ -81,13 +84,14 @@ public class JsonParserTask extends AsyncTask<InputStream, Void, Object> {
     }
 
     // parses json string into chart adapters
-    private LineChartAdapter[] parseAdapters(String json) throws Throwable {
+    private List<LineChartAdapter> parseAdapters(String json) throws Throwable {
         JSONArray array = new JSONArray(json);
         int count = array.length();
-        LineChartAdapter[] adapters = new LineChartAdapter[count];
+        List<LineChartAdapter> adapters = new ArrayList<>(count);
         for (int i = 0; i < count; i++) {
             JSONObject obj = array.getJSONObject(i);
-            adapters[i] = parseAdapter(obj);
+            LineChartAdapter a = parseAdapter(obj);
+            adapters.add(a);
         }
         return adapters;
     }
@@ -114,9 +118,7 @@ public class JsonParserTask extends AsyncTask<InputStream, Void, Object> {
             }
         }
 
-        LineChartFactory.Builder builder = LineChartFactory.builder();
-        builder.setTimestamps(timestamps);
-
+        LineChartFactory.Builder builder = LineChartFactory.builder(timestamps);
         for (int i = 0; i < chartCount; i++) {
             JSONArray columns = columnsJson.getJSONArray(i);
             String chartCode = columns.get(0).toString();

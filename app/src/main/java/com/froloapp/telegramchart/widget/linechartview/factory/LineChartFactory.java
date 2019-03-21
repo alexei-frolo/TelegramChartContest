@@ -32,14 +32,13 @@ public final class LineChartFactory {
     }
 
     public static class Builder {
-        private List<Long> timestamps;
-        private List<Line> lines = new ArrayList<>();
-        private Builder() {
-        }
-
-        public Builder setTimestamps(List<Long> timestamps) {
+        private final List<Long> timestamps;
+        private final List<Line> lines = new ArrayList<>();
+        private Builder(List<Long> timestamps) {
+            if (timestamps == null) {
+                throw new IllegalArgumentException("Timestamps must not be null");
+            }
             this.timestamps = timestamps;
-            return this;
         }
 
         public Builder addLine(int[] values, int color, String name) {
@@ -49,14 +48,11 @@ public final class LineChartFactory {
         }
 
         public LineChartAdapter build() {
-            if (timestamps == null) {
-                throw new IllegalArgumentException("Timestamps must not be null");
-            }
             return new SimpleLineChartAdapter(timestamps, lines);
         }
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public static Builder builder(List<Long> timestamps) {
+        return new Builder(timestamps);
     }
 }
