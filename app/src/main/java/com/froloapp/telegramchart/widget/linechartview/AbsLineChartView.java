@@ -32,7 +32,7 @@ public class AbsLineChartView extends View implements LineChartUI {
     private static final int DEFAULT_WIDTH_IN_DP = 200;
     private static final int DEFAULT_HEIGHT_IN_DP = 100;
     private static final int DEFAULT_TEXT_HEIGHT_IN_SP = 12;
-    private static final long Y_AXIS_ANIM_DURATION = 400L;
+    private static final long Y_AXIS_ANIM_DURATION = 250L;
     private static final long X_AXIS_ANIM_DURATION = 250L;
 
     private static final int DEFAULT_Y_AXIS_BAR_COUNT = 5;
@@ -60,6 +60,9 @@ public class AbsLineChartView extends View implements LineChartUI {
     // current min and max value on Y axis
     private float minYValue;
     private float maxYValue;
+
+    private float targetMinYValue;
+    private float targetMaxYValue;
 
     /* *********************************
      *** Y AXIS PROPERTIES INTERFACE ***
@@ -325,6 +328,8 @@ public class AbsLineChartView extends View implements LineChartUI {
             minYValue = 0f;
             maxYValue = 0f;
         }
+        targetMinYValue = minYValue;
+        targetMaxYValue = maxYValue;
 
         checkIfXAxisStepCountChanged(false);
     }
@@ -401,12 +406,15 @@ public class AbsLineChartView extends View implements LineChartUI {
         this.yBarStep = (int) (newRange / yAxisStampCount);
 
         // check min value
-        if (newMinValue != this.minYValue || newMaxValue != this.maxYValue) {
+        if (newMinValue != this.targetMinYValue || newMaxValue != this.targetMaxYValue) {
             ValueAnimator oldAnimator = yAxisAnimator;
             if (oldAnimator != null) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) oldAnimator.pause();
                 else oldAnimator.cancel();
             }
+
+            targetMinYValue = newMinValue;
+            targetMaxYValue = newMaxValue;
 
             if (animate) {
                 PropertyValuesHolder h1 = PropertyValuesHolder.ofFloat(MIN_Y_VALUE, newMinValue);
