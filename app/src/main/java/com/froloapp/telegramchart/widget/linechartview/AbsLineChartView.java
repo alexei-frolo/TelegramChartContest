@@ -9,7 +9,6 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.Rect;
 import android.os.Build;
 import android.util.AttributeSet;
@@ -44,10 +43,8 @@ public class AbsLineChartView extends View implements LineChartUI {
     private final Paint chartPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint yAxisPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint yAxisTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    //private final Paint xAxisPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint xAxisTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final Path bufferPath = new Path(); // buffer path to avoid allocating to many paths for multiple charts
-    private float[] bufferLinePoints;
+    private float[] bufferLinePoints; // for collecting (x; y) coors of a chart line to draw
     private final Rect buffTextBounds = new Rect(); // here we store bounds for stamp text height
     private float axisStrokeWidth;
     private int footerHeight; // for x axis stamps
@@ -261,7 +258,7 @@ public class AbsLineChartView extends View implements LineChartUI {
 
     private void log(String msg) {
         if (BuildConfig.DEBUG) {
-            Log.d(this.getClass().getSimpleName(), msg);
+            Log.d("AbsLineChartView", msg);
         }
     }
 
@@ -397,29 +394,35 @@ public class AbsLineChartView extends View implements LineChartUI {
         LineChartAdapter.MinMaxValue minMaxValue = adapter.getLocalMinMax(startXPercentage, stopXPercentage);
         final int newMinValue = minMaxValue.min;
         final int newMaxValue = minMaxValue.max;
-        float newRange = newMaxValue - newMinValue;
-
-        this.phantomYBarStartValue = this.yBarStartValue;
-        this.phantomYBarStep = this.yBarStep;
-
-        this.yBarStartValue = newMinValue;
-        this.yBarStep = (int) (newRange / yAxisStampCount);
 
         // check min value
         if (newMinValue != this.targetMinYValue || newMaxValue != this.targetMaxYValue) {
+            targetMinYValue = newMinValue;
+            targetMaxYValue = newMaxValue;
+            float newRange = newMaxValue - newMinValue;
+
+            this.phantomYBarStartValue = this.yBarStartValue;
+            this.phantomYBarStep = this.yBarStep;
+
+            this.yBarStartValue = newMinValue;
+            this.yBarStep = (int) (newRange / (yAxisStampCount));
+
+            float startYAxisAlpha = 0.1f;
+            float startMinYValue = minYValue;
+            float startMaxYValue = maxYValue;
+
             ValueAnimator oldAnimator = yAxisAnimator;
             if (oldAnimator != null) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) oldAnimator.pause();
                 else oldAnimator.cancel();
             }
 
-            targetMinYValue = newMinValue;
-            targetMaxYValue = newMaxValue;
+            log("Updated Y Axis: alpha=" + startYAxisAlpha);
 
             if (animate) {
-                PropertyValuesHolder h1 = PropertyValuesHolder.ofFloat(MIN_Y_VALUE, newMinValue);
-                PropertyValuesHolder h2 = PropertyValuesHolder.ofFloat(MAX_Y_VALUE, newMaxValue);
-                PropertyValuesHolder h3 = PropertyValuesHolder.ofFloat(Y_AXIS_ALPHA, 0.1f, 1f);
+                PropertyValuesHolder h1 = PropertyValuesHolder.ofFloat(MIN_Y_VALUE, startMinYValue, newMinValue);
+                PropertyValuesHolder h2 = PropertyValuesHolder.ofFloat(MAX_Y_VALUE, startMaxYValue, newMaxValue);
+                PropertyValuesHolder h3 = PropertyValuesHolder.ofFloat(Y_AXIS_ALPHA, startYAxisAlpha, 1f);
 
                 ObjectAnimator newAnimator = ObjectAnimator.ofPropertyValuesHolder(AbsLineChartView.this, h1, h2, h3);
                 newAnimator.setInterpolator(yValueInterpolator);

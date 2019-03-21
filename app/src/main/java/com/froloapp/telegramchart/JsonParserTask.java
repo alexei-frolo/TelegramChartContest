@@ -4,10 +4,8 @@ package com.froloapp.telegramchart;
 import android.graphics.Color;
 import android.os.AsyncTask;
 
-import com.froloapp.telegramchart.widget.linechartview.Line;
 import com.froloapp.telegramchart.widget.linechartview.LineChartAdapter;
-import com.froloapp.telegramchart.widget.linechartview.factory.LineChartAdapters;
-import com.froloapp.telegramchart.widget.linechartview.factory.Lines;
+import com.froloapp.telegramchart.widget.linechartview.factory.LineChartFactory;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -116,7 +114,9 @@ public class JsonParserTask extends AsyncTask<InputStream, Void, Object> {
             }
         }
 
-        List<Line> charts = new ArrayList<>();
+        LineChartFactory.Builder builder = LineChartFactory.builder();
+        builder.setTimestamps(timestamps);
+
         for (int i = 0; i < chartCount; i++) {
             JSONArray columns = columnsJson.getJSONArray(i);
             String chartCode = columns.get(0).toString();
@@ -125,19 +125,15 @@ public class JsonParserTask extends AsyncTask<InputStream, Void, Object> {
                 int[] values = new int[columns.length()];
                 for (int j = 1; j < columns.length(); j++) {
                     int value = columns.getInt(j);
-                    long stamp = timestamps.get(j - 1);
-                    //
                     values[j - 1] = value;
                 }
                 String type = typesJson.getString(chartCode); // what to do with this??
                 String name = namesJson.getString(chartCode);
                 String color = colorsJson.getString(chartCode);
-                //Line data = Lines.create(map, Color.parseColor(color), name);
-                //charts.add(data);
-                Line data = Lines.create(values, Color.parseColor(color), name);
-                charts.add(data);
+
+                builder.addLine(values, Color.parseColor(color), name);
             }
         }
-        return LineChartAdapters.create(timestamps, charts);
+        return builder.build();
     }
 }
