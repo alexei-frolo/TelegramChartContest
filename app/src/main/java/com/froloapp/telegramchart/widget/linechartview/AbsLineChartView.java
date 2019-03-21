@@ -32,6 +32,7 @@ public class AbsLineChartView extends View implements LineChartUI {
     private static final int DEFAULT_HEIGHT_IN_DP = 100;
     private static final int DEFAULT_TEXT_HEIGHT_IN_SP = 12;
     private static final long Y_AXIS_ANIM_DURATION = 250L;
+    private static final long Y_AXIS_ANIM_DUR = 150L;
     private static final long X_AXIS_ANIM_DURATION = 250L;
 
     private static final int DEFAULT_Y_AXIS_BAR_COUNT = 5;
@@ -383,6 +384,26 @@ public class AbsLineChartView extends View implements LineChartUI {
         }
     }
 
+    // calculates appropriate anim duration for the given old and new Y value ranges
+    private long getYAxisAnimDuration(float oldYValueRange, float newYValueRange) {
+        if (oldYValueRange != 0 && newYValueRange != 0) {
+            float coeff;
+            if (newYValueRange > oldYValueRange) {
+                coeff = newYValueRange / oldYValueRange;
+            } else {
+                coeff = oldYValueRange / newYValueRange;
+            }
+
+            coeff = coeff * coeff;
+            if (coeff > 2.5) {
+                coeff = 2.5f;
+            }
+            return (long) (Y_AXIS_ANIM_DUR * coeff);
+        } else {
+            return Y_AXIS_ANIM_DURATION;
+        }
+    }
+
     /**
      * Checks if min or max value on Y axis has changed;
      * If so then it does phantom magic with current Y axis bars;
@@ -417,16 +438,17 @@ public class AbsLineChartView extends View implements LineChartUI {
                 else oldAnimator.cancel();
             }
 
-            log("Updated Y Axis: alpha=" + startYAxisAlpha);
-
             if (animate) {
+                float oldRange = (startMaxYValue - startMinYValue);
+                long animDur = getYAxisAnimDuration(oldRange, newRange);
+
                 PropertyValuesHolder h1 = PropertyValuesHolder.ofFloat(MIN_Y_VALUE, startMinYValue, newMinValue);
                 PropertyValuesHolder h2 = PropertyValuesHolder.ofFloat(MAX_Y_VALUE, startMaxYValue, newMaxValue);
                 PropertyValuesHolder h3 = PropertyValuesHolder.ofFloat(Y_AXIS_ALPHA, startYAxisAlpha, 1f);
 
                 ObjectAnimator newAnimator = ObjectAnimator.ofPropertyValuesHolder(AbsLineChartView.this, h1, h2, h3);
                 newAnimator.setInterpolator(yValueInterpolator);
-                newAnimator.setDuration(Y_AXIS_ANIM_DURATION);
+                newAnimator.setDuration(animDur);
                 newAnimator.addListener(yAxisAnimListener);
                 yAxisAnimator = newAnimator;
                 newAnimator.start();
