@@ -13,17 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 class SimpleLineChartAdapter implements LineChartAdapter {
-    // static
-    private static final int DEFAULT_MIN_VALUE = -10;
-    private static final int DEFAULT_MAX_VALUE = 10;
-
-    private static AtomicInteger chartId = new AtomicInteger(0);
-
-    private static int nextChartId() {
-        return chartId.getAndAdd(1);
-    }
-
-    private final int id;
+    private final String name;
 
     private final List<Long> timestamps = new ArrayList<>();
     private final List<String> timestampTexts = new ArrayList<>();
@@ -43,8 +33,8 @@ class SimpleLineChartAdapter implements LineChartAdapter {
         }
     }
 
-    SimpleLineChartAdapter(List<Long> timestamps, List<Line> lines) {
-        id = nextChartId();
+    SimpleLineChartAdapter(String name, List<Long> timestamps, List<Line> lines) {
+        this.name = name;
 
         lineHolders.clear();
         this.timestamps.addAll(timestamps);
@@ -351,6 +341,6 @@ class SimpleLineChartAdapter implements LineChartAdapter {
 
     @Override
     public String toString() {
-        return "Line chart #" + String.valueOf(id);
+        return name;
     }
 }

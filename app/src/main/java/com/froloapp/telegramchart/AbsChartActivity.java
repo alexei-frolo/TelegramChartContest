@@ -1,5 +1,6 @@
 package com.froloapp.telegramchart;
 
+
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
@@ -9,39 +10,36 @@ import android.support.v7.app.AppCompatDelegate;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import com.froloapp.telegramchart.widget.linechartview.LineChartAdapter;
 
 import java.io.InputStream;
 
-
-public class MainActivity extends AppCompatActivity {
-
-    private ListView listCharts;
-
+abstract class AbsChartActivity extends AppCompatActivity {
     // hold task to cancel if needed
     private JsonParserTask jsonParserTask;
 
     private void log(String msg) {
         if (BuildConfig.DEBUG) {
-            Log.d("ChartViewMainActivity", msg);
+            Log.d("AbsChartActivity", msg);
         }
     }
 
     private void log(Throwable e) {
         if (BuildConfig.DEBUG) {
-            Log.e("ChartViewMainActivity", "", e);
+            Log.e("AbsChartActivity", "", e);
         }
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        listCharts = findViewById(R.id.listCharts);
+    protected void onDestroy() {
+        super.onDestroy();
+        AsyncTask task = jsonParserTask;
+        if (task != null) task.cancel(true);
+    }
 
+    void load() {
         Object lastInstance = getLastCustomNonConfigurationInstance();
         if (lastInstance instanceof JsonParserTask) {
             JsonParserTask retainedTask = (JsonParserTask) lastInstance;
@@ -56,17 +54,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        AsyncTask task = jsonParserTask;
-        if (task != null) task.cancel(true);
-    }
-
-    private void populateCharts(LineChartAdapter[] adapters) {
-        ChartListAdapter chartListAdapter = new ChartListAdapter(adapters);
-        listCharts.setAdapter(chartListAdapter);
-    }
+    abstract void populateCharts(LineChartAdapter[] adapters);
 
     private void loadCharts() {
         AsyncTask task = jsonParserTask;
@@ -78,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
             }
             @Override public void onError(Throwable error) {
                 log(error);
-                Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(AbsChartActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
             }
             @Override public void onResult(LineChartAdapter[] adapters) {
                 populateCharts(adapters);
@@ -121,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean isNightModeEnabled() {
         int nightModeFlags = getResources().getConfiguration().uiMode &
-                        Configuration.UI_MODE_NIGHT_MASK;
+                Configuration.UI_MODE_NIGHT_MASK;
         switch (nightModeFlags) {
             case Configuration.UI_MODE_NIGHT_YES: {
                 return true;

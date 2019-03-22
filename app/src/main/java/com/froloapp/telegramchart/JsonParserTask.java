@@ -96,14 +96,14 @@ public class JsonParserTask extends AsyncTask<InputStream, Void, Object> {
         List<LineChartAdapter> adapters = new ArrayList<>(count);
         for (int i = 0; i < count; i++) {
             JSONObject obj = array.getJSONObject(i);
-            LineChartAdapter a = parseAdapter(obj);
+            LineChartAdapter a = parseAdapter(i, obj);
             adapters.add(a);
         }
         return adapters;
     }
 
     // parses json object into chart adapter
-    private LineChartAdapter parseAdapter(JSONObject obj) throws Throwable {
+    private LineChartAdapter parseAdapter(int index, JSONObject obj) throws Throwable {
         JSONArray columnsJson = obj.getJSONArray("columns");
         JSONObject typesJson = obj.getJSONObject("types");
         JSONObject namesJson = obj.getJSONObject("names");
@@ -124,7 +124,8 @@ public class JsonParserTask extends AsyncTask<InputStream, Void, Object> {
             }
         }
 
-        LineChartFactory.Builder builder = LineChartFactory.builder(timestamps);
+        String chartName = "Line chart #" + index;
+        LineChartFactory.Builder builder = LineChartFactory.builder(chartName, timestamps);
         for (int i = 0; i < chartCount; i++) {
             JSONArray columns = columnsJson.getJSONArray(i);
             String chartCode = columns.get(0).toString();

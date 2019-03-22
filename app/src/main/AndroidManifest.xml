@@ -13,7 +13,17 @@
         tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:label="@string/statistics"
-            android:name=".MainActivity">
+            android:name=".ChartListActivity">
+            <!--<intent-filter>-->
+                <!--<action android:name="android.intent.action.MAIN" />-->
+
+                <!--<category android:name="android.intent.category.LAUNCHER" />-->
+            <!--</intent-filter>-->
+        </activity>
+
+        <activity
+            android:label="@string/statistics"
+            android:name=".ChartSwitcherActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
