@@ -600,8 +600,7 @@ public class AbsLineChartView extends View implements LineChartUI {
         }
     }
 
-    private void drawYBarWithStamp(Canvas canvas, float value, int startX, int stopX, Paint barPaint, Paint textPaint) {
-        float y = getYCoor(value) - axisStrokeWidth / 2;
+    private void drawYBarWithStamp(Canvas canvas, float value, int startX, int stopX, float y, Paint barPaint, Paint textPaint) {
         // bar line
         canvas.drawLine(startX, y, stopX, y, barPaint);
 
@@ -633,7 +632,8 @@ public class AbsLineChartView extends View implements LineChartUI {
             yAxisTextPaint.setAlpha(fadeOutAlpha);
             for (int i = 0; i < yAxisStampCount; i++) {
                 float value = phantomYBarStartValue + i * phantomYBarStep;
-                drawYBarWithStamp(canvas, value, startX, stopX, yAxisPaint, yAxisTextPaint);
+                float y = getYCoor(value) - axisStrokeWidth / 2;
+                drawYBarWithStamp(canvas, value, startX, stopX, y, yAxisPaint, yAxisTextPaint);
             }
         }
 
@@ -645,7 +645,8 @@ public class AbsLineChartView extends View implements LineChartUI {
         yAxisTextPaint.setAlpha(fadeInAlpha);
         for (int i = 0; i < yAxisStampCount; i++) {
             float value = yBarStartValue + i * yBarStep;
-            drawYBarWithStamp(canvas, value, startX, stopX, yAxisPaint, yAxisTextPaint);
+            float y = getYCoor(value) - axisStrokeWidth / 2;
+            drawYBarWithStamp(canvas, value, startX, stopX, y, yAxisPaint, yAxisTextPaint);
         }
     }
 
