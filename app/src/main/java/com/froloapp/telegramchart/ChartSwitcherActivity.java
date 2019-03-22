@@ -53,7 +53,7 @@ public class ChartSwitcherActivity extends AbsChartActivity
     }
 
     private void initSpinner(LineChartAdapter[] adapters) {
-        ArrayAdapter<LineChartAdapter> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line);
+        ArrayAdapter<LineChartAdapter> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item);
         spinnerAdapter.addAll(adapters);
         spinnerCharts.setAdapter(spinnerAdapter);
         if (adapters.length != 0) {

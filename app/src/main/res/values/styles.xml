@@ -13,9 +13,4 @@
         <item name="frameBorderColor">@color/day_slider_frame</item>
         <item name="clickedStampSmallDotColor">@color/white</item>
     </style>
-
-    <style name="SpinnerItem" parent="android:Widget.TextView.SpinnerItem">
-        <item name="android:textColor">@color/black</item>
-        <item name="android:itemBackground">@color/white</item>
-    </style>
 </resources>
