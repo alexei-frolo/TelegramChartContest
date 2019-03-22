@@ -4,7 +4,6 @@ package com.froloapp.telegramchart;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.util.Log;
