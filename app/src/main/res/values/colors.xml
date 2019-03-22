@@ -3,6 +3,7 @@
     <color name="white">#FFFFFF</color>
     <color name="lt_gray">#E2E2E2</color>
     <color name="gray">#C3C3C3</color>
+    <color name="black">#1B1B1B</color>
 
     <color name="night_dark">#1A242E</color>
     <color name="night_toolbar">#212D3B</color>

@@ -56,21 +56,24 @@ public class ChartSwitcherActivity extends AbsChartActivity
         ArrayAdapter<LineChartAdapter> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line);
         spinnerAdapter.addAll(adapters);
         spinnerCharts.setAdapter(spinnerAdapter);
+        if (adapters.length != 0) {
+            LineChartAdapter firstChart = adapters[0];
+            initChart(firstChart, false);
+            spinnerCharts.setSelection(0);
+        }
+        // set callback after set selection
         spinnerCharts.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 LineChartAdapter adapter = (LineChartAdapter) parent.getAdapter().getItem(position);
-                currAdapter = adapter;
-                initChart(adapter);
-                initCheckboxes(adapter);
+                initChart(adapter, true);
             }
             @Override public void onNothingSelected(AdapterView<?> parent) { }
         });
-        if (adapters.length != 0) {
-            spinnerCharts.setSelection(0);
-        }
     }
 
-    private void initChart(LineChartAdapter adapter) {
+    private void initChart(LineChartAdapter adapter, boolean animate) {
+        currAdapter = adapter;
+
         chartView.setOnStampClickListener(null);
         chartSlider.setOnScrollListener(null);
 
@@ -78,12 +81,14 @@ public class ChartSwitcherActivity extends AbsChartActivity
         final float stopXPosition = 0.3f;
 
         chartView.setOnStampClickListener(this);
-        chartView.setAdapter(adapter, false);
-        chartView.setXPositions(startXPosition, stopXPosition, false);
+        chartView.setAdapter(adapter, animate);
+        chartView.setXPositions(startXPosition, stopXPosition, animate);
 
-        chartSlider.setAdapter(adapter, false);
-        chartSlider.setXPositions(startXPosition, stopXPosition, false);
+        chartSlider.setAdapter(adapter, animate);
+        chartSlider.setXPositions(startXPosition, stopXPosition, animate);
         chartSlider.setOnScrollListener(this);
+
+        initCheckboxes(adapter);
     }
 
     private void initCheckboxes(final LineChartAdapter adapter) {
