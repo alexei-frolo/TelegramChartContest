@@ -11,6 +11,9 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Build;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Property;
@@ -771,5 +774,93 @@ public class AbsLineChartView extends View implements LineChartUI {
             animateFadedOutChart(chart);
             invalidate();
         }
+    }
+
+    /* *********************************
+     ****** SAVING INSTANCE STATE ******
+     **********************************/
+
+    static class SavedState extends BaseSavedState {
+        float startXPercentage;
+        float stopXPercentage;
+        float minYValue;
+        float maxYValue;
+
+        SavedState(Parcelable superState) {
+            super(superState);
+        }
+
+        SavedState(Parcel in) {
+            super(in);
+            startXPercentage = in.readFloat();
+            stopXPercentage = in.readFloat();
+            minYValue = in.readFloat();
+            maxYValue = in.readFloat();
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            super.writeToParcel(out, flags);
+            out.writeFloat(startXPercentage);
+            out.writeFloat(stopXPercentage);
+            out.writeFloat(minYValue);
+            out.writeFloat(maxYValue);
+        }
+
+        public static final Parcelable.Creator<SavedState> CREATOR
+                = new Parcelable.Creator<SavedState>() {
+            @Override
+            public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in);
+            }
+
+            @Override
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
+    }
+
+    private void dumpState() {
+        char divider = '\n';
+        String stateTxt = new StringBuilder()
+                .append("startXPercentage").append('=').append(startXPercentage).append(divider)
+                .append("stopXPercentage").append('=').append(stopXPercentage).append(divider)
+                .append("minYValue").append('=').append(minYValue).append(divider)
+                .append("maxYValue").append('=').append(maxYValue).append(divider)
+                .toString();
+        log("Dumping:\n" + stateTxt);
+    }
+
+    @Nullable
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        dumpState();
+
+        Parcelable superState = super.onSaveInstanceState();
+        SavedState ss = new SavedState(superState);
+
+        ss.startXPercentage = startXPercentage;
+        ss.stopXPercentage = stopXPercentage;
+        ss.minYValue = minYValue;
+        ss.maxYValue = maxYValue;
+
+        return ss;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        SavedState ss = (SavedState) state;
+
+        super.onRestoreInstanceState(ss.getSuperState());
+
+        startXPercentage = ss.startXPercentage;
+        stopXPercentage = ss.stopXPercentage;
+        minYValue = ss.minYValue;
+        maxYValue = ss.maxYValue;
+
+        dumpState();
+
+        invalidate();
     }
 }

@@ -144,6 +144,5 @@ public class MainActivity extends AppCompatActivity {
                 AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO;
         AppCompatDelegate delegate = getDelegate();
         delegate.setLocalNightMode(mode);
-        delegate.applyDayNight();
     }
 }
