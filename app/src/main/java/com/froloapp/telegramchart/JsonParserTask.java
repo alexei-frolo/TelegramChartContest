@@ -29,9 +29,14 @@ public class JsonParserTask extends AsyncTask<InputStream, Void, Object> {
     }
 
     private final Callback callback;
+    private LineChartAdapter[] result;
 
     JsonParserTask(Callback callback) {
         this.callback = callback;
+    }
+
+    LineChartAdapter[] getResult() {
+        return result;
     }
 
     @Override
@@ -42,6 +47,7 @@ public class JsonParserTask extends AsyncTask<InputStream, Void, Object> {
     @Override
     protected void onPostExecute(Object o) {
         if (o instanceof LineChartAdapter[]) {
+            this.result = (LineChartAdapter[]) o;
             callback.onResult((LineChartAdapter[]) o);
         } else if (o instanceof Throwable) {
             callback.onError((Throwable) o);

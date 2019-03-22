@@ -42,7 +42,18 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         listCharts = findViewById(R.id.listCharts);
 
-        loadCharts();
+        Object lastInstance = getLastCustomNonConfigurationInstance();
+        if (lastInstance instanceof JsonParserTask) {
+            JsonParserTask retainedTask = (JsonParserTask) lastInstance;
+            LineChartAdapter[] result = retainedTask.getResult();
+            if (result != null) {
+                populateCharts(result);
+            } else {
+                loadCharts();
+            }
+        }  else {
+            loadCharts();
+        }
     }
 
     @Override
@@ -50,6 +61,11 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         AsyncTask task = jsonParserTask;
         if (task != null) task.cancel(true);
+    }
+
+    private void populateCharts(LineChartAdapter[] adapters) {
+        ChartListAdapter chartListAdapter = new ChartListAdapter(adapters);
+        listCharts.setAdapter(chartListAdapter);
     }
 
     private void loadCharts() {
@@ -65,8 +81,7 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
             }
             @Override public void onResult(LineChartAdapter[] adapters) {
-                ChartListAdapter chartListAdapter = new ChartListAdapter(adapters);
-                listCharts.setAdapter(chartListAdapter);
+                populateCharts(adapters);
             }
             @Override
             public void onCancelled() {
@@ -97,6 +112,11 @@ public class MainActivity extends AppCompatActivity {
             }
             default: return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public Object onRetainCustomNonConfigurationInstance() {
+        return jsonParserTask;
     }
 
     private boolean isNightModeEnabled() {
