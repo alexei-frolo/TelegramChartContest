@@ -42,7 +42,7 @@ public class AbsLineChartView extends View implements LineChartUI {
 
     // paint tools
     private final Paint chartPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final Paint yAxisPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint yAxisPaint = new Paint(); // Paint.ANTI_ALIAS_FLAG???
     private final Paint yAxisTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint xAxisTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private float[] bufferLinePoints; // for collecting (x; y) coors of a chart line to draw
@@ -84,10 +84,10 @@ public class AbsLineChartView extends View implements LineChartUI {
     private final float xAxisStampMaxCount = 6;
     private final float xAxisStampMinCount = 3;
     private int xAxisStampIndexStepCount = 5; // stamp are drawn through this step
+    private int phantomXAxisStampIndexStepCount; // phantom stamp are drawn through this step
     private int xAxisColor;
     private int xAxisTextColor;
     private float xAxisAlpha;
-    private int phantomXAxisStampIndexStepCount; // phantom stamp are drawn through this step
     private boolean drawXPhantoms;
 
     // Animators
@@ -523,57 +523,80 @@ public class AbsLineChartView extends View implements LineChartUI {
         animator.start();
     }
 
-    /**
-     * Draws X axis stamps;
-     * @param canvas canvas
-     */
-    protected void drawXAxis(Canvas canvas) {
-        LineChartAdapter adapter = getAdapter();
+    private void drawXAxisStampsNoTransition(Canvas canvas) {
+        LineChartAdapter adapter = this.adapter;
         if (adapter == null) return;
-        // TO DO: draw phantom and actual stamps on X axis
 
         final float y = getMeasuredHeight() - getPaddingBottom();
 
         final int timestampCount = adapter.getTimestampCount();
         final float avTimestampPosXStep = 1f / adapter.getTimestampCount(); // average step
 
-        if (drawXPhantoms) {
-            xAxisTextPaint.setAlpha((int) ((1 - xAxisAlpha) * 255));
-            int index = adapter.getLeftClosestTimestampIndex(startXPercentage);
-            int timestampIndex = (index / phantomXAxisStampIndexStepCount) * phantomXAxisStampIndexStepCount; // normalize
-            float timestampPosX = adapter.getTimestampRelPositionAt(timestampIndex);
-
-            while (timestampIndex < timestampCount) {
-                String text = adapter.getXStampTextAt(timestampIndex);
-                float x = getXCoor(timestampPosX);
-                //xAxisTextPaint.getTextBounds(text, 0, text.length() - 1, buffTextBounds);
-                canvas.drawText(text, x - buffTextBounds.width() / 2f, y, xAxisTextPaint);
-                if (timestampPosX > stopXPercentage) {
-                    break;
-                }
-                timestampIndex += phantomXAxisStampIndexStepCount;
-                timestampPosX += phantomXAxisStampIndexStepCount * avTimestampPosXStep;
-            }
-        }
-
-        xAxisTextPaint.setAlpha((int) (xAxisAlpha * 255));
-
-        int index = adapter.getLeftClosestTimestampIndex(startXPercentage);
-        int timestampIndex = (index / xAxisStampIndexStepCount) * xAxisStampIndexStepCount; // normalize
+        int timestampIndex = adapter.getLeftClosestTimestampIndex(startXPercentage);
+        timestampIndex = (timestampIndex / xAxisStampIndexStepCount) * xAxisStampIndexStepCount; // normalize
         float timestampPosX = adapter.getTimestampRelPositionAt(timestampIndex);
+
+        xAxisTextPaint.setAlpha(255);
+        while (timestampIndex < timestampCount) {
+            String text = adapter.getXStampTextAt(timestampIndex);
+            float x = getXCoor(timestampPosX);
+            canvas.drawText(text, x, y, xAxisTextPaint);
+            if (timestampPosX > stopXPercentage) {
+                break;
+            }
+            timestampIndex += xAxisStampIndexStepCount;
+            timestampPosX += xAxisStampIndexStepCount * avTimestampPosXStep;
+        }
+    }
+
+    private void drawXAxisStampsTransition(Canvas canvas) {
+        LineChartAdapter adapter = this.adapter;
+        if (adapter == null) return;
+
+        final float y = getMeasuredHeight() - getPaddingBottom();
+
+        final int timestampCount = adapter.getTimestampCount();
+        final float avTimestampPosXStep = 1f / adapter.getTimestampCount(); // average step
+
+        boolean fadeIn = xAxisStampIndexStepCount < phantomXAxisStampIndexStepCount; // fade int if true, fade out - otherwise
+        int smallStep = fadeIn ? xAxisStampIndexStepCount : phantomXAxisStampIndexStepCount;
+        int bigStep = fadeIn ? phantomXAxisStampIndexStepCount : xAxisStampIndexStepCount;
+
+        int timestampIndex = adapter.getLeftClosestTimestampIndex(startXPercentage);
+        timestampIndex = (timestampIndex / smallStep) * smallStep; // normalize
+        float timestampPosX = adapter.getTimestampRelPositionAt(timestampIndex);
+
+        int alpha = fadeIn ? (int) (xAxisAlpha * 255) : (int) ((1 - xAxisAlpha) * 255);
 
         while (timestampIndex < timestampCount) {
             String text = adapter.getXStampTextAt(timestampIndex);
             float x = getXCoor(timestampPosX);
-            //xAxisTextPaint.getTextBounds(text, 0, text.length() - 1, buffTextBounds);
-            canvas.drawText(text, x - buffTextBounds.width() / 2f, y, xAxisTextPaint);
+
+            if (timestampIndex % bigStep != 0) { // means phantom
+                xAxisTextPaint.setAlpha(alpha);
+            } else {
+                xAxisTextPaint.setAlpha(255);
+            }
+
+            canvas.drawText(text, x, y, xAxisTextPaint);
 
             if (timestampPosX > stopXPercentage) {
                 break;
             }
+            timestampIndex += smallStep;
+            timestampPosX += smallStep * avTimestampPosXStep;
+        }
+    }
 
-            timestampIndex += xAxisStampIndexStepCount;
-            timestampPosX += xAxisStampIndexStepCount * avTimestampPosXStep;
+    /**
+     * Draws X axis stamps with or without transition;
+     * @param canvas canvas
+     */
+    protected void drawXAxis(Canvas canvas) {
+        if (drawXPhantoms) {
+            drawXAxisStampsTransition(canvas);
+        } else {
+            drawXAxisStampsNoTransition(canvas);
         }
     }
 
