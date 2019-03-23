@@ -410,8 +410,10 @@ public class AbsLineChartView extends View implements LineChartUI {
     /**
      * Checks if min or max value on Y axis has changed;
      * If so then it does phantom magic with current Y axis bars;
+     * @param animate if transition needs to be animated
+     * @param calcAnimDuration if animation duration should be calculated, false - to use default duration
      */
-    private void checkIfMinOrMaxValueChanged(boolean animate) {
+    private void checkIfMinOrMaxValueChanged(boolean animate, boolean calcAnimDuration) {
         LineChartAdapter adapter = this.adapter;
         if (adapter == null) return;
 
@@ -443,7 +445,7 @@ public class AbsLineChartView extends View implements LineChartUI {
 
             if (animate) {
                 float oldRange = (startMaxYValue - startMinYValue);
-                long animDur = getYAxisAnimDuration(oldRange, newRange);
+                long animDur = calcAnimDuration ? getYAxisAnimDuration(oldRange, newRange) : Y_AXIS_ANIM_DURATION;
 
                 PropertyValuesHolder h1 = PropertyValuesHolder.ofFloat(MIN_Y_VALUE, startMinYValue, newMinValue);
                 PropertyValuesHolder h2 = PropertyValuesHolder.ofFloat(MAX_Y_VALUE, startMaxYValue, newMaxValue);
@@ -736,7 +738,7 @@ public class AbsLineChartView extends View implements LineChartUI {
             bufferLinePoints = new float[adapter.getTimestampCount() * 4];
         }
         checkIfXAxisStepCountChanged(animate);
-        checkIfMinOrMaxValueChanged(animate);
+        checkIfMinOrMaxValueChanged(animate, false);
         invalidate();
     }
 
@@ -746,7 +748,7 @@ public class AbsLineChartView extends View implements LineChartUI {
             this.startXPercentage = start;
             this.stopXPercentage = stop;
             checkIfXAxisStepCountChanged(animate);
-            checkIfMinOrMaxValueChanged(animate);
+            checkIfMinOrMaxValueChanged(animate, true);
             invalidate();
         }
     }
@@ -757,7 +759,7 @@ public class AbsLineChartView extends View implements LineChartUI {
         LineChartAdapter adapter = this.adapter;
         if (adapter != null) {
             adapter.setLineEnabled(chart, true);
-            checkIfMinOrMaxValueChanged(animate);
+            checkIfMinOrMaxValueChanged(animate, false);
             animateFadedInChart(chart);
             invalidate();
         }
@@ -770,7 +772,7 @@ public class AbsLineChartView extends View implements LineChartUI {
         if (adapter != null) {
             adapter.setLineEnabled(chart, false);
             // if (adapter.hasEnabledLines()) // maybe do not check for new local min and max if adapter has no enabled lines
-            checkIfMinOrMaxValueChanged(animate);
+            checkIfMinOrMaxValueChanged(animate, false);
             animateFadedOutChart(chart);
             invalidate();
         }
