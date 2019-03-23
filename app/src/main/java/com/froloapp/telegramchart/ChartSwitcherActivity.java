@@ -1,6 +1,7 @@
 package com.froloapp.telegramchart;
 
 
+import android.annotation.SuppressLint;
 import android.content.res.ColorStateList;
 import android.graphics.Rect;
 import android.os.Build;
@@ -8,6 +9,7 @@ import android.os.Bundle;
 import android.support.v4.widget.TintableCompoundButton;
 import android.support.v7.widget.AppCompatCheckBox;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -32,6 +34,9 @@ public class ChartSwitcherActivity extends AbsChartActivity
     private LineChartSlider chartSlider;
     private LinearLayout layoutCheckboxes;
 
+    // I need to know when spinner callback triggered due a user input or programmatically
+    private boolean spinnerTouched = false;
+
     private LineChartAdapter currAdapter;
 
     private PopupWindow popupWindow;
@@ -44,6 +49,25 @@ public class ChartSwitcherActivity extends AbsChartActivity
         chartView = findViewById(R.id.chartView);
         chartSlider = findViewById(R.id.chartSlider);
         layoutCheckboxes = findViewById(R.id.layoutCheckboxes);
+
+        spinnerCharts.setOnTouchListener(new View.OnTouchListener() {
+            @SuppressLint("ClickableViewAccessibility")
+            @Override public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    spinnerTouched = true; // user touched the spinner
+                }
+                return false;
+            }
+        });
+        // set callback after set selection
+        spinnerCharts.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                LineChartAdapter adapter = (LineChartAdapter) parent.getAdapter().getItem(position);
+                initChart(adapter, spinnerTouched); // animate only if selected by user
+                spinnerTouched = false;
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) { }
+        });
 
         final float startXPosition = 0.0f;
         final float stopXPosition = 0.3f;
@@ -69,14 +93,6 @@ public class ChartSwitcherActivity extends AbsChartActivity
             initChart(firstChart, false);
             spinnerCharts.setSelection(0);
         }
-        // set callback after set selection
-        spinnerCharts.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                LineChartAdapter adapter = (LineChartAdapter) parent.getAdapter().getItem(position);
-                initChart(adapter, true);
-            }
-            @Override public void onNothingSelected(AdapterView<?> parent) { }
-        });
     }
 
     private void initChart(LineChartAdapter adapter, boolean animate) {
