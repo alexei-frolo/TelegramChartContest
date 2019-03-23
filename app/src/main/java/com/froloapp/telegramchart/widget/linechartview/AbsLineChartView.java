@@ -411,7 +411,7 @@ public class AbsLineChartView extends View implements LineChartUI {
      * Checks if min or max value on Y axis has changed;
      * If so then it does phantom magic with current Y axis bars;
      * @param animate if transition needs to be animated
-     * @param calcAnimDuration if animation duration should be calculated, false - to use default duration
+     * @param calcAnimDuration true if animation duration should be calculated, false - to use default duration (ignored if @param animate = false)
      */
     private void checkIfMinOrMaxValueChanged(boolean animate, boolean calcAnimDuration) {
         LineChartAdapter adapter = this.adapter;
@@ -783,10 +783,10 @@ public class AbsLineChartView extends View implements LineChartUI {
      **********************************/
 
     static class SavedState extends BaseSavedState {
-        float startXPercentage;
-        float stopXPercentage;
-        float minYValue;
-        float maxYValue;
+        private float startXPercentage;
+        private float stopXPercentage;
+        private float minYValue;
+        private float maxYValue;
 
         SavedState(Parcelable superState) {
             super(superState);
@@ -834,7 +834,6 @@ public class AbsLineChartView extends View implements LineChartUI {
         log("Dumping:\n" + stateTxt);
     }
 
-    @Nullable
     @Override
     protected Parcelable onSaveInstanceState() {
         dumpState();
@@ -863,6 +862,7 @@ public class AbsLineChartView extends View implements LineChartUI {
 
         dumpState();
 
-        invalidate();
+        checkIfXAxisStepCountChanged(false);
+        checkIfMinOrMaxValueChanged(false, false);
     }
 }

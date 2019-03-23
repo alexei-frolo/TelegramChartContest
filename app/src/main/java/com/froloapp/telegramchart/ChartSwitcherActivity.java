@@ -44,6 +44,14 @@ public class ChartSwitcherActivity extends AbsChartActivity
         chartView = findViewById(R.id.chartView);
         chartSlider = findViewById(R.id.chartSlider);
         layoutCheckboxes = findViewById(R.id.layoutCheckboxes);
+
+        final float startXPosition = 0.0f;
+        final float stopXPosition = 0.3f;
+        chartView.setXPositions(startXPosition, stopXPosition, false);
+        chartSlider.setXPositions(startXPosition, stopXPosition, false);
+        chartView.setOnStampClickListener(this);
+        chartSlider.setOnScrollListener(this);
+
         load();
     }
 
@@ -73,21 +81,8 @@ public class ChartSwitcherActivity extends AbsChartActivity
 
     private void initChart(LineChartAdapter adapter, boolean animate) {
         currAdapter = adapter;
-
-        chartView.setOnStampClickListener(null);
-        chartSlider.setOnScrollListener(null);
-
-        final float startXPosition = 0.0f;
-        final float stopXPosition = 0.3f;
-
-        chartView.setOnStampClickListener(this);
         chartView.setAdapter(adapter, animate);
-        chartView.setXPositions(startXPosition, stopXPosition, animate);
-
         chartSlider.setAdapter(adapter, animate);
-        chartSlider.setXPositions(startXPosition, stopXPosition, animate);
-        chartSlider.setOnScrollListener(this);
-
         initCheckboxes(adapter);
     }
 

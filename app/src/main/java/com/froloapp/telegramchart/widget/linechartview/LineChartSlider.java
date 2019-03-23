@@ -6,6 +6,8 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 
@@ -276,5 +278,67 @@ public class LineChartSlider extends AbsLineChartView {
         this.leftBorderXPosition = start;
         this.rightBorderXPosition = stop;
         super.setXPositions(0f, 1f, animate);
+    }
+
+    /* *********************************
+     ****** SAVING INSTANCE STATE ******
+     **********************************/
+
+    static class SavedState extends AbsLineChartView.SavedState {
+        float leftBorderXPosition;
+        float rightBorderXPosition;
+
+        SavedState(Parcelable superState) {
+            super(superState);
+        }
+
+        SavedState(Parcel in) {
+            super(in);
+            leftBorderXPosition = in.readFloat();
+            rightBorderXPosition = in.readFloat();
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            super.writeToParcel(out, flags);
+            out.writeFloat(leftBorderXPosition);
+            out.writeFloat(rightBorderXPosition);
+        }
+
+        public static final Parcelable.Creator<SavedState> CREATOR
+                = new Parcelable.Creator<SavedState>() {
+            @Override
+            public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in);
+            }
+
+            @Override
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
+    }
+
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Parcelable superState = super.onSaveInstanceState();
+        SavedState ss = new SavedState(superState);
+
+        ss.leftBorderXPosition = leftBorderXPosition;
+        ss.rightBorderXPosition = rightBorderXPosition;
+
+        return ss;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        SavedState ss = (SavedState) state;
+
+        super.onRestoreInstanceState(ss.getSuperState());
+
+        leftBorderXPosition = ss.leftBorderXPosition;
+        rightBorderXPosition = ss.rightBorderXPosition;
+
+        invalidate();
     }
 }

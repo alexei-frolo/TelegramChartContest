@@ -44,6 +44,7 @@ abstract class AbsChartActivity extends AppCompatActivity {
             JsonParserTask retainedTask = (JsonParserTask) lastInstance;
             LineChartAdapter[] result = retainedTask.getResult();
             if (result != null) {
+                jsonParserTask = retainedTask;
                 populateCharts(result);
             } else {
                 loadCharts();
