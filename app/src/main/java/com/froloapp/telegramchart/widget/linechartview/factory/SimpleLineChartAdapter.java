@@ -286,33 +286,45 @@ class SimpleLineChartAdapter implements LineChartAdapter {
 
     @Override
     public void setLineEnabled(Line chart, boolean visible) {
-        for (int i = 0; i < lineHolders.size(); i++) {
-            LineHolder holder = lineHolders.get(i);
-            if (holder.data.equals(chart)) {
-                holder.visible = visible;
-                for (int j = 0; j < timestamps.size(); j++) {
-                    int value = holder.data.getValueAt(j);
-                    int currMinValue = localMinimums.get(j);
-                    int currMaxValue = localMaximums.get(j);
-                    if (visible) {
-                        if (value < currMinValue) {
-                            localMinimums.set(j, value);
-                        }
-                        if (value > currMaxValue) {
-                            localMaximums.set(j, value);
-                        }
-                    } else {
-                        if (value <= currMinValue) {
-                            int newMinValue = findMinValueAt(j);
-                            localMinimums.set(j, newMinValue);
-                        }
-                        if (value >= currMaxValue) {
-                            int newMaxValue = findMaxValueAt(j);
-                            localMaximums.set(j, newMaxValue);
+        if (visible && getEnabledLineCount() == 0) {
+            for (int i = 0; i < lineHolders.size(); i++) {
+                LineHolder holder = lineHolders.get(i);
+                if (holder.data.equals(chart)) {
+                    holder.visible = visible;
+                }
+            }
+            // total recalculation
+            calcMinimumsAndMaximums();
+        } else {
+            // optimized way (recalculation just for local timestamps if needed)
+            for (int i = 0; i < lineHolders.size(); i++) {
+                LineHolder holder = lineHolders.get(i);
+                if (holder.data.equals(chart)) {
+                    holder.visible = visible;
+                    for (int j = 0; j < timestamps.size(); j++) {
+                        int value = holder.data.getValueAt(j);
+                        int currMinValue = localMinimums.get(j);
+                        int currMaxValue = localMaximums.get(j);
+                        if (visible) {
+                            if (value < currMinValue) {
+                                localMinimums.set(j, value);
+                            }
+                            if (value > currMaxValue) {
+                                localMaximums.set(j, value);
+                            }
+                        } else {
+                            if (value <= currMinValue) {
+                                int newMinValue = findMinValueAt(j);
+                                localMinimums.set(j, newMinValue);
+                            }
+                            if (value >= currMaxValue) {
+                                int newMaxValue = findMaxValueAt(j);
+                                localMaximums.set(j, newMaxValue);
+                            }
                         }
                     }
+                    break;
                 }
-                break;
             }
         }
     }
