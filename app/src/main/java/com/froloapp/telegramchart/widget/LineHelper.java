@@ -16,7 +16,7 @@ final class LineHelper {
     private static final Interpolator FADE_INTERPOLATOR =
             new FastOutLinearInInterpolator();
 
-    private static final float DEFAULT_LINE_STROKE_WIDTH_IN_DP = 2f;
+    private static final float DEFAULT_LINE_STROKE_WIDTH_IN_DP = 1.5f;
 
     private final AbsChartView mView;
     private final List<Point> mPoints;

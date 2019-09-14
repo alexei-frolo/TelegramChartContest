@@ -6,9 +6,9 @@ import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.support.v4.view.animation.FastOutLinearInInterpolator;
 import android.util.Log;
 import android.util.Property;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 
 import com.froloapp.telegramchart.BuildConfig;
@@ -18,10 +18,10 @@ final class YAxisHelper {
 
     private static final String LOG_TAG = "YAxisHelper";
 
-    private static final long Y_AXIS_ANIM_DURATION = 2000;
+    private static final long Y_AXIS_ANIM_DURATION = 250;
 
     private static final Interpolator Y_AXIS_INTERPOLATOR =
-            new FastOutLinearInInterpolator();
+            new AccelerateDecelerateInterpolator();
 
     private static final float DEFAULT_LINE_STROKE_WIDTH_IN_DP = 2f;
     private static final float DEFAULT_TEXT_SIZE_IN_SP = 16f;
@@ -145,7 +145,7 @@ final class YAxisHelper {
         canvas.drawText(
                 text,
                 startXCoordinate,
-                yCoordinate - 5f, // y - 5 to make a margin between stamp and bar
+                yCoordinate - mLinePaint.getStrokeWidth() * 4, // mLinePaint.getStrokeWidth() * 4 adds additional space between line and text
                 mTextPaint);
     }
 

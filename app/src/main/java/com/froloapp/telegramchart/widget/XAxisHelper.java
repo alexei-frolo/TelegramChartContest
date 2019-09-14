@@ -8,8 +8,8 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.Property;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
-import android.view.animation.LinearInterpolator;
 
 import java.util.Collections;
 import java.util.List;
@@ -19,7 +19,7 @@ final class XAxisHelper {
     private static final long X_AXIS_ANIM_DURATION = 200;
 
     private static final Interpolator X_AXIS_INTERPOLATOR =
-            new LinearInterpolator();
+            new AccelerateDecelerateInterpolator();
 
     private static final float DEFAULT_TEXT_SIZE_IN_SP = 16f;
 
