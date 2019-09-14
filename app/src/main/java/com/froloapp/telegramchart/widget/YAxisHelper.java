@@ -19,7 +19,7 @@ final class YAxisHelper {
 
     private static final String LOG_TAG = "YAxisHelper";
 
-    private static final long Y_AXIS_ANIM_DURATION = 250;
+    private static final long Y_AXIS_ANIM_DURATION = Config.Y_AXIS_ANIM_DURATION;
 
     private static final Interpolator Y_AXIS_INTERPOLATOR =
             new AccelerateDecelerateInterpolator();
@@ -28,23 +28,23 @@ final class YAxisHelper {
     private static final float DEFAULT_TEXT_SIZE_IN_SP = 16f;
 
     private final static Property<YAxisHelper, Float> MIN_Y_VALUE =
-            new Property<YAxisHelper, Float>(float.class, "mTargetYMin") {
+            new Property<YAxisHelper, Float>(float.class, "mCurrentYMin") {
         @Override public Float get(YAxisHelper object) {
-            return object.mTargetYMin;
+            return object.mCurrentYMin;
         }
         @Override public void set(YAxisHelper object, Float value) {
-            object.mTargetYMin = value;
+            object.mCurrentYMin = value;
             object.requestRedraw();
         }
     };
 
     private final static Property<YAxisHelper, Float> MAX_Y_VALUE =
-            new Property<YAxisHelper, Float>(float.class, "mTargetYMax") {
+            new Property<YAxisHelper, Float>(float.class, "mCurrentYMax") {
         @Override public Float get(YAxisHelper object) {
-            return object.mTargetYMax;
+            return object.mCurrentYMax;
         }
         @Override public void set(YAxisHelper object, Float value) {
-            object.mTargetYMax = value;
+            object.mCurrentYMax = value;
             object.requestRedraw();
         }
     };
@@ -65,11 +65,17 @@ final class YAxisHelper {
     // count of horizontal lines
     private final int mLineCount = 5;
 
-    // actual Y min and max
+    // target Y min and max
     private float mTargetYMin;
     private float mTargetYMax;
-    // actual value step between lines
+    // target value step between lines
     private float mTargetYStep;
+
+    // current Y min and max
+    private float mCurrentYMin;
+    private float mCurrentYMax;
+    // current value step between lines
+    private float mCurrentYStep;
 
     // old Y min and max
     private float mPhantomYMin = 0;
@@ -130,7 +136,22 @@ final class YAxisHelper {
     }
 
     private long calcAnimDuration(float oldRange, float newRange) {
-        return Y_AXIS_ANIM_DURATION;
+        if (oldRange != 0 && newRange != 0) {
+            float coeff;
+            if (newRange > oldRange) {
+                coeff = newRange / oldRange;
+            } else {
+                coeff = oldRange / newRange;
+            }
+
+            coeff = coeff * coeff;
+            if (coeff > 2.5) {
+                coeff = 2.5f;
+            }
+            return (long) (Y_AXIS_ANIM_DURATION * coeff);
+        } else {
+            return Y_AXIS_ANIM_DURATION;
+        }
     }
 
     private void drawLineAndText(Canvas canvas,
@@ -172,6 +193,7 @@ final class YAxisHelper {
 
         if (mIsAnimating) {
             // Here, we're drawing phantom lines
+            mPhantomYStep = (mPhantomYMax - mPhantomYMin) / mLineCount;
 
             // Drawing lines that are fading out
             mLinePaint.setAlpha(fadeOutAlpha);
@@ -182,8 +204,8 @@ final class YAxisHelper {
 
                 float y = CommonHelper.findYCoordinate(
                         mView,
-                        mTargetYMin,
-                        mTargetYMax,
+                        mPhantomYMin,
+                        mPhantomYMax,
                         value);
 
                 drawLineAndText(
@@ -198,17 +220,19 @@ final class YAxisHelper {
         {
             // Here, we're drawing target lines
 
+            mCurrentYStep = (mCurrentYMax - mCurrentYStep) / mLineCount;
+
             // Drawing fading in bars
             mLinePaint.setAlpha(fadeInAlpha);
             mTextPaint.setAlpha(fadeInAlpha);
 
             for (int i = 0; i < mLineCount; i++) {
-                float value = mTargetYMin + i * mTargetYStep;
+                float value = mCurrentYMin + i * mCurrentYStep;
 
                 float y = CommonHelper.findYCoordinate(
                         mView,
-                        mTargetYMin,
-                        mTargetYMax,
+                        mCurrentYMin,
+                        mCurrentYMax,
                         value);
 
                 drawLineAndText(
@@ -224,27 +248,45 @@ final class YAxisHelper {
     void setMaxAndMin(float min, float max, boolean animate) {
         if (mTargetYMin != min || mTargetYMax != max) {
 
-            if (mAnim != null) {
-                mAnim.cancel();
-                mAnim = null;
-            }
-
-            float oldRange = (mTargetYMax - mTargetYMin);
+            float oldRange = (mCurrentYMax - mCurrentYMin);
             float newRange = max - min;
 
-            mPhantomYMin = mTargetYMin;
-            mPhantomYStep = mTargetYStep;
-
             mTargetYMin = min;
+            mTargetYMax = max;
             mTargetYStep = newRange / (mLineCount);
 
+            final boolean wasAnimating;
+
+            final float startAlpha;
+
+            if (mAnim != null) {
+                wasAnimating = mAnim.isRunning();
+                mAnim.cancel();
+                mAnim = null;
+            } else {
+                wasAnimating = false;
+            }
+
+            mCurrentYStep = (mCurrentYMax - mCurrentYStep) / mLineCount;
+
+            if (!wasAnimating) {
+                startAlpha = 0.1f;
+                mPhantomYMin = mCurrentYMin;
+                mPhantomYMax = mCurrentYMax;
+                mPhantomYStep = mCurrentYStep;
+            } else {
+                startAlpha = mAlpha;
+                // phantom values don't change if it was not animating
+            }
+
+
             if (animate) {
-                boolean sensitiveAnimation = true;
+                boolean sensitiveAnimation = false;
                 long animDuration = sensitiveAnimation ? calcAnimDuration(oldRange, newRange) : Y_AXIS_ANIM_DURATION;
 
-                PropertyValuesHolder h1 = PropertyValuesHolder.ofFloat(MIN_Y_VALUE, mTargetYMin, min);
-                PropertyValuesHolder h2 = PropertyValuesHolder.ofFloat(MAX_Y_VALUE, mTargetYMax, max);
-                PropertyValuesHolder h3 = PropertyValuesHolder.ofFloat(Y_AXIS_ALPHA, 0.1f, 1f);
+                PropertyValuesHolder h1 = PropertyValuesHolder.ofFloat(MIN_Y_VALUE, mCurrentYMin, min);
+                PropertyValuesHolder h2 = PropertyValuesHolder.ofFloat(MAX_Y_VALUE, mCurrentYMax, max);
+                PropertyValuesHolder h3 = PropertyValuesHolder.ofFloat(Y_AXIS_ALPHA, startAlpha, 1f);
 
                 ObjectAnimator newAnim = ObjectAnimator.ofPropertyValuesHolder(this, h1, h2, h3);
                 newAnim.addListener(mAnimListener);
@@ -255,20 +297,20 @@ final class YAxisHelper {
                 mAnim = newAnim;
             } else {
                 mAnim = null;
-                mTargetYMin = min;
-                mTargetYMax = max;
+                mCurrentYMin = min;
+                mCurrentYMax = max;
                 mAlpha = 1f;
                 requestRedraw();
             }
         }
     }
 
-    float getTargetMinValue() {
-        return mTargetYMin;
+    float getCurrentMinValue() {
+        return mCurrentYMin;
     }
 
-    float getTargetMaxValue() {
-        return mTargetYMax;
+    float getCurrentMaxValue() {
+        return mCurrentYMax;
     }
 
     void attach() {

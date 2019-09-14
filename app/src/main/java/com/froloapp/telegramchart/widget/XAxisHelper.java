@@ -17,7 +17,7 @@ import java.util.List;
 
 // This helper is responsible for animating and drawing X axis
 final class XAxisHelper {
-    private static final long X_AXIS_ANIM_DURATION = 200;
+    private static final long X_AXIS_ANIM_DURATION = Config.X_AXIS_ANIM_DURATION;
 
     private static final Interpolator X_AXIS_INTERPOLATOR =
             new AccelerateDecelerateInterpolator();

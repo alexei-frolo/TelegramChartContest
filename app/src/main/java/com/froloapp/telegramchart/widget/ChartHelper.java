@@ -114,7 +114,7 @@ final class ChartHelper {
         }
     }
 
-    private void calcLocalMinMax(MinMax holder, float fromXPosition, float toXPosition) {
+    private void findLocalMinMax(MinMax holder, float fromXPosition, float toXPosition) {
         if (mPoints.isEmpty()) {
             return;
         }
@@ -172,7 +172,7 @@ final class ChartHelper {
     }
 
     private void dispatchMinAndMaxInRange(boolean animate) {
-        calcLocalMinMax(mMinMax, mStartXPosition, mStopXPosition);
+        findLocalMinMax(mMinMax, mStartXPosition, mStopXPosition);
         mYAxisHelper.setMaxAndMin(mMinMax.min, mMinMax.max, animate);
     }
 
@@ -310,8 +310,8 @@ final class ChartHelper {
         for (LineHelper helper : mLineHelpers) {
             helper.draw(
                     canvas,
-                    mYAxisHelper.getTargetMinValue(),
-                    mYAxisHelper.getTargetMaxValue());
+                    mYAxisHelper.getCurrentMinValue(),
+                    mYAxisHelper.getCurrentMaxValue());
         }
     }
 

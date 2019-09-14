@@ -12,7 +12,7 @@ import java.util.List;
 
 // This helper is responsible for animating and drawing one chart line
 final class LineHelper {
-    private static final long FADE_ANIM_DURATION = 250;
+    private static final long FADE_ANIM_DURATION = Config.Y_AXIS_ANIM_DURATION;
 
     private static final Interpolator FADE_INTERPOLATOR =
             new FastOutLinearInInterpolator();
