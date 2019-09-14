@@ -162,10 +162,11 @@ final class YAxisHelper {
         int fadeInAlpha = (int) (255 * mAlpha);
         int fadeOutAlpha = (int) (255 * (1 - mAlpha));
 
-        // it should be dynamic
-        final float lineStrokeWidth = 6;
+        final float lineStrokeWidth = mLinePaint.getStrokeWidth();
 
         if (mIsAnimating) {
+            // Here, we're drawing phantom lines
+
             float phantomLineStartValue = mPhantomYMin;
             float phantomLineStep = (mPhantomYMax - mPhantomYMin) / mLineCount;
 
@@ -191,34 +192,32 @@ final class YAxisHelper {
             }
         }
 
-        float targetLineStartValue = mTargetYMin;
-        float targetLineStep = (mTargetYMax - mTargetYMin) / mLineCount;
+        {
+            // Here, we're drawing target lines
 
-        // Drawing fading in bars
-        mLinePaint.setAlpha(fadeInAlpha);
-        mTextPaint.setAlpha(fadeInAlpha);
+            float targetLineStartValue = mTargetYMin;
+            float targetLineStep = (mTargetYMax - mTargetYMin) / mLineCount;
 
-        for (int i = 0; i < mLineCount; i++) {
-            float value = targetLineStartValue + i * targetLineStep;
+            // Drawing fading in bars
+            mLinePaint.setAlpha(fadeInAlpha);
+            mTextPaint.setAlpha(fadeInAlpha);
 
-            CommonHelper.findYCoordinate(
-                    mView,
-                    mPhantomYMin,
-                    mPhantomYMax,
-                    value);
+            for (int i = 0; i < mLineCount; i++) {
+                float value = targetLineStartValue + i * targetLineStep;
 
-            float y = CommonHelper.findYCoordinate(
-                    mView,
-                    mTargetYMin,
-                    mTargetYMax,
-                    value);
+                float y = CommonHelper.findYCoordinate(
+                        mView,
+                        mTargetYMin,
+                        mTargetYMax,
+                        value);
 
-            drawLineAndText(
-                    canvas,
-                    value,
-                    startXCoordinate,
-                    stopXCoordinate,
-                    y - lineStrokeWidth / 2);
+                drawLineAndText(
+                        canvas,
+                        value,
+                        startXCoordinate,
+                        stopXCoordinate,
+                        y - lineStrokeWidth / 2);
+            }
         }
     }
 
