@@ -5,12 +5,9 @@
         <item name="colorPrimary">@color/day_toolbar</item>
         <item name="colorPrimaryDark">@color/day_dark</item>
         <item name="android:windowBackground">@color/day_background</item>
-        <item name="overlayColor">@color/day_slider_overlay</item>
         <item name="xAxisColor">@color/day_chart_axis</item>
-        <item name="xAxisTextColor">@color/day_chart_axis_text</item>
         <item name="yAxisColor">@color/day_chart_axis</item>
-        <item name="yAxisTextColor">@color/day_chart_axis_text</item>
+        <item name="overlayColor">@color/day_slider_overlay</item>
         <item name="frameBorderColor">@color/day_slider_frame</item>
-        <item name="clickedStampSmallDotColor">@color/white</item>
     </style>
 </resources>

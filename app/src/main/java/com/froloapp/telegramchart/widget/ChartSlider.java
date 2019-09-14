@@ -101,6 +101,9 @@ public class ChartSlider extends AbsChartView {
         framePaint.setColor(frameBorderColor);
 
         touchBorderThreshold = Utils.dpToPx(5f, context);
+
+        setWillDrawXAxis(false);
+        setWillDrawYAxis(false);
     }
 
     public interface OnScrollListener {

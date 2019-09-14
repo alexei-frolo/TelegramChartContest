@@ -11,7 +11,7 @@ import android.view.View;
 import com.froloapp.telegramchart.R;
 
 
-public class AbsChartView extends View {
+abstract class AbsChartView extends View {
 
     private static final int DEFAULT_WIDTH_IN_DP = 200;
     private static final int DEFAULT_HEIGHT_IN_DP = 100;
@@ -39,7 +39,8 @@ public class AbsChartView extends View {
     private void init(Context context, AttributeSet attrs) {
         float chartLineWidth;
         if (attrs != null) {
-            TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.AbsLineChartView, 0, 0);
+            TypedArray typedArray = context.getTheme()
+                    .obtainStyledAttributes(attrs, R.styleable.AbsLineChartView, 0, 0);
             chartLineWidth = typedArray.getDimension(R.styleable.AbsLineChartView_chartStrokeWidth, Utils.dpToPx(DEFAULT_CHART_LINE_WIDTH_IN_DP, context));
             //axisStrokeWidth = typedArray.getDimension(R.styleable.AbsLineChartView_axisStrokeWidth, Utils.dpToPx(DEFAULT_AXIS_LINE_WIDTH_IN_DP, context));
             typedArray.recycle();
@@ -117,23 +118,13 @@ public class AbsChartView extends View {
         mChartHelper.hide(line, animate);
     }
 
-    /* *********************************
-     ********* PACKAGE INTERFACE *******
-     **********************************/
-
-    /*abstract*/ int getFooterHeight() {
+    /* package */ int getFooterHeight() {
         return footerHeight;
     }
 
-    /* *********************************
-     ****** SAVING INSTANCE STATE ******
-     **********************************/
-
     static class SavedState extends BaseSavedState {
-        private float startXPercentage;
-        private float stopXPercentage;
-        private float minYValue;
-        private float maxYValue;
+        private float mStartXPosition;
+        private float mStopXPosition;
 
         SavedState(Parcelable superState) {
             super(superState);
@@ -141,19 +132,15 @@ public class AbsChartView extends View {
 
         SavedState(Parcel in) {
             super(in);
-            startXPercentage = in.readFloat();
-            stopXPercentage = in.readFloat();
-            minYValue = in.readFloat();
-            maxYValue = in.readFloat();
+            mStartXPosition = in.readFloat();
+            mStopXPosition = in.readFloat();
         }
 
         @Override
         public void writeToParcel(Parcel out, int flags) {
             super.writeToParcel(out, flags);
-            out.writeFloat(startXPercentage);
-            out.writeFloat(stopXPercentage);
-            out.writeFloat(minYValue);
-            out.writeFloat(maxYValue);
+            out.writeFloat(mStartXPosition);
+            out.writeFloat(mStopXPosition);
         }
 
         public static final Parcelable.Creator<SavedState> CREATOR
@@ -170,14 +157,13 @@ public class AbsChartView extends View {
         };
     }
 
-
     @Override
     protected Parcelable onSaveInstanceState() {
         Parcelable superState = super.onSaveInstanceState();
         SavedState ss = new SavedState(superState);
 
-//        ss.startXPercentage = startXPercentage;
-//        ss.stopXPercentage = stopXPercentage;
+//        ss.mStartXPosition = mStartXPosition;
+//        ss.mStopXPosition = mStopXPosition;
 //        ss.minYValue = minYValue;
 //        ss.maxYValue = maxYValue;
 
@@ -190,10 +176,8 @@ public class AbsChartView extends View {
 
         super.onRestoreInstanceState(ss.getSuperState());
 
-        float startXPercentage = ss.startXPercentage;
-        float stopXPercentage = ss.stopXPercentage;
-        float minYValue = ss.minYValue;
-        float maxYValue = ss.maxYValue;
+        float startXPercentage = ss.mStartXPosition;
+        float stopXPercentage = ss.mStopXPosition;
 
     }
 }

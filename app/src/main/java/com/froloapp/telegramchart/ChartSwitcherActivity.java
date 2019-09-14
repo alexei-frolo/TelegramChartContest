@@ -3,12 +3,10 @@ package com.froloapp.telegramchart;
 
 import android.annotation.SuppressLint;
 import android.content.res.ColorStateList;
-import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.widget.TintableCompoundButton;
 import android.support.v7.widget.AppCompatCheckBox;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,27 +17,23 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.Spinner;
 
-import com.froloapp.telegramchart.widget.AbsChartView;
 import com.froloapp.telegramchart.widget.Chart;
+import com.froloapp.telegramchart.widget.ChartView;
 import com.froloapp.telegramchart.widget.Line;
 import com.froloapp.telegramchart.widget.Utils;
 import com.froloapp.telegramchart.widget.ChartSlider;
 
 
 public class ChartSwitcherActivity extends AbsChartActivity
-        implements ChartSlider.OnScrollListener
-        //LineChartView.OnStampClickListener
-{
+        implements ChartSlider.OnScrollListener {
 
     private Spinner spinnerCharts;
-    private AbsChartView chartView;
+    private ChartView chartView;
     private ChartSlider chartSlider;
     private LinearLayout layoutCheckboxes;
 
     // I need to know when spinner callback triggered due a user input or programmatically
     private boolean spinnerTouched = false;
-
-    private Chart currAdapter;
 
     private PopupWindow popupWindow;
 
@@ -75,7 +69,6 @@ public class ChartSwitcherActivity extends AbsChartActivity
         final float stopXPosition = 0.3f;
         chartView.setXPositions(startXPosition, stopXPosition, false);
         chartSlider.setXPositions(startXPosition, stopXPosition, false);
-        //chartView.setOnStampClickListener(this);
         chartSlider.setOnScrollListener(this);
 
         load();
@@ -98,7 +91,6 @@ public class ChartSwitcherActivity extends AbsChartActivity
     }
 
     private void initChart(Chart chart, boolean animate) {
-        currAdapter = chart;
         chartView.setChart(chart, animate);
         chartSlider.setChart(chart, animate);
         initCheckboxes(chart);
@@ -146,46 +138,4 @@ public class ChartSwitcherActivity extends AbsChartActivity
     public void onScroll(ChartSlider slider, float startStampRel, float endStampRel) {
         chartView.setXPositions(startStampRel, endStampRel, true);
     }
-
-//    //@Override
-//    public void onTouchDown(final AbsChartView view, long timestamp, float timestampX) {
-//        showPopup(timestamp, timestampX);
-//    }
-//
-//    //@Override
-//    public void onTouchUp(AbsChartView view) {
-//        PopupWindow currWindow = this.popupWindow;
-//        if (currWindow != null) {
-//            currWindow.dismiss();
-//            this.popupWindow = null;
-//        }
-//    }
-//
-//    private void showPopup(long timestamp, float timestampX) {
-//        final Rect location = Utils.getViewLocation(chartView);
-//        if (location == null) {
-//            // early return. Shouldn't happen
-//            return;
-//        }
-//
-//        final int locX = location.left
-//                + (int) timestampX
-//                + 15; // + 15 to make a margin between x axis bar and dialog
-//        final int locY = location.top;
-//
-//        final PopupWindow currPopup = this.popupWindow;
-//        if (currPopup == null) {
-//            PopupWindow newWindow = PopupHelper.createPopupWindow(this, currAdapter, timestamp);
-//            if (newWindow != null) {
-//                newWindow.showAtLocation(chartView, Gravity.TOP | Gravity.LEFT, locX, locY);
-//                this.popupWindow = newWindow;
-//            }
-//        } else {
-//            final int w = ViewGroup.LayoutParams.WRAP_CONTENT;
-//            final int h = ViewGroup.LayoutParams.WRAP_CONTENT;
-//            View v = currPopup.getContentView();
-//            PopupHelper.populateWindowView(v, currAdapter, timestamp);
-//            currPopup.update(locX, locY, w, h);
-//        }
-//    }
 }

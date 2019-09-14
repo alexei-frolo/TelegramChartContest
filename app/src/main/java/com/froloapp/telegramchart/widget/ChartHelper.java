@@ -49,7 +49,7 @@ final class ChartHelper {
 
     // finds min value for the given index
     private float findMinValueAt(int index) {
-        boolean atLeastOneLineEnabled = false;
+        boolean atLeastOneLineVisible = false;
         float min = Float.MAX_VALUE;
 
         for (LineHelper helper : mLineHelpers) {
@@ -58,7 +58,7 @@ final class ChartHelper {
                 continue;
             }
 
-            atLeastOneLineEnabled = true;
+            atLeastOneLineVisible = true;
 
             Line line = helper.getLine();
             float value = line.getValueAt(index);
@@ -66,14 +66,14 @@ final class ChartHelper {
                 min = value;
             }
         }
-        if (atLeastOneLineEnabled) {
+        if (atLeastOneLineVisible) {
             return min;
         } else return 0f; // by default min is 0
     }
 
     // finds max value for the given index
     private float findMaxValueAt(int index) {
-        boolean atLeastOneLineEnabled = false;
+        boolean atLeastOneLineVisible = false;
         float max = Float.MIN_VALUE;
 
         for (LineHelper helper : mLineHelpers) {
@@ -82,7 +82,7 @@ final class ChartHelper {
                 continue;
             }
 
-            atLeastOneLineEnabled = true;
+            atLeastOneLineVisible = true;
 
             Line line = helper.getLine();
             float value = line.getValueAt(index);
@@ -90,7 +90,7 @@ final class ChartHelper {
                 max = value;
             }
         }
-        if (atLeastOneLineEnabled) {
+        if (atLeastOneLineVisible) {
             return max;
         } else return 10f; // by default max is 10
     }
@@ -242,7 +242,7 @@ final class ChartHelper {
                     helper.show(animate);
                 }
             }
-            // entire recalculation
+            // Full recalculation
             calcLocalMinAndMAx();
             dispatchMinAndMaxInRange(animate);
         } else {
