@@ -24,6 +24,7 @@ final class YAxisHelper {
             new FastOutLinearInInterpolator();
 
     private static final float DEFAULT_LINE_STROKE_WIDTH_IN_DP = 2f;
+    private static final float DEFAULT_TEXT_SIZE_IN_SP = 16f;
 
     private final static Property<YAxisHelper, Float> MIN_Y_VALUE =
             new Property<YAxisHelper, Float>(float.class, "mTargetYMin") {
@@ -110,7 +111,7 @@ final class YAxisHelper {
         mLinePaint = linePaint;
 
         Paint textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        textPaint.setStrokeWidth(5);
+        textPaint.setTextSize(Utils.spToPx(DEFAULT_TEXT_SIZE_IN_SP, view.getContext()));
         mTextPaint = textPaint;
     }
 
