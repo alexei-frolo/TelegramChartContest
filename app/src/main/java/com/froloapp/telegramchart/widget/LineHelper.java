@@ -10,6 +10,7 @@ import android.view.animation.Interpolator;
 import java.util.List;
 
 
+// This helper is responsible for animating and drawing one chart line
 final class LineHelper {
     private static final long FADE_ANIM_DURATION = 250;
 

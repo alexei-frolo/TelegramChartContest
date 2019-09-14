@@ -14,6 +14,7 @@ import android.view.animation.Interpolator;
 import com.froloapp.telegramchart.BuildConfig;
 
 
+// This helper is responsible for animating and drawing Y axis
 final class YAxisHelper {
 
     private static final String LOG_TAG = "YAxisHelper";
@@ -61,15 +62,20 @@ final class YAxisHelper {
 
     private final AbsChartView mView;
 
+    // count of horizontal lines
     private final int mLineCount = 5;
 
     // actual Y min and max
     private float mTargetYMin;
     private float mTargetYMax;
+    // actual value step between lines
+    private float mTargetYStep;
 
     // old Y min and max
     private float mPhantomYMin = 0;
     private float mPhantomYMax = 0;
+    // old value step between lines
+    private float mPhantomYStep = 0;
 
     private float mAlpha = 1f;
 
@@ -167,20 +173,17 @@ final class YAxisHelper {
         if (mIsAnimating) {
             // Here, we're drawing phantom lines
 
-            float phantomLineStartValue = mPhantomYMin;
-            float phantomLineStep = (mPhantomYMax - mPhantomYMin) / mLineCount;
-
             // Drawing lines that are fading out
             mLinePaint.setAlpha(fadeOutAlpha);
             mTextPaint.setAlpha(fadeOutAlpha);
 
             for (int i = 0; i < mLineCount; i++) {
-                float value = phantomLineStartValue + i * phantomLineStep;
+                float value = mPhantomYMin + i * mPhantomYStep;
 
                 float y = CommonHelper.findYCoordinate(
                         mView,
-                        mPhantomYMin,
-                        mPhantomYMax,
+                        mTargetYMin,
+                        mTargetYMax,
                         value);
 
                 drawLineAndText(
@@ -195,15 +198,12 @@ final class YAxisHelper {
         {
             // Here, we're drawing target lines
 
-            float targetLineStartValue = mTargetYMin;
-            float targetLineStep = (mTargetYMax - mTargetYMin) / mLineCount;
-
             // Drawing fading in bars
             mLinePaint.setAlpha(fadeInAlpha);
             mTextPaint.setAlpha(fadeInAlpha);
 
             for (int i = 0; i < mLineCount; i++) {
-                float value = targetLineStartValue + i * targetLineStep;
+                float value = mTargetYMin + i * mTargetYStep;
 
                 float y = CommonHelper.findYCoordinate(
                         mView,
@@ -229,13 +229,17 @@ final class YAxisHelper {
                 mAnim = null;
             }
 
+            float oldRange = (mTargetYMax - mTargetYMin);
+            float newRange = max - min;
+
             mPhantomYMin = mTargetYMin;
-            mPhantomYMax = mTargetYMax;
+            mPhantomYStep = mTargetYStep;
+
+            mTargetYMin = min;
+            mTargetYStep = newRange / (mLineCount);
 
             if (animate) {
                 boolean sensitiveAnimation = true;
-                float oldRange = (mTargetYMax - mTargetYMin);
-                float newRange = max - min;
                 long animDuration = sensitiveAnimation ? calcAnimDuration(oldRange, newRange) : Y_AXIS_ANIM_DURATION;
 
                 PropertyValuesHolder h1 = PropertyValuesHolder.ofFloat(MIN_Y_VALUE, mTargetYMin, min);
