@@ -1,4 +1,4 @@
-package com.froloapp.telegramchart.widget.linechartview;
+package com.froloapp.telegramchart.widget;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -12,9 +12,9 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 
 import com.froloapp.telegramchart.R;
-import com.froloapp.telegramchart.widget.Utils;
 
-public class LineChartSlider extends AbsLineChartView {
+
+public class ChartSlider extends AbsChartView {
     // static
     private static final int DEFAULT_FRAME_HORIZONTAL_BORDER_WIDTH_IN_DP = 5;
     private static final int DEFAULT_FRAME_VERTICAl_BORDER_WIDTH_IN_DP = 1;
@@ -61,15 +61,15 @@ public class LineChartSlider extends AbsLineChartView {
     // SCROLL LISTENER
     private OnScrollListener listener;
 
-    public LineChartSlider(Context context) {
+    public ChartSlider(Context context) {
         this(context, null);
     }
 
-    public LineChartSlider(Context context, AttributeSet attrs) {
+    public ChartSlider(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public LineChartSlider(Context context, AttributeSet attrs, int defStyleAttr) {
+    public ChartSlider(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context, attrs);
     }
@@ -78,14 +78,14 @@ public class LineChartSlider extends AbsLineChartView {
         int overlayColor;
         int frameBorderColor;
         if (attrs != null) {
-            TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.LineChartSlider, 0, 0);
-            overlayColor = typedArray.getColor(R.styleable.LineChartSlider_overlayColor, Color.parseColor("#AAFFFFFF"));
-            frameBorderColor = typedArray.getColor(R.styleable.LineChartSlider_frameBorderColor, Color.parseColor("#AAC1C1C1"));
-            frameHorizontalBorderWidth = typedArray.getDimension(R.styleable.LineChartSlider_frameHorizontalBorderWidth,
+            TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.ChartSlider, 0, 0);
+            overlayColor = typedArray.getColor(R.styleable.ChartSlider_overlayColor, Color.parseColor("#AAFFFFFF"));
+            frameBorderColor = typedArray.getColor(R.styleable.ChartSlider_frameBorderColor, Color.parseColor("#AAC1C1C1"));
+            frameHorizontalBorderWidth = typedArray.getDimension(R.styleable.ChartSlider_frameHorizontalBorderWidth,
                     Utils.dpToPx(DEFAULT_FRAME_HORIZONTAL_BORDER_WIDTH_IN_DP, context));
-            frameVerticalBorderWidth = typedArray.getDimension(R.styleable.LineChartSlider_frameVerticalBorderWidth,
+            frameVerticalBorderWidth = typedArray.getDimension(R.styleable.ChartSlider_frameVerticalBorderWidth,
                     Utils.dpToPx(DEFAULT_FRAME_VERTICAl_BORDER_WIDTH_IN_DP, context));
-            maxFrameCompression = typedArray.getFloat(R.styleable.LineChartSlider_maxFrameCompression, DEFAULT_MAX_FRAME_COMPRESSION);
+            maxFrameCompression = typedArray.getFloat(R.styleable.ChartSlider_maxFrameCompression, DEFAULT_MAX_FRAME_COMPRESSION);
             typedArray.recycle();
         } else {
             overlayColor = Color.parseColor("#AAFFFFFF");
@@ -104,7 +104,7 @@ public class LineChartSlider extends AbsLineChartView {
     }
 
     public interface OnScrollListener {
-        void onScroll(LineChartSlider slider, float startStampRel, float endStampRel);
+        void onScroll(ChartSlider slider, float startStampRel, float endStampRel);
     }
 
     public void setOnScrollListener(OnScrollListener listener) {
@@ -165,7 +165,7 @@ public class LineChartSlider extends AbsLineChartView {
         float rightBorder = getPaddingLeft() + width * rightBorderXPosition;
 
         drawFrame(canvas, leftBorder, rightBorder);
-        drawLines(canvas);
+        super.onDraw(canvas);
         drawOverlay(canvas, left, top, right, bottom, leftBorder, rightBorder);
     }
 
@@ -268,12 +268,6 @@ public class LineChartSlider extends AbsLineChartView {
     }
 
     @Override
-    public void setAdapter(LineChartAdapter adapter, boolean animate) {
-        super.setAdapter(adapter, animate);
-        super.setXPositions(0f, 1f, animate);
-    }
-
-    @Override
     public void setXPositions(float start, float stop, boolean animate) {
         this.leftBorderXPosition = start;
         this.rightBorderXPosition = stop;
@@ -284,7 +278,7 @@ public class LineChartSlider extends AbsLineChartView {
      ****** SAVING INSTANCE STATE ******
      **********************************/
 
-    static class SavedState extends AbsLineChartView.SavedState {
+    static class SavedState extends AbsChartView.SavedState {
         float leftBorderXPosition;
         float rightBorderXPosition;
 

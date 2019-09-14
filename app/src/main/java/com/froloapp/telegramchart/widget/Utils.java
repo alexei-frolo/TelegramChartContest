@@ -31,7 +31,7 @@ public final class Utils {
         return px / ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT);
     }
 
-    public static int spToPx(float sp, Context context) {
+    static int spToPx(float sp, Context context) {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, context.getResources().getDisplayMetrics());
     }
 
@@ -98,7 +98,7 @@ public final class Utils {
         }
     }
 
-    public static String format(int value) {
+    static String format(int value) {
         if (value == Integer.MIN_VALUE) return format(Integer.MIN_VALUE + 1);
         if (value < 0) return "-" + format(-value);
         if (value < 1000) return Integer.toString(value); //deal with easy case

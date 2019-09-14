@@ -11,7 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.froloapp.telegramchart.widget.linechartview.LineChartAdapter;
+import com.froloapp.telegramchart.widget.Chart;
 
 import java.io.InputStream;
 
@@ -42,7 +42,7 @@ abstract class AbsChartActivity extends AppCompatActivity {
         Object lastInstance = getLastCustomNonConfigurationInstance();
         if (lastInstance instanceof JsonParserTask) {
             JsonParserTask retainedTask = (JsonParserTask) lastInstance;
-            LineChartAdapter[] result = retainedTask.getResult();
+            Chart[] result = retainedTask.getResult();
             if (result != null) {
                 jsonParserTask = retainedTask;
                 populateCharts(result);
@@ -54,7 +54,7 @@ abstract class AbsChartActivity extends AppCompatActivity {
         }
     }
 
-    abstract void populateCharts(LineChartAdapter[] adapters);
+    abstract void populateCharts(Chart[] charts);
 
     private void loadCharts() {
         AsyncTask task = jsonParserTask;
@@ -68,8 +68,8 @@ abstract class AbsChartActivity extends AppCompatActivity {
                 log(error);
                 Toast.makeText(AbsChartActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
             }
-            @Override public void onResult(LineChartAdapter[] adapters) {
-                populateCharts(adapters);
+            @Override public void onResult(Chart[] charts) {
+                populateCharts(charts);
             }
             @Override
             public void onCancelled() {

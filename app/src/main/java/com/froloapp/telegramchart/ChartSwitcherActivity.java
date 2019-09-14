@@ -19,25 +19,27 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.Spinner;
 
+import com.froloapp.telegramchart.widget.AbsChartView;
+import com.froloapp.telegramchart.widget.Chart;
+import com.froloapp.telegramchart.widget.Line;
 import com.froloapp.telegramchart.widget.Utils;
-import com.froloapp.telegramchart.widget.linechartview.Line;
-import com.froloapp.telegramchart.widget.linechartview.LineChartAdapter;
-import com.froloapp.telegramchart.widget.linechartview.LineChartSlider;
-import com.froloapp.telegramchart.widget.linechartview.LineChartView;
+import com.froloapp.telegramchart.widget.ChartSlider;
 
 
 public class ChartSwitcherActivity extends AbsChartActivity
-        implements LineChartView.OnStampClickListener, LineChartSlider.OnScrollListener {
+        implements ChartSlider.OnScrollListener
+        //LineChartView.OnStampClickListener
+{
 
     private Spinner spinnerCharts;
-    private LineChartView chartView;
-    private LineChartSlider chartSlider;
+    private AbsChartView chartView;
+    private ChartSlider chartSlider;
     private LinearLayout layoutCheckboxes;
 
     // I need to know when spinner callback triggered due a user input or programmatically
     private boolean spinnerTouched = false;
 
-    private LineChartAdapter currAdapter;
+    private Chart currAdapter;
 
     private PopupWindow popupWindow;
 
@@ -62,8 +64,8 @@ public class ChartSwitcherActivity extends AbsChartActivity
         // set callback after set selection
         spinnerCharts.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                LineChartAdapter adapter = (LineChartAdapter) parent.getAdapter().getItem(position);
-                initChart(adapter, spinnerTouched); // animate only if selected by user
+                Chart chart = (Chart) parent.getAdapter().getItem(position);
+                initChart(chart, spinnerTouched); // animate only if selected by user
                 spinnerTouched = false;
             }
             @Override public void onNothingSelected(AdapterView<?> parent) { }
@@ -73,36 +75,36 @@ public class ChartSwitcherActivity extends AbsChartActivity
         final float stopXPosition = 0.3f;
         chartView.setXPositions(startXPosition, stopXPosition, false);
         chartSlider.setXPositions(startXPosition, stopXPosition, false);
-        chartView.setOnStampClickListener(this);
+        //chartView.setOnStampClickListener(this);
         chartSlider.setOnScrollListener(this);
 
         load();
     }
 
     @Override
-    void populateCharts(LineChartAdapter[] adapters) {
-        initSpinner(adapters);
+    void populateCharts(Chart[] charts) {
+        initSpinner(charts);
     }
 
-    private void initSpinner(LineChartAdapter[] adapters) {
-        ArrayAdapter<LineChartAdapter> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item);
-        spinnerAdapter.addAll(adapters);
+    private void initSpinner(Chart[] charts) {
+        ArrayAdapter<Chart> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item);
+        spinnerAdapter.addAll(charts);
         spinnerCharts.setAdapter(spinnerAdapter);
-        if (adapters.length != 0) {
-            LineChartAdapter firstChart = adapters[0];
+        if (charts.length != 0) {
+            Chart firstChart = charts[0];
             initChart(firstChart, false);
             spinnerCharts.setSelection(0);
         }
     }
 
-    private void initChart(LineChartAdapter adapter, boolean animate) {
-        currAdapter = adapter;
-        chartView.setAdapter(adapter, animate);
-        chartSlider.setAdapter(adapter, animate);
-        initCheckboxes(adapter);
+    private void initChart(Chart chart, boolean animate) {
+        currAdapter = chart;
+        chartView.setChart(chart, animate);
+        chartSlider.setChart(chart, animate);
+        initCheckboxes(chart);
     }
 
-    private void initCheckboxes(final LineChartAdapter adapter) {
+    private void initCheckboxes(final Chart adapter) {
         layoutCheckboxes.removeAllViews();
         // adding checkboxes dynamic
         for (int i = 0; i < adapter.getLineCount(); i++) {
@@ -115,7 +117,7 @@ public class ChartSwitcherActivity extends AbsChartActivity
                 ((TintableCompoundButton) checkBox).setSupportButtonTintList(ColorStateList.valueOf(color));
             }
             checkBox.setText(line.getName());
-            checkBox.setChecked(adapter.isLineEnabled(line));
+            checkBox.setChecked(chartView.isLineVisible(line));
             checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if (isChecked) {
@@ -141,49 +143,49 @@ public class ChartSwitcherActivity extends AbsChartActivity
     }
 
     @Override
-    public void onScroll(LineChartSlider slider, float startStampRel, float endStampRel) {
+    public void onScroll(ChartSlider slider, float startStampRel, float endStampRel) {
         chartView.setXPositions(startStampRel, endStampRel, true);
     }
 
-    @Override
-    public void onTouchDown(final LineChartView view, long timestamp, float timestampX) {
-        showPopup(timestamp, timestampX);
-    }
-
-    @Override
-    public void onTouchUp(LineChartView view) {
-        PopupWindow currWindow = this.popupWindow;
-        if (currWindow != null) {
-            currWindow.dismiss();
-            this.popupWindow = null;
-        }
-    }
-
-    private void showPopup(long timestamp, float timestampX) {
-        final Rect location = Utils.getViewLocation(chartView);
-        if (location == null) {
-            // early return. Shouldn't happen
-            return;
-        }
-
-        final int locX = location.left
-                + (int) timestampX
-                + 15; // + 15 to make a margin between x axis bar and dialog
-        final int locY = location.top;
-
-        final PopupWindow currPopup = this.popupWindow;
-        if (currPopup == null) {
-            PopupWindow newWindow = PopupHelper.createPopupWindow(this, currAdapter, timestamp);
-            if (newWindow != null) {
-                newWindow.showAtLocation(chartView, Gravity.TOP | Gravity.LEFT, locX, locY);
-                this.popupWindow = newWindow;
-            }
-        } else {
-            final int w = ViewGroup.LayoutParams.WRAP_CONTENT;
-            final int h = ViewGroup.LayoutParams.WRAP_CONTENT;
-            View v = currPopup.getContentView();
-            PopupHelper.populateWindowView(v, currAdapter, timestamp);
-            currPopup.update(locX, locY, w, h);
-        }
-    }
+//    //@Override
+//    public void onTouchDown(final AbsChartView view, long timestamp, float timestampX) {
+//        showPopup(timestamp, timestampX);
+//    }
+//
+//    //@Override
+//    public void onTouchUp(AbsChartView view) {
+//        PopupWindow currWindow = this.popupWindow;
+//        if (currWindow != null) {
+//            currWindow.dismiss();
+//            this.popupWindow = null;
+//        }
+//    }
+//
+//    private void showPopup(long timestamp, float timestampX) {
+//        final Rect location = Utils.getViewLocation(chartView);
+//        if (location == null) {
+//            // early return. Shouldn't happen
+//            return;
+//        }
+//
+//        final int locX = location.left
+//                + (int) timestampX
+//                + 15; // + 15 to make a margin between x axis bar and dialog
+//        final int locY = location.top;
+//
+//        final PopupWindow currPopup = this.popupWindow;
+//        if (currPopup == null) {
+//            PopupWindow newWindow = PopupHelper.createPopupWindow(this, currAdapter, timestamp);
+//            if (newWindow != null) {
+//                newWindow.showAtLocation(chartView, Gravity.TOP | Gravity.LEFT, locX, locY);
+//                this.popupWindow = newWindow;
+//            }
+//        } else {
+//            final int w = ViewGroup.LayoutParams.WRAP_CONTENT;
+//            final int h = ViewGroup.LayoutParams.WRAP_CONTENT;
+//            View v = currPopup.getContentView();
+//            PopupHelper.populateWindowView(v, currAdapter, timestamp);
+//            currPopup.update(locX, locY, w, h);
+//        }
+//    }
 }

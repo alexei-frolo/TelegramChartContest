@@ -10,7 +10,7 @@
         <attr name="yAxisTextColor" format="color|reference"/>
     </declare-styleable>
 
-    <declare-styleable name="LineChartSlider">
+    <declare-styleable name="ChartSlider">
         <attr name="overlayColor" format="color|reference"/>
         <attr name="frameBorderColor" format="color|reference"/>
         <attr name="frameHorizontalBorderWidth" format="dimension|reference"/>
