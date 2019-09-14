@@ -72,12 +72,13 @@ final class YAxisHelper {
     private float mTargetMinYValue;
     private float mTargetMaxYValue;
 
-    // actual stamps
-    private float yBarStartValue; // from this value, y axis bars are drawn
-    private float yBarStep; // by this step, y axis bars are drawn
-    // phantom stamps
-    private float phantomYBarStartValue; // from this value, phantom y axis bars are drawn
-    private float phantomYBarStep; // by this step, y axis bars are drawn
+    // current Y axis min value and step
+    private float mCurrMinYValue; // from this value, current lines are drawn on Y axis
+    private float mCurrYValueStep; // by this step, current lines are drawn on Y axis
+
+    // phantom Y axis min value and step
+    private float mPhantomMinYValue; // from this value, phantom lines are drawn on Y axis
+    private float mPhantomYValueStep; // by this step, phantom lines are drawn on Y axis
 
     private float mAlpha = 1f;
 
@@ -180,9 +181,6 @@ final class YAxisHelper {
         int fadeInAlpha = (int) (255 * mAlpha);
         int fadeOutAlpha = (int) (255 * (1 - mAlpha));
 
-        float phantomYBarStartValue = this.phantomYBarStartValue;
-        float phantomYBarStep = this.phantomYBarStep;
-
         final float lineStrokeWidth = mLinePaint.getStrokeWidth();
 
         if (mIsAnimating) {
@@ -192,7 +190,7 @@ final class YAxisHelper {
             mTextPaint.setAlpha(fadeOutAlpha);
 
             for (int i = 0; i < mLineCount; i++) {
-                float value = phantomYBarStartValue + i * phantomYBarStep;
+                float value = mPhantomMinYValue + i * mPhantomYValueStep;
                 float y = CommonHelper.findYCoordinate(
                         mView,
                         mMinYValue,
@@ -211,15 +209,12 @@ final class YAxisHelper {
         {
             // Here, we're drawing target lines
 
-            float yBarStartValue = this.yBarStartValue;
-            float yBarStep = this.yBarStep;
-
             // Drawing fading in bars
             mLinePaint.setAlpha(fadeInAlpha);
             mTextPaint.setAlpha(fadeInAlpha);
 
             for (int i = 0; i < mLineCount; i++) {
-                float value = yBarStartValue + i * yBarStep;
+                float value = mCurrMinYValue + i * mCurrYValueStep;
                 float y = CommonHelper.findYCoordinate(
                         mView,
                         mMinYValue,
@@ -243,11 +238,11 @@ final class YAxisHelper {
             mTargetMaxYValue = max;
             float newRange = max - min;
 
-            this.phantomYBarStartValue = this.yBarStartValue;
-            this.phantomYBarStep = this.yBarStep;
+            this.mPhantomMinYValue = this.mCurrMinYValue;
+            this.mPhantomYValueStep = this.mCurrYValueStep;
 
-            this.yBarStartValue = min;
-            this.yBarStep = (int) (newRange / (mLineCount));
+            this.mCurrMinYValue = min;
+            this.mCurrYValueStep = (int) (newRange / (mLineCount));
 
             float startYAxisAlpha = 0.1f;
             float startMinYValue = mMinYValue;
