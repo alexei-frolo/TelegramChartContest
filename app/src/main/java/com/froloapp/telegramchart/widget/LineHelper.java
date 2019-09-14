@@ -151,13 +151,17 @@ final class LineHelper {
         }
 
         final int pointCount = mPoints.size();
-        final int startPointIndex = CommonHelper.findVeryLeftPointIndex(mPoints, mStartXPercentage);
+        final int startPointIndex = CommonHelper.findVeryLeftPointIndex(
+                mPoints,
+                mStartXPercentage);
 
         if (startPointIndex == -1) {
             return;
         }
 
-        final float startPointXPosition = CommonHelper.calcPointRelativePositionAt(mPoints, startPointIndex);
+        final float startPointXPosition = CommonHelper.calcPointRelativePositionAt(
+                mPoints,
+                startPointIndex);
 
         // drawing
         int pointIndex = startPointIndex;
@@ -177,8 +181,16 @@ final class LineHelper {
 
         mPaint.setStyle(Paint.Style.STROKE);
 
-        float xCoor = CommonHelper.findXCoordinate(mView, mStartXPercentage, mStopXPercentage, pointXPosition);
-        float yCoor = CommonHelper.findYCoordinate(mView, minValue, maxValue, value);
+        float xCoor = CommonHelper.findXCoordinate(
+                mView,
+                mStartXPercentage,
+                mStopXPercentage,
+                pointXPosition);
+        float yCoor = CommonHelper.findYCoordinate(
+                mView,
+                minValue,
+                maxValue,
+                value);
 
         int k = 0; // just a counter
         mBufferLinePoints[k++] = xCoor;
@@ -186,11 +198,23 @@ final class LineHelper {
 
         while (pointIndex < pointCount - 1) {
             pointIndex++;
-            pointXPosition = CommonHelper.calcPointRelativePositionAt(mPoints, pointIndex); // i think it could be optimized
+            // it could be optimized
+            pointXPosition = CommonHelper.calcPointRelativePositionAt(
+                    mPoints,
+                    pointIndex);
 
             value = mLine.getValueAt(pointIndex);
-            xCoor = CommonHelper.findXCoordinate(mView, mStartXPercentage, mStopXPercentage, pointXPosition);
-            yCoor = CommonHelper.findYCoordinate(mView, minValue, maxValue, value);
+
+            xCoor = CommonHelper.findXCoordinate(
+                    mView,
+                    mStartXPercentage,
+                    mStopXPercentage,
+                    pointXPosition);
+            yCoor = CommonHelper.findYCoordinate(
+                    mView,
+                    minValue,
+                    maxValue,
+                    value);
 
             mBufferLinePoints[k++] = xCoor;
             mBufferLinePoints[k++] = yCoor;
