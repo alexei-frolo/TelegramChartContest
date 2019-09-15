@@ -43,23 +43,23 @@ public class ChartSlider extends AbsChartView {
     public static final int SCROLL_STATE_SETTLING = 4;
 
     private int scrollState = SCROLL_STATE_IDLE;
-    private float xDragPos = 0f;
+    private float mDragX = 0f;
     // If a finger touches a border in a place +- this threshold then the border must be under drag
-    private float touchBorderThreshold;
+    private float mTouchBorderThreshold;
 
-    private final Paint overlayPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private final Paint framePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint mOverlayPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint mFramePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
-    private float frameHorizontalBorderWidth;
-    private float frameVerticalBorderWidth;
+    private float mFrameHorizontalBorderWidth;
+    private float mFrameVerticalBorderWidth;
 
-    private float leftBorderXPosition = 0f;
-    private float rightBorderXPosition = 1f;
+    private float mLeftBorderXPosition = 0f;
+    private float mRightBorderXPosition = 1f;
 
-    private float maxFrameCompression = 0.5f;
+    private float mMaxFrameCompression = 0.5f;
 
     // SCROLL LISTENER
-    private OnScrollListener listener;
+    private OnScrollListener mListener;
 
     public ChartSlider(Context context) {
         this(context, null);
@@ -78,29 +78,39 @@ public class ChartSlider extends AbsChartView {
         int overlayColor;
         int frameBorderColor;
         if (attrs != null) {
-            TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.ChartSlider, 0, 0);
-            overlayColor = typedArray.getColor(R.styleable.ChartSlider_overlayColor, Color.parseColor("#AAFFFFFF"));
-            frameBorderColor = typedArray.getColor(R.styleable.ChartSlider_frameBorderColor, Color.parseColor("#AAC1C1C1"));
-            frameHorizontalBorderWidth = typedArray.getDimension(R.styleable.ChartSlider_frameHorizontalBorderWidth,
+            TypedArray typedArray = context.getTheme()
+                    .obtainStyledAttributes(attrs, R.styleable.ChartSlider, 0, 0);
+
+            overlayColor = typedArray.getColor(R.styleable.ChartSlider_overlayColor,
+                    Color.parseColor("#AAFFFFFF"));
+
+            frameBorderColor = typedArray.getColor(R.styleable.ChartSlider_frameBorderColor,
+                    Color.parseColor("#AAC1C1C1"));
+
+            mFrameHorizontalBorderWidth = typedArray.getDimension(R.styleable.ChartSlider_frameHorizontalBorderWidth,
                     Utils.dpToPx(DEFAULT_FRAME_HORIZONTAL_BORDER_WIDTH_IN_DP, context));
-            frameVerticalBorderWidth = typedArray.getDimension(R.styleable.ChartSlider_frameVerticalBorderWidth,
+
+            mFrameVerticalBorderWidth = typedArray.getDimension(R.styleable.ChartSlider_frameVerticalBorderWidth,
                     Utils.dpToPx(DEFAULT_FRAME_VERTICAl_BORDER_WIDTH_IN_DP, context));
-            maxFrameCompression = typedArray.getFloat(R.styleable.ChartSlider_maxFrameCompression, DEFAULT_MAX_FRAME_COMPRESSION);
+
+            mMaxFrameCompression = typedArray.getFloat(R.styleable.ChartSlider_maxFrameCompression,
+                    DEFAULT_MAX_FRAME_COMPRESSION);
+
             typedArray.recycle();
         } else {
             overlayColor = Color.parseColor("#AAFFFFFF");
             frameBorderColor = Color.parseColor("#AAC1C1C1");
-            frameHorizontalBorderWidth = Utils.dpToPx(DEFAULT_FRAME_HORIZONTAL_BORDER_WIDTH_IN_DP, context);
-            frameVerticalBorderWidth = Utils.dpToPx(DEFAULT_FRAME_VERTICAl_BORDER_WIDTH_IN_DP, context);
-            maxFrameCompression = DEFAULT_MAX_FRAME_COMPRESSION;
+            mFrameHorizontalBorderWidth = Utils.dpToPx(DEFAULT_FRAME_HORIZONTAL_BORDER_WIDTH_IN_DP, context);
+            mFrameVerticalBorderWidth = Utils.dpToPx(DEFAULT_FRAME_VERTICAl_BORDER_WIDTH_IN_DP, context);
+            mMaxFrameCompression = DEFAULT_MAX_FRAME_COMPRESSION;
         }
-        overlayPaint.setStyle(Paint.Style.FILL);
-        overlayPaint.setColor(overlayColor);
+        mOverlayPaint.setStyle(Paint.Style.FILL);
+        mOverlayPaint.setColor(overlayColor);
 
-        framePaint.setStyle(Paint.Style.STROKE);
-        framePaint.setColor(frameBorderColor);
+        mFramePaint.setStyle(Paint.Style.STROKE);
+        mFramePaint.setColor(frameBorderColor);
 
-        touchBorderThreshold = Utils.dpToPx(5f, context);
+        mTouchBorderThreshold = Utils.dpToPx(5f, context);
 
         setWillDrawXAxis(false);
         setWillDrawYAxis(false);
@@ -111,11 +121,11 @@ public class ChartSlider extends AbsChartView {
     }
 
     public void setOnScrollListener(OnScrollListener listener) {
-        this.listener = listener;
+        this.mListener = listener;
     }
 
     private void dispatchScrolled(float startXPosition, float stopXPosition) {
-        OnScrollListener l = listener;
+        OnScrollListener l = mListener;
         if (l != null) {
             l.onScroll(this, startXPosition, stopXPosition);
         }
@@ -134,25 +144,25 @@ public class ChartSlider extends AbsChartView {
     }
 
     private boolean isFrameLeftBorderTouched(float x) {
-        float startStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * leftBorderXPosition;
-        return x > startStampPos - frameHorizontalBorderWidth - touchBorderThreshold
-                && x < startStampPos + frameHorizontalBorderWidth + touchBorderThreshold;
+        float startStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * mLeftBorderXPosition;
+        return x > startStampPos - mFrameHorizontalBorderWidth - mTouchBorderThreshold
+                && x < startStampPos + mFrameHorizontalBorderWidth + mTouchBorderThreshold;
     }
 
     private boolean isFrameRightBorderTouched(float x) {
-        float endStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * rightBorderXPosition;
-        return x > endStampPos - frameHorizontalBorderWidth - touchBorderThreshold
-                && x < endStampPos + frameHorizontalBorderWidth + touchBorderThreshold;
+        float endStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * mRightBorderXPosition;
+        return x > endStampPos - mFrameHorizontalBorderWidth - mTouchBorderThreshold
+                && x < endStampPos + mFrameHorizontalBorderWidth + mTouchBorderThreshold;
     }
 
     private boolean isFrameTouched(float x) {
-        float startStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * leftBorderXPosition;
-        float endStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * rightBorderXPosition;
-        return x > startStampPos + touchBorderThreshold && x < endStampPos - touchBorderThreshold;
+        float startStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * mLeftBorderXPosition;
+        float endStampPos = getPaddingLeft() + (getMeasuredWidth() - getPaddingLeft() - getPaddingRight()) * mRightBorderXPosition;
+        return x > startStampPos + mTouchBorderThreshold && x < endStampPos - mTouchBorderThreshold;
     }
 
     private boolean canCompressFrame(float startXPosition, float stopXPosition) {
-        return stopXPosition - startXPosition >= maxFrameCompression;
+        return stopXPosition - startXPosition >= mMaxFrameCompression;
     }
 
     @Override
@@ -164,8 +174,8 @@ public class ChartSlider extends AbsChartView {
         float right = getMeasuredWidth() - getPaddingRight();
         float bottom = getMeasuredHeight() - getPaddingBottom();
 
-        float leftBorder = getPaddingLeft() + width * leftBorderXPosition;
-        float rightBorder = getPaddingLeft() + width * rightBorderXPosition;
+        float leftBorder = getPaddingLeft() + width * mLeftBorderXPosition;
+        float rightBorder = getPaddingLeft() + width * mRightBorderXPosition;
 
         drawFrame(canvas, leftBorder, rightBorder);
         super.onDraw(canvas);
@@ -174,27 +184,27 @@ public class ChartSlider extends AbsChartView {
 
     private void drawOverlay(Canvas canvas, float left, float top, float right, float bottom, float leftBorder, float rightBorder) {
         // drawing left overlay
-        canvas.drawRect(left, top, leftBorder, bottom, overlayPaint);
+        canvas.drawRect(left, top, leftBorder, bottom, mOverlayPaint);
         // drawing right overlay
-        canvas.drawRect(rightBorder, top, right, bottom, overlayPaint);
+        canvas.drawRect(rightBorder, top, right, bottom, mOverlayPaint);
     }
 
     private void drawFrame(Canvas canvas, float leftBorder, float rightBorder) {
-        framePaint.setStrokeWidth(frameHorizontalBorderWidth);
+        mFramePaint.setStrokeWidth(mFrameHorizontalBorderWidth);
         // Left border
-        canvas.drawLine(leftBorder + frameHorizontalBorderWidth / 2, getPaddingTop(),
-                leftBorder + frameHorizontalBorderWidth / 2, getMeasuredHeight() - getPaddingBottom(), framePaint);
+        canvas.drawLine(leftBorder + mFrameHorizontalBorderWidth / 2, getPaddingTop(),
+                leftBorder + mFrameHorizontalBorderWidth / 2, getMeasuredHeight() - getPaddingBottom(), mFramePaint);
         // Right border
-        canvas.drawLine(rightBorder - frameHorizontalBorderWidth / 2, getPaddingTop(),
-                rightBorder - frameHorizontalBorderWidth / 2, getMeasuredHeight() - getPaddingBottom(), framePaint);
+        canvas.drawLine(rightBorder - mFrameHorizontalBorderWidth / 2, getPaddingTop(),
+                rightBorder - mFrameHorizontalBorderWidth / 2, getMeasuredHeight() - getPaddingBottom(), mFramePaint);
 
-        framePaint.setStrokeWidth(frameVerticalBorderWidth);
+        mFramePaint.setStrokeWidth(mFrameVerticalBorderWidth);
         // Top border
-        canvas.drawLine(leftBorder, getPaddingTop() + frameVerticalBorderWidth / 2,
-                rightBorder, getPaddingTop() + frameVerticalBorderWidth / 2, framePaint);
+        canvas.drawLine(leftBorder, getPaddingTop() + mFrameVerticalBorderWidth / 2,
+                rightBorder, getPaddingTop() + mFrameVerticalBorderWidth / 2, mFramePaint);
         // Bottom border
-        canvas.drawLine(leftBorder, getMeasuredHeight() - getPaddingBottom() - frameVerticalBorderWidth / 2,
-                rightBorder, getMeasuredHeight() - getPaddingBottom() - frameVerticalBorderWidth / 2, framePaint);
+        canvas.drawLine(leftBorder, getMeasuredHeight() - getPaddingBottom() - mFrameVerticalBorderWidth / 2,
+                rightBorder, getMeasuredHeight() - getPaddingBottom() - mFrameVerticalBorderWidth / 2, mFramePaint);
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -205,7 +215,7 @@ public class ChartSlider extends AbsChartView {
             case MotionEvent.ACTION_DOWN: {
                  // Detect if user starts dragging frame or one of frame borders
                 float x = event.getX();
-                xDragPos = x;
+                mDragX = x;
                 if (isFrameLeftBorderTouched(x)) {
                     scrollState = SCROLL_STATE_LEFT_BORDER_DRAGGING;
                     getParent().requestDisallowInterceptTouchEvent(true);
@@ -223,38 +233,38 @@ public class ChartSlider extends AbsChartView {
             case MotionEvent.ACTION_MOVE: {
                 if (scrollState == SCROLL_STATE_LEFT_BORDER_DRAGGING) {
                     float x = event.getX();
-                    float frameScrollRel = (x - xDragPos) / getViewContentWith();
-                    xDragPos = x;
-                    float newStartXPosition = checkPercentage(leftBorderXPosition + frameScrollRel);
-                    if (canCompressFrame(newStartXPosition, rightBorderXPosition)) {
-                        leftBorderXPosition = newStartXPosition;
-                        dispatchScrolled(leftBorderXPosition, rightBorderXPosition);
+                    float frameScrollRel = (x - mDragX) / getViewContentWith();
+                    mDragX = x;
+                    float newStartXPosition = checkPercentage(mLeftBorderXPosition + frameScrollRel);
+                    if (canCompressFrame(newStartXPosition, mRightBorderXPosition)) {
+                        mLeftBorderXPosition = newStartXPosition;
+                        dispatchScrolled(mLeftBorderXPosition, mRightBorderXPosition);
                         invalidate();
                     }
                     return true;
                 } else if (scrollState == SCROLL_STATE_RIGHT_BORDER_DRAGGING) {
                     float x = event.getX();
-                    float frameScrollRel = (x - xDragPos) / getViewContentWith();
-                    xDragPos = x;
-                    float newStopXPosition = checkPercentage(rightBorderXPosition + frameScrollRel);
-                    if (canCompressFrame(leftBorderXPosition, newStopXPosition)) {
-                        rightBorderXPosition = newStopXPosition;
-                        dispatchScrolled(leftBorderXPosition, rightBorderXPosition);
+                    float frameScrollRel = (x - mDragX) / getViewContentWith();
+                    mDragX = x;
+                    float newStopXPosition = checkPercentage(mRightBorderXPosition + frameScrollRel);
+                    if (canCompressFrame(mLeftBorderXPosition, newStopXPosition)) {
+                        mRightBorderXPosition = newStopXPosition;
+                        dispatchScrolled(mLeftBorderXPosition, mRightBorderXPosition);
                         invalidate();
                     }
                     return true;
                 } else if (scrollState == SCROLL_STATE_FRAME_DRAGGING) {
                     float x = event.getX();
-                    float frameScrollRel = (x - xDragPos) / getViewContentWith();
+                    float frameScrollRel = (x - mDragX) / getViewContentWith();
                     if (frameScrollRel > 0) {
-                        frameScrollRel = Math.min(1 - rightBorderXPosition, frameScrollRel);
+                        frameScrollRel = Math.min(1 - mRightBorderXPosition, frameScrollRel);
                     } else {
-                        frameScrollRel = -Math.min(leftBorderXPosition, -frameScrollRel);
+                        frameScrollRel = -Math.min(mLeftBorderXPosition, -frameScrollRel);
                     }
-                    leftBorderXPosition = checkPercentage(leftBorderXPosition + frameScrollRel);
-                    rightBorderXPosition = checkPercentage(rightBorderXPosition + frameScrollRel);
-                    xDragPos = x;
-                    dispatchScrolled(leftBorderXPosition, rightBorderXPosition);
+                    mLeftBorderXPosition = checkPercentage(mLeftBorderXPosition + frameScrollRel);
+                    mRightBorderXPosition = checkPercentage(mRightBorderXPosition + frameScrollRel);
+                    mDragX = x;
+                    dispatchScrolled(mLeftBorderXPosition, mRightBorderXPosition);
                     invalidate();
                     return true;
                 }
@@ -272,8 +282,8 @@ public class ChartSlider extends AbsChartView {
 
     @Override
     public void setXPositions(float start, float stop, boolean animate) {
-        this.leftBorderXPosition = start;
-        this.rightBorderXPosition = stop;
+        this.mLeftBorderXPosition = start;
+        this.mRightBorderXPosition = stop;
         super.setXPositions(0f, 1f, animate);
     }
 
@@ -321,8 +331,8 @@ public class ChartSlider extends AbsChartView {
         Parcelable superState = super.onSaveInstanceState();
         SavedState ss = new SavedState(superState);
 
-        ss.leftBorderXPosition = leftBorderXPosition;
-        ss.rightBorderXPosition = rightBorderXPosition;
+        ss.leftBorderXPosition = mLeftBorderXPosition;
+        ss.rightBorderXPosition = mRightBorderXPosition;
 
         return ss;
     }
@@ -333,8 +343,8 @@ public class ChartSlider extends AbsChartView {
 
         super.onRestoreInstanceState(ss.getSuperState());
 
-        leftBorderXPosition = ss.leftBorderXPosition;
-        rightBorderXPosition = ss.rightBorderXPosition;
+        mLeftBorderXPosition = ss.leftBorderXPosition;
+        mRightBorderXPosition = ss.rightBorderXPosition;
 
         invalidate();
     }
