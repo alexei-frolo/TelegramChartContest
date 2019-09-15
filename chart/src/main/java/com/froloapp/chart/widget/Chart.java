@@ -1,4 +1,4 @@
-package com.froloapp.telegramchart.widget;
+package com.froloapp.chart.widget;
 
 import java.util.ArrayList;
 import java.util.List;

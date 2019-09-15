@@ -16,7 +16,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
-        <com.froloapp.telegramchart.widget.ChartView
+        <com.froloapp.chart.widget.ChartView
             app:chartStrokeWidth="1.5dp"
             app:xAxisTextColor="@color/gray"
             app:yAxisTextColor="@color/gray"
@@ -26,7 +26,7 @@
             android:layout_width="match_parent"
             android:layout_height="300dp"/>
 
-        <com.froloapp.telegramchart.widget.ChartSlider
+        <com.froloapp.chart.widget.ChartSlider
             app:chartStrokeWidth="1dp"
             app:frameHorizontalBorderWidth="7dp"
             app:frameVerticalBorderWidth="1dp"

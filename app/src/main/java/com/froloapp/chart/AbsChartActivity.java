@@ -1,4 +1,4 @@
-package com.froloapp.telegramchart;
+package com.froloapp.chart;
 
 
 import android.content.res.AssetManager;
@@ -11,7 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.froloapp.telegramchart.widget.Chart;
+import com.froloapp.chart.widget.Chart;
 
 import java.io.InputStream;
 

@@ -1,4 +1,4 @@
-package com.froloapp.telegramchart.widget;
+package com.froloapp.chart.widget;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -11,7 +11,7 @@ import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 
-import com.froloapp.telegramchart.R;
+import com.froloapp.chart.R;
 
 
 public class ChartSlider extends AbsChartView {

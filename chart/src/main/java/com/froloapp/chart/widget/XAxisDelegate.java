@@ -1,4 +1,4 @@
-package com.froloapp.telegramchart.widget;
+package com.froloapp.chart.widget;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
@@ -15,7 +15,7 @@ import android.util.Property;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 
-import com.froloapp.telegramchart.R;
+import com.froloapp.chart.R;
 
 import java.util.Collections;
 import java.util.List;

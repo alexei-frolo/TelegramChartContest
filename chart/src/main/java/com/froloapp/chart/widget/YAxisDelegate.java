@@ -1,4 +1,4 @@
-package com.froloapp.telegramchart.widget;
+package com.froloapp.chart.widget;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
@@ -10,13 +10,11 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.Property;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 
-import com.froloapp.telegramchart.BuildConfig;
-import com.froloapp.telegramchart.R;
+import com.froloapp.chart.R;
 
 
 // This delegate is responsible for animating and drawing Y axis
@@ -128,10 +126,6 @@ final class YAxisDelegate {
         Paint textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         textPaint.setTextSize(Misc.spToPx(DEFAULT_TEXT_SIZE_IN_SP, view.getContext()));
         mTextPaint = textPaint;
-    }
-
-    private void log(String msg) {
-        if (BuildConfig.DEBUG) Log.d(LOG_TAG, msg);
     }
 
     private void requestRedraw() {

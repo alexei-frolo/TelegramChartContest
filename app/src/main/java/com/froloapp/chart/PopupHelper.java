@@ -1,4 +1,4 @@
-package com.froloapp.telegramchart;
+package com.froloapp.chart;
 
 
 import android.content.Context;
@@ -9,10 +9,10 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
-import com.froloapp.telegramchart.widget.Chart;
-import com.froloapp.telegramchart.widget.ChartView;
-import com.froloapp.telegramchart.widget.Line;
-import com.froloapp.telegramchart.widget.Misc;
+import com.froloapp.chart.widget.Chart;
+import com.froloapp.chart.widget.ChartView;
+import com.froloapp.chart.widget.Line;
+import com.froloapp.chart.widget.Misc;
 
 import java.util.Calendar;
 

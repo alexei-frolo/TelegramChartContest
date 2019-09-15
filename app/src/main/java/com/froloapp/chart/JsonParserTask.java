@@ -1,11 +1,11 @@
-package com.froloapp.telegramchart;
+package com.froloapp.chart;
 
 
 import android.graphics.Color;
 import android.os.AsyncTask;
 
-import com.froloapp.telegramchart.widget.Chart;
-import com.froloapp.telegramchart.widget.Point;
+import com.froloapp.chart.widget.Chart;
+import com.froloapp.chart.widget.Point;
 
 import org.json.JSONArray;
 import org.json.JSONObject;

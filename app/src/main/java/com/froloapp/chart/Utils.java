@@ -1,4 +1,4 @@
-package com.froloapp.telegramchart;
+package com.froloapp.chart;
 
 import android.graphics.Rect;
 import android.view.View;

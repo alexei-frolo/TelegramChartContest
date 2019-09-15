@@ -1,12 +1,9 @@
-package com.froloapp.telegramchart.widget;
+package com.froloapp.chart.widget;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
-
-import com.froloapp.telegramchart.BuildConfig;
 
 
 public class ChartView extends AbsChartView {
@@ -36,10 +33,6 @@ public class ChartView extends AbsChartView {
     private void init(Context context, AttributeSet attrs) {
         setWillDrawXAxis(true);
         setWillDrawYAxis(true);
-    }
-
-    private void log(String msg) {
-        if (BuildConfig.DEBUG) Log.d(LOG_TAG, msg);
     }
 
     public void setOnStampClickListener(OnStampClickListener l) {
@@ -81,7 +74,7 @@ public class ChartView extends AbsChartView {
                 helper.getStartXPosition(),
                 helper.getStopXPosition(),
                 x);
-        log("Touched: x_coor=" + x + ", x_pos=" + xPosition);
+
         helper.setSelectedXPosition(xPosition);
 
         int stampIndex = CommonHelper.getClosestPointIndex(

@@ -1,4 +1,4 @@
-package com.froloapp.telegramchart;
+package com.froloapp.chart;
 
 
 import android.annotation.SuppressLint;
@@ -21,11 +21,11 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.Spinner;
 
-import com.froloapp.telegramchart.widget.Chart;
-import com.froloapp.telegramchart.widget.ChartView;
-import com.froloapp.telegramchart.widget.Line;
-import com.froloapp.telegramchart.widget.Misc;
-import com.froloapp.telegramchart.widget.ChartSlider;
+import com.froloapp.chart.widget.Chart;
+import com.froloapp.chart.widget.ChartView;
+import com.froloapp.chart.widget.Line;
+import com.froloapp.chart.widget.Misc;
+import com.froloapp.chart.widget.ChartSlider;
 
 
 public class ChartSwitcherActivity extends AbsChartActivity implements

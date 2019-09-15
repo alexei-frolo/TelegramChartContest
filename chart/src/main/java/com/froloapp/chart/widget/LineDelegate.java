@@ -1,10 +1,10 @@
-package com.froloapp.telegramchart.widget;
+package com.froloapp.chart.widget;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.support.v4.view.animation.FastOutLinearInInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 
 import java.util.List;
@@ -15,7 +15,7 @@ final class LineDelegate {
     private static final long FADE_ANIM_DURATION = Config.Y_AXIS_ANIM_DURATION;
 
     private static final Interpolator FADE_INTERPOLATOR =
-            new FastOutLinearInInterpolator();
+            new DecelerateInterpolator();
 
     private static final float DEFAULT_LINE_STROKE_WIDTH_IN_DP = 1.5f;
 
