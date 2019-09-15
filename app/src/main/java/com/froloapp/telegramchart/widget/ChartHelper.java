@@ -366,7 +366,7 @@ final class ChartHelper {
 
             // At first, normalizing X position
 
-            int index = CommonHelper.findVeryLeftPointIndex(
+            int index = CommonHelper.getClosestPointIndex(
                     mPoints,
                     mSelectedXPosition);
 
