@@ -4,12 +4,18 @@ import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
+import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.util.AttributeSet;
 import android.util.Property;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
+
+import com.froloapp.telegramchart.R;
 
 import java.util.Collections;
 import java.util.List;
@@ -178,6 +184,21 @@ final class XAxisHelper {
             pointIndex += smallStep;
             pointXPosition += smallStep * averageXPositionStep;
         }
+    }
+
+    void loadAttributes(Context context, AttributeSet attrs) {
+        int xAxisColor;
+        if (attrs != null) {
+            TypedArray typedArray = context.getTheme()
+                    .obtainStyledAttributes(attrs, R.styleable.AbsLineChartView, 0, 0);
+            xAxisColor = typedArray.getColor(R.styleable.AbsLineChartView_xAxisColor,
+                    Color.GRAY);
+            typedArray.recycle();
+        } else {
+            xAxisColor = Color.GRAY;
+        }
+
+        mPaint.setColor(xAxisColor);
     }
 
     void setPoints(List<Point> points) {

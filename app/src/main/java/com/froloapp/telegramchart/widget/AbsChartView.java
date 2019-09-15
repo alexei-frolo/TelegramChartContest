@@ -1,14 +1,11 @@
 package com.froloapp.telegramchart.widget;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.View;
-
-import com.froloapp.telegramchart.R;
 
 
 abstract class AbsChartView extends View {
@@ -16,12 +13,9 @@ abstract class AbsChartView extends View {
     private static final int DEFAULT_WIDTH_IN_DP = 200;
     private static final int DEFAULT_HEIGHT_IN_DP = 100;
 
-    private static final float DEFAULT_CHART_LINE_WIDTH_IN_DP = 1f;
-    private static final float DEFAULT_AXIS_LINE_WIDTH_IN_DP = 1f;
-
     private final ChartHelper mChartHelper = new ChartHelper(this);
 
-    private int footerHeight; // for x axis stamps
+    private int mFooterHeight; // for X axis
 
     public AbsChartView(Context context) {
         this(context, null);
@@ -37,17 +31,8 @@ abstract class AbsChartView extends View {
     }
 
     private void init(Context context, AttributeSet attrs) {
-        float chartLineWidth;
-        if (attrs != null) {
-            TypedArray typedArray = context.getTheme()
-                    .obtainStyledAttributes(attrs, R.styleable.AbsLineChartView, 0, 0);
-            chartLineWidth = typedArray.getDimension(R.styleable.AbsLineChartView_chartStrokeWidth, Utils.dpToPx(DEFAULT_CHART_LINE_WIDTH_IN_DP, context));
-            //axisStrokeWidth = typedArray.getDimension(R.styleable.AbsLineChartView_axisStrokeWidth, Utils.dpToPx(DEFAULT_AXIS_LINE_WIDTH_IN_DP, context));
-            typedArray.recycle();
-        } else {
-            chartLineWidth = Utils.dpToPx(DEFAULT_CHART_LINE_WIDTH_IN_DP, context);
-            //axisStrokeWidth = Utils.dpToPx(DEFAULT_AXIS_LINE_WIDTH_IN_DP, context);
-        }
+        mChartHelper.loadAttributes(context, attrs);
+        mChartHelper.setXPositions(0.0f, 0.3f, false);
     }
 
     @Override
@@ -90,7 +75,7 @@ abstract class AbsChartView extends View {
     }
 
     void setFooterHeight(int height) {
-        footerHeight = height;
+        mFooterHeight = height;
         invalidate();
     }
 
@@ -119,7 +104,7 @@ abstract class AbsChartView extends View {
     }
 
     /* package */ int getFooterHeight() {
-        return footerHeight;
+        return mFooterHeight;
     }
 
     static class SavedState extends BaseSavedState {
@@ -160,12 +145,11 @@ abstract class AbsChartView extends View {
     @Override
     protected Parcelable onSaveInstanceState() {
         Parcelable superState = super.onSaveInstanceState();
+
         SavedState ss = new SavedState(superState);
 
-//        ss.mStartXPosition = mStartXPosition;
-//        ss.mStopXPosition = mStopXPosition;
-//        ss.minYValue = minYValue;
-//        ss.maxYValue = maxYValue;
+        ss.mStartXPosition = mChartHelper.getStartXPosition();
+        ss.mStopXPosition = mChartHelper.getStopXPosition();
 
         return ss;
     }
@@ -178,6 +162,8 @@ abstract class AbsChartView extends View {
 
         float startXPercentage = ss.mStartXPosition;
         float stopXPercentage = ss.mStopXPosition;
+
+        mChartHelper.setXPositions(startXPercentage, stopXPercentage, false);
 
     }
 }

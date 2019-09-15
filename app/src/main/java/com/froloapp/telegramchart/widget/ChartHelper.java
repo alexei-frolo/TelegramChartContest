@@ -1,6 +1,8 @@
 package com.froloapp.telegramchart.widget;
 
+import android.content.Context;
 import android.graphics.Canvas;
+import android.util.AttributeSet;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -176,6 +178,11 @@ final class ChartHelper {
         mYAxisHelper.setMaxAndMin(mMinMax.min, mMinMax.max, animate);
     }
 
+    void loadAttributes(Context context, AttributeSet attrs) {
+        mXAxisHelper.loadAttributes(context, attrs);
+        mYAxisHelper.loadAttributes(context, attrs);
+    }
+
     boolean willDrawXAxis() {
         return mWillDrawXAxis;
     }
@@ -205,6 +212,14 @@ final class ChartHelper {
         }
         calcLocalMinAndMAx();
         dispatchMinAndMaxInRange(animate);
+    }
+
+    float getStartXPosition() {
+        return mStartXPosition;
+    }
+
+    float getStopXPosition() {
+        return mStopXPosition;
     }
 
     void setXPositions(float startXPosition, float stopXPosition, boolean animate) {

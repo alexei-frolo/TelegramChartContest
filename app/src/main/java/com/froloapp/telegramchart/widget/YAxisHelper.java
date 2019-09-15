@@ -4,14 +4,19 @@ import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
+import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Property;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 
 import com.froloapp.telegramchart.BuildConfig;
+import com.froloapp.telegramchart.R;
 
 
 // This helper is responsible for animating and drawing Y axis
@@ -24,7 +29,7 @@ final class YAxisHelper {
     private static final Interpolator Y_AXIS_INTERPOLATOR =
             new AccelerateDecelerateInterpolator();
 
-    private static final float DEFAULT_LINE_STROKE_WIDTH_IN_DP = 2f;
+    private static final float DEFAULT_LINE_STROKE_WIDTH_IN_DP = 1.4f;
     private static final float DEFAULT_TEXT_SIZE_IN_SP = 16f;
 
     private final static Property<YAxisHelper, Float> MIN_Y_VALUE =
@@ -171,6 +176,22 @@ final class YAxisHelper {
                 startXCoordinate,
                 yCoordinate - mLinePaint.getStrokeWidth() * 4, // mLinePaint.getStrokeWidth() * 4 adds additional space between line and text
                 mTextPaint);
+    }
+
+    void loadAttributes(Context context, AttributeSet attrs) {
+        int yAxisColor;
+        if (attrs != null) {
+            TypedArray typedArray = context.getTheme()
+                    .obtainStyledAttributes(attrs, R.styleable.AbsLineChartView, 0, 0);
+            yAxisColor = typedArray.getColor(R.styleable.AbsLineChartView_yAxisColor,
+                    Color.GRAY);
+            typedArray.recycle();
+        } else {
+            yAxisColor = Color.GRAY;
+        }
+
+        mLinePaint.setColor(yAxisColor);
+        mTextPaint.setColor(yAxisColor);
     }
 
     void draw(Canvas canvas) {
