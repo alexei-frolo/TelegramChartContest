@@ -22,6 +22,7 @@ import java.util.List;
 final class ChartHelper {
 
     private static final float DEFAULT_LINE_STROKE_WIDTH_IN_DP = 1.0f;
+    private static final float DEFAULT_SELECTED_LINE_DOT_RADIUS_IN_DP = 4.0f;
 
     private static class MinMax {
         float min;
@@ -56,6 +57,8 @@ final class ChartHelper {
 
     // Paint tools
     private final Paint mPaint;
+    private final Paint mDotPaint;
+    private final float mSelectedXPositionDotRadius;
 
     ChartHelper(AbsChartView view) {
         this.mView = view;
@@ -66,6 +69,15 @@ final class ChartHelper {
         paint.setStyle(Paint.Style.FILL);
         paint.setStrokeWidth(Misc.dpToPx(DEFAULT_LINE_STROKE_WIDTH_IN_DP, view.getContext()));
         mPaint = paint;
+
+        Paint dotPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        dotPaint.setStyle(Paint.Style.FILL);
+        dotPaint.setStrokeWidth(Misc.dpToPx(DEFAULT_LINE_STROKE_WIDTH_IN_DP, view.getContext()));
+        mDotPaint = dotPaint;
+
+        mSelectedXPositionDotRadius = Misc.dpToPx(
+                DEFAULT_SELECTED_LINE_DOT_RADIUS_IN_DP,
+                view.getContext());
     }
 
     // finds min value for the given index
@@ -360,7 +372,7 @@ final class ChartHelper {
         }
     }
 
-    private void drawSelectedXPosition(Canvas canvas) {
+    private void drawSelectedXPositionLine(Canvas canvas) {
         if (mSelectedXPosition >= 0.0f
                 && mSelectedXPosition <= 1.0f) {
 
@@ -392,8 +404,53 @@ final class ChartHelper {
         }
     }
 
+    private void drawSelectedXPositionDots(Canvas canvas) {
+        if (mSelectedXPosition >= 0.0f
+                && mSelectedXPosition <= 1.0f) {
+
+            // At first, normalizing X position
+
+            int index = CommonHelper.getClosestPointIndex(
+                    mPoints,
+                    mSelectedXPosition);
+
+            float correctXPosition = CommonHelper.calcPointRelativePositionAt(
+                    mPoints,
+                    index);
+
+            float xCoordinate = CommonHelper.findXCoordinate(
+                    mView,
+                    mStartXPosition,
+                    mStopXPosition,
+                    correctXPosition);
+
+            for (LineHelper helper : mLineHelpers) {
+                if (helper.isVisible()) {
+
+                    Line line = helper.getLine();
+
+                    // draw only if it's visible
+                    float yCoordinate = CommonHelper.findYCoordinate(
+                            mView,
+                            mYAxisHelper.getCurrentMinValue(),
+                            mYAxisHelper.getCurrentMaxValue(),
+                            line.getValueAt(index));
+
+                    mDotPaint.setColor(line.getColor());
+
+                    canvas.drawCircle(
+                            xCoordinate,
+                            yCoordinate,
+                            mSelectedXPositionDotRadius,
+                            mDotPaint);
+                }
+            }
+        }
+    }
+
     void draw(Canvas canvas) {
-        drawSelectedXPosition(canvas);
+        // draw selected X position line at first
+        drawSelectedXPositionLine(canvas);
 
         if (mWillDrawXAxis) {
             mXAxisHelper.draw(canvas);
@@ -407,6 +464,9 @@ final class ChartHelper {
                     mYAxisHelper.getCurrentMinValue(),
                     mYAxisHelper.getCurrentMaxValue());
         }
+
+        // draw selected X position dots at last
+        drawSelectedXPositionDots(canvas);
     }
 
     void attach() {

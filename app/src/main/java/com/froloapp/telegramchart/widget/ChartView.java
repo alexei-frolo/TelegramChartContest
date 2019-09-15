@@ -63,7 +63,8 @@ public class ChartView extends AbsChartView {
                 handleTouch(x);
                 break;
             }
-            case MotionEvent.ACTION_UP: {
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL: {
                 getChartHelper().clearSelectedXPosition();
                 getParent().requestDisallowInterceptTouchEvent(false);
                 dispatchTouchUp();
