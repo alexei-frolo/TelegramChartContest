@@ -12,11 +12,11 @@ public final class Line {
         this.color = color;
     }
 
-    int getValueCount() {
+    public int getValueCount() {
         return mValues.length;
     }
 
-    float getValueAt(int index) {
+    public float getValueAt(int index) {
         return mValues[index];
     }
 

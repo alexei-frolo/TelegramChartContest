@@ -121,11 +121,11 @@ final class YAxisHelper {
         this.mView = view;
 
         Paint linePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        linePaint.setStrokeWidth(Utils.dpToPx(DEFAULT_LINE_STROKE_WIDTH_IN_DP, view.getContext()));
+        linePaint.setStrokeWidth(Misc.dpToPx(DEFAULT_LINE_STROKE_WIDTH_IN_DP, view.getContext()));
         mLinePaint = linePaint;
 
         Paint textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        textPaint.setTextSize(Utils.spToPx(DEFAULT_TEXT_SIZE_IN_SP, view.getContext()));
+        textPaint.setTextSize(Misc.spToPx(DEFAULT_TEXT_SIZE_IN_SP, view.getContext()));
         mTextPaint = textPaint;
     }
 
@@ -170,7 +170,7 @@ final class YAxisHelper {
                 mLinePaint);
 
         // text
-        String text = Utils.format((int) value);
+        String text = Misc.format((int) value);
         canvas.drawText(
                 text,
                 startXCoordinate,
@@ -183,10 +183,10 @@ final class YAxisHelper {
         int yAxisTextColor;
         if (attrs != null) {
             TypedArray typedArray = context.getTheme()
-                    .obtainStyledAttributes(attrs, R.styleable.AbsLineChartView, 0, 0);
-            yAxisColor = typedArray.getColor(R.styleable.AbsLineChartView_yAxisColor,
+                    .obtainStyledAttributes(attrs, R.styleable.AbsChartView, 0, 0);
+            yAxisColor = typedArray.getColor(R.styleable.AbsChartView_yAxisColor,
                     Color.GRAY);
-            yAxisTextColor = typedArray.getColor(R.styleable.AbsLineChartView_yAxisTextColor,
+            yAxisTextColor = typedArray.getColor(R.styleable.AbsChartView_yAxisTextColor,
                     Color.GRAY);
             typedArray.recycle();
         } else {

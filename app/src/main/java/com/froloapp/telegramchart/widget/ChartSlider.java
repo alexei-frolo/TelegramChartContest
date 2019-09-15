@@ -88,10 +88,10 @@ public class ChartSlider extends AbsChartView {
                     Color.parseColor("#AAC1C1C1"));
 
             mFrameHorizontalBorderWidth = typedArray.getDimension(R.styleable.ChartSlider_frameHorizontalBorderWidth,
-                    Utils.dpToPx(DEFAULT_FRAME_HORIZONTAL_BORDER_WIDTH_IN_DP, context));
+                    Misc.dpToPx(DEFAULT_FRAME_HORIZONTAL_BORDER_WIDTH_IN_DP, context));
 
             mFrameVerticalBorderWidth = typedArray.getDimension(R.styleable.ChartSlider_frameVerticalBorderWidth,
-                    Utils.dpToPx(DEFAULT_FRAME_VERTICAl_BORDER_WIDTH_IN_DP, context));
+                    Misc.dpToPx(DEFAULT_FRAME_VERTICAl_BORDER_WIDTH_IN_DP, context));
 
             mMaxFrameCompression = typedArray.getFloat(R.styleable.ChartSlider_maxFrameCompression,
                     DEFAULT_MAX_FRAME_COMPRESSION);
@@ -100,8 +100,8 @@ public class ChartSlider extends AbsChartView {
         } else {
             overlayColor = Color.parseColor("#AAFFFFFF");
             frameBorderColor = Color.parseColor("#AAC1C1C1");
-            mFrameHorizontalBorderWidth = Utils.dpToPx(DEFAULT_FRAME_HORIZONTAL_BORDER_WIDTH_IN_DP, context);
-            mFrameVerticalBorderWidth = Utils.dpToPx(DEFAULT_FRAME_VERTICAl_BORDER_WIDTH_IN_DP, context);
+            mFrameHorizontalBorderWidth = Misc.dpToPx(DEFAULT_FRAME_HORIZONTAL_BORDER_WIDTH_IN_DP, context);
+            mFrameVerticalBorderWidth = Misc.dpToPx(DEFAULT_FRAME_VERTICAl_BORDER_WIDTH_IN_DP, context);
             mMaxFrameCompression = DEFAULT_MAX_FRAME_COMPRESSION;
         }
         mOverlayPaint.setStyle(Paint.Style.FILL);
@@ -110,7 +110,7 @@ public class ChartSlider extends AbsChartView {
         mFramePaint.setStyle(Paint.Style.STROKE);
         mFramePaint.setColor(frameBorderColor);
 
-        mTouchBorderThreshold = Utils.dpToPx(5f, context);
+        mTouchBorderThreshold = Misc.dpToPx(5f, context);
 
         setWillDrawXAxis(false);
         setWillDrawYAxis(false);
@@ -286,10 +286,6 @@ public class ChartSlider extends AbsChartView {
         this.mRightBorderXPosition = stop;
         super.setXPositions(0f, 1f, animate);
     }
-
-    /* *********************************
-     ****** SAVING INSTANCE STATE ******
-     **********************************/
 
     static class SavedState extends AbsChartView.SavedState {
         float leftBorderXPosition;

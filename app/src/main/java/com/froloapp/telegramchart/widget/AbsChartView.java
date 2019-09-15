@@ -17,6 +17,8 @@ abstract class AbsChartView extends View {
 
     private int mFooterHeight; // for X axis
 
+    private Chart mChart;
+
     public AbsChartView(Context context) {
         this(context, null);
     }
@@ -35,6 +37,10 @@ abstract class AbsChartView extends View {
         mChartHelper.setXPositions(0.0f, 0.3f, false);
     }
 
+    protected final ChartHelper getChartHelper() {
+        return mChartHelper;
+    }
+
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
@@ -43,8 +49,8 @@ abstract class AbsChartView extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        final int defWidth = (int) Utils.dpToPx(DEFAULT_WIDTH_IN_DP, getContext());
-        final int defHeight = (int) Utils.dpToPx(DEFAULT_HEIGHT_IN_DP, getContext());
+        final int defWidth = (int) Misc.dpToPx(DEFAULT_WIDTH_IN_DP, getContext());
+        final int defHeight = (int) Misc.dpToPx(DEFAULT_HEIGHT_IN_DP, getContext());
         final int measuredWidth = resolveSizeAndState(defWidth, widthMeasureSpec, 0);
         final int measuredHeight = resolveSizeAndState(defHeight, heightMeasureSpec, 0);
         setMeasuredDimension(measuredWidth, measuredHeight);
@@ -79,11 +85,13 @@ abstract class AbsChartView extends View {
         invalidate();
     }
 
-    /* *********************************
-     ********* PUBLIC INTERFACE ********
-     **********************************/
+    /* Nullable */
+    public Chart getChart() {
+        return mChart;
+    }
 
     public void setChart(Chart chart, boolean animate) {
+        mChart = chart;
         mChartHelper.setChart(chart.getPoints(), chart.getLines(), animate);
     }
 
@@ -93,6 +101,10 @@ abstract class AbsChartView extends View {
 
     public boolean isLineVisible(Line line) {
         return mChartHelper.isLineVisible(line);
+    }
+
+    public int getVisibleLineCount() {
+        return mChartHelper.getVisibleLineCount();
     }
 
     public void show(Line line, boolean animate) {

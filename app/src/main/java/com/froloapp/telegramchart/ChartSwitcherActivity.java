@@ -3,10 +3,12 @@ package com.froloapp.telegramchart;
 
 import android.annotation.SuppressLint;
 import android.content.res.ColorStateList;
+import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.widget.TintableCompoundButton;
 import android.support.v7.widget.AppCompatCheckBox;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,12 +22,13 @@ import android.widget.Spinner;
 import com.froloapp.telegramchart.widget.Chart;
 import com.froloapp.telegramchart.widget.ChartView;
 import com.froloapp.telegramchart.widget.Line;
-import com.froloapp.telegramchart.widget.Utils;
+import com.froloapp.telegramchart.widget.Misc;
 import com.froloapp.telegramchart.widget.ChartSlider;
 
 
 public class ChartSwitcherActivity extends AbsChartActivity
-        implements ChartSlider.OnScrollListener {
+        implements ChartSlider.OnScrollListener,
+        ChartView.OnStampClickListener {
 
     private Spinner spinnerCharts;
     private ChartView chartView;
@@ -67,6 +70,8 @@ public class ChartSwitcherActivity extends AbsChartActivity
 
         final float startXPosition = 0.0f;
         final float stopXPosition = 0.3f;
+
+        chartView.setOnStampClickListener(this);
         chartView.setXPositions(startXPosition, stopXPosition, false);
         chartSlider.setXPositions(startXPosition, stopXPosition, false);
         chartSlider.setOnScrollListener(this);
@@ -124,12 +129,12 @@ public class ChartSwitcherActivity extends AbsChartActivity
             ViewGroup.MarginLayoutParams lp = new ViewGroup.MarginLayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT);
-            int m = (int) Utils.dpToPx(5f, this);
+            int m = (int) Misc.dpToPx(5f, this);
             lp.leftMargin = m;
             lp.topMargin = m;
             lp.rightMargin = m;
             lp.bottomMargin = m;
-            checkBox.setMinimumWidth((int) Utils.dpToPx(70f, this));
+            checkBox.setMinimumWidth((int) Misc.dpToPx(70f, this));
             layoutCheckboxes.addView(checkBox, lp);
         }
     }
@@ -137,5 +142,47 @@ public class ChartSwitcherActivity extends AbsChartActivity
     @Override
     public void onScroll(ChartSlider slider, float startStampRel, float endStampRel) {
         chartView.setXPositions(startStampRel, endStampRel, true);
+    }
+
+    @Override
+    public void onTouchDown(final ChartView view, int stampIndex, float stampXCoordinate) {
+        showPopup(view, stampIndex, stampXCoordinate);
+    }
+
+    @Override
+    public void onTouchUp(ChartView view) {
+        PopupWindow currWindow = this.popupWindow;
+        if (currWindow != null) {
+            currWindow.dismiss();
+            this.popupWindow = null;
+        }
+    }
+
+    private void showPopup(ChartView chartView, int stampIndex, float stampXCoordinate) {
+        final Rect location = Utils.getViewLocation(chartView);
+        if (location == null) {
+            // early return. Shouldn't happen
+            return;
+        }
+
+        final int locX = location.left
+                + (int) stampXCoordinate
+                + 15; // + 15 to make a margin between x axis bar and dialog
+        final int locY = location.top;
+
+        final PopupWindow currPopup = this.popupWindow;
+        if (currPopup == null) {
+            PopupWindow newWindow = PopupHelper.createPopupWindow(chartView, stampIndex);
+            if (newWindow != null) {
+                newWindow.showAtLocation(chartView, Gravity.TOP | Gravity.END, locX, locY);
+                this.popupWindow = newWindow;
+            }
+        } else {
+            final int w = ViewGroup.LayoutParams.WRAP_CONTENT;
+            final int h = ViewGroup.LayoutParams.WRAP_CONTENT;
+            View v = currPopup.getContentView();
+            PopupHelper.populateWindowView(v, chartView, stampIndex);
+            currPopup.update(locX, locY, w, h);
+        }
     }
 }

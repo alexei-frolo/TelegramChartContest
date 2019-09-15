@@ -15,6 +15,7 @@
             app:chartStrokeWidth="1.5dp"
             app:xAxisTextColor="@color/gray"
             app:yAxisTextColor="@color/gray"
+            app:clickedStampLineColor="@color/gray"
             android:padding="5dp"
             android:id="@+id/chartView"
             android:layout_width="match_parent"

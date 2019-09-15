@@ -96,7 +96,7 @@ final class XAxisHelper {
 
         Paint textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         textPaint.setStyle(Paint.Style.FILL);
-        textPaint.setTextSize(Utils.spToPx(DEFAULT_TEXT_SIZE_IN_SP, view.getContext()));
+        textPaint.setTextSize(Misc.spToPx(DEFAULT_TEXT_SIZE_IN_SP, view.getContext()));
         mTextPaint = textPaint;
     }
 
@@ -255,10 +255,10 @@ final class XAxisHelper {
         final int xAxisTextColor;
         if (attrs != null) {
             TypedArray typedArray = context.getTheme()
-                    .obtainStyledAttributes(attrs, R.styleable.AbsLineChartView, 0, 0);
-            xAxisColor = typedArray.getColor(R.styleable.AbsLineChartView_xAxisColor,
+                    .obtainStyledAttributes(attrs, R.styleable.AbsChartView, 0, 0);
+            xAxisColor = typedArray.getColor(R.styleable.AbsChartView_xAxisColor,
                     Color.GRAY);
-            xAxisTextColor = typedArray.getColor(R.styleable.AbsLineChartView_xAxisTextColor,
+            xAxisTextColor = typedArray.getColor(R.styleable.AbsChartView_xAxisTextColor,
                     Color.GRAY);
             typedArray.recycle();
         } else {

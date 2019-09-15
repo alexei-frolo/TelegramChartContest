@@ -1,8 +1,13 @@
 package com.froloapp.telegramchart.widget;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.util.AttributeSet;
+
+import com.froloapp.telegramchart.R;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,6 +21,8 @@ import java.util.List;
  */
 final class ChartHelper {
 
+    private static final float DEFAULT_LINE_STROKE_WIDTH_IN_DP = 1.0f;
+
     private static class MinMax {
         float min;
         float max;
@@ -23,7 +30,7 @@ final class ChartHelper {
 
     private final AbsChartView mView;
 
-    // other helpers
+    // Delegate helpers
     private final YAxisHelper mYAxisHelper;
     private final XAxisHelper mXAxisHelper;
     private final List<LineHelper> mLineHelpers = new ArrayList<>();
@@ -34,7 +41,11 @@ final class ChartHelper {
     private List<Point> mPoints = Collections.emptyList();
 
     private float mStartXPosition = 0f;
-    private float mStopXPosition = 0f;
+    private float mStopXPosition = 1f;
+
+    // Special vertical line is drawn at this X position
+    // If it is in range 0..1
+    private float mSelectedXPosition = -1f;
 
     // Caching local minimums and maximums for optimization
     private final List<Float> mLocalMin = new ArrayList<>();
@@ -43,10 +54,18 @@ final class ChartHelper {
     // A try to reuse the same instance for further optimizations
     private final MinMax mMinMax = new MinMax();
 
+    // Paint tools
+    private final Paint mPaint;
+
     ChartHelper(AbsChartView view) {
         this.mView = view;
         this.mXAxisHelper = new XAxisHelper(view);
         this.mYAxisHelper = new YAxisHelper(view);
+
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setStyle(Paint.Style.FILL);
+        paint.setStrokeWidth(Misc.dpToPx(DEFAULT_LINE_STROKE_WIDTH_IN_DP, view.getContext()));
+        mPaint = paint;
     }
 
     // finds min value for the given index
@@ -179,6 +198,18 @@ final class ChartHelper {
     }
 
     void loadAttributes(Context context, AttributeSet attrs) {
+        final int xSelectedStampLineColor;
+        if (attrs != null) {
+            TypedArray typedArray = context.getTheme()
+                    .obtainStyledAttributes(attrs, R.styleable.ChartView, 0, 0);
+            xSelectedStampLineColor = typedArray.getColor(R.styleable.ChartView_clickedStampLineColor,
+                    Color.GRAY);
+            typedArray.recycle();
+        } else {
+            xSelectedStampLineColor = Color.GRAY;
+        }
+        mPaint.setColor(xSelectedStampLineColor);
+
         mXAxisHelper.loadAttributes(context, attrs);
         mYAxisHelper.loadAttributes(context, attrs);
     }
@@ -214,6 +245,10 @@ final class ChartHelper {
         dispatchMinAndMaxInRange(animate);
     }
 
+    List<Point> getPoints() {
+        return mPoints;
+    }
+
     float getStartXPosition() {
         return mStartXPosition;
     }
@@ -232,6 +267,16 @@ final class ChartHelper {
         dispatchMinAndMaxInRange(animate);
     }
 
+    void setSelectedXPosition(float targetXPosition) {
+        this.mSelectedXPosition = targetXPosition;
+        mView.invalidate();
+    }
+
+    void clearSelectedXPosition() {
+        this.mSelectedXPosition = -1f;
+        mView.invalidate();
+    }
+
     boolean isLineVisible(Line line) {
         for (LineHelper helper : mLineHelpers) {
             if (helper.getLine().equals(line)) {
@@ -239,6 +284,16 @@ final class ChartHelper {
             }
         }
         return false;
+    }
+
+    int getVisibleLineCount() {
+        int count = 0;
+        for (LineHelper helper : mLineHelpers) {
+            if (helper.isVisible()) {
+                count++;
+            }
+        }
+        return count;
     }
 
     void show(Line line, boolean animate) {
@@ -305,17 +360,41 @@ final class ChartHelper {
         }
     }
 
-    private int getVisibleLineCount() {
-        int count = 0;
-        for (LineHelper helper : mLineHelpers) {
-            if (helper.isVisible()) {
-                count++;
-            }
+    private void drawSelectedXPosition(Canvas canvas) {
+        if (mSelectedXPosition >= 0.0f
+                && mSelectedXPosition <= 1.0f) {
+
+            // At first, normalizing X position
+
+            int index = CommonHelper.findVeryLeftPointIndex(
+                    mPoints,
+                    mSelectedXPosition);
+
+            float correctXPosition = CommonHelper.calcPointRelativePositionAt(
+                    mPoints,
+                    index);
+
+            float xCoordinate = CommonHelper.findXCoordinate(
+                    mView,
+                    mStartXPosition,
+                    mStopXPosition,
+                    correctXPosition);
+
+            float yTop = mView.getPaddingTop();
+            float yBottom = mView.getMeasuredHeight() - mView.getPaddingBottom() - mView.getFooterHeight();
+
+            canvas.drawLine(
+                    xCoordinate,
+                    yTop,
+                    xCoordinate,
+                    yBottom,
+                    mPaint);
         }
-        return count;
     }
 
     void draw(Canvas canvas) {
+        drawSelectedXPosition(canvas);
+
         if (mWillDrawXAxis) {
             mXAxisHelper.draw(canvas);
         }

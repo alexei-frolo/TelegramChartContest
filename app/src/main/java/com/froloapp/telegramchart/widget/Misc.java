@@ -12,7 +12,7 @@ import java.util.NavigableMap;
 import java.util.TreeMap;
 
 
-public final class Utils {
+public final class Misc {
     private static final NavigableMap<Integer, String> BIG_NUMBER_SUFFIXES = new TreeMap<>();
     static {
         BIG_NUMBER_SUFFIXES.put(1_000, "k");
@@ -20,7 +20,7 @@ public final class Utils {
         BIG_NUMBER_SUFFIXES.put(1_000_000_000, "G");
     }
 
-    private Utils() {
+    private Misc() {
     }
 
     public static float dpToPx(float dp, Context context){

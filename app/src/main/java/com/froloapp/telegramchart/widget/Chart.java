@@ -67,6 +67,19 @@ public final class Chart {
         return mLines.get(index);
     }
 
+    public long getStampAt(int index) {
+        return mPoints.get(index).stamp;
+    }
+
+    public int findStampIndex(long stamp) {
+        for (int i = 0; i < mPoints.size(); i++) {
+            if (mPoints.get(i).stamp == stamp) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     @Override
     public String toString() {
         return mChartName;

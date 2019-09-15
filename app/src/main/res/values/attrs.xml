@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="AbsLineChartView">
+    <declare-styleable name="AbsChartView">
         <attr name="chartStrokeWidth" format="dimension|reference"/>
         <attr name="axisStrokeWidth" format="dimension|reference"/>
-        <attr name="yAxisStampCount" format="integer"/>
         <attr name="xAxisColor" format="color|reference"/>
         <attr name="xAxisTextColor" format="color|reference"/>
         <attr name="yAxisColor" format="color|reference"/>
@@ -19,6 +18,7 @@
     </declare-styleable>
 
     <declare-styleable name="ChartView">
+        <attr name="clickedStampLineColor" format="color|reference"/>
         <attr name="clickedStampSmallDotColor" format="color|reference"/>
     </declare-styleable>
 </resources>
