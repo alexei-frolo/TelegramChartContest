@@ -206,7 +206,7 @@ public class ChartSwitcherActivity extends AbsChartActivity implements
 
         final int locX = location.left
                 + (int) stampXCoordinate
-                + 15; // + 15 to make a margin between x axis bar and dialog
+                + 16; // + 16 to make a margin between x axis bar and dialog
         final int locY = location.top;
 
         final PopupWindow currPopup = this.popupWindow;
