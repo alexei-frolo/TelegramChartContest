@@ -28,7 +28,8 @@ final class XAxisHelper {
     private static final Interpolator X_AXIS_INTERPOLATOR =
             new AccelerateDecelerateInterpolator();
 
-    private static final float DEFAULT_TEXT_SIZE_IN_SP = 16f;
+    private static final float DEFAULT_TEXT_SIZE_IN_SP =
+            Config.TEXT_SIZE_IN_SP;
 
     private final static Property<XAxisHelper, Float> X_AXIS_ALPHA =
             new Property<XAxisHelper, Float>(float.class, "mAlpha") {

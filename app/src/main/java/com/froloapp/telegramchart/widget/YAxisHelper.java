@@ -30,7 +30,8 @@ final class YAxisHelper {
             new AccelerateDecelerateInterpolator();
 
     private static final float DEFAULT_LINE_STROKE_WIDTH_IN_DP = 1.0f;
-    private static final float DEFAULT_TEXT_SIZE_IN_SP = 16f;
+    private static final float DEFAULT_TEXT_SIZE_IN_SP =
+            Config.TEXT_SIZE_IN_SP;
 
     private final static Property<YAxisHelper, Float> MIN_Y_VALUE =
             new Property<YAxisHelper, Float>(float.class, "mMinYValue") {
