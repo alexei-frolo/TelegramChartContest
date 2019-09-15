@@ -7,7 +7,6 @@ import android.os.AsyncTask;
 import com.froloapp.telegramchart.widget.Chart;
 import com.froloapp.telegramchart.widget.Line;
 import com.froloapp.telegramchart.widget.Point;
-import com.froloapp.telegramchart.widget.Utils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -121,7 +120,7 @@ public class JsonParserTask extends AsyncTask<InputStream, Void, Object> {
             if (chartCode.equals("x")) { // these are timestamps
                 for (int j = 1; j < columns.length(); j++) {
                     long stamp = columns.getLong(j);
-                    String text = "point";
+                    String text = Utils.getTextForTimestamp(stamp);
                     Point point = Point.create(stamp, text);
                     points.add(point);
                 }
