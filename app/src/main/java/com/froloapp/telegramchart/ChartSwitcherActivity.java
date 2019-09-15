@@ -43,9 +43,9 @@ public class ChartSwitcherActivity extends AbsChartActivity implements
     private boolean mUserIsInteracting = false;
 
     // I need to know when spinner callback triggered due a user input or programmatically
-    private boolean spinnerTouched = false;
+    private boolean mSpinnerTouched = false;
 
-    private PopupWindow popupWindow;
+    private PopupWindow mPopupWindow;
 
     private void log(String msg) {
         if (BuildConfig.DEBUG) Log.d(LOG_TAG, msg);
@@ -64,7 +64,7 @@ public class ChartSwitcherActivity extends AbsChartActivity implements
             @SuppressLint("ClickableViewAccessibility")
             @Override public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    spinnerTouched = true; // user touched the spinner
+                    mSpinnerTouched = true; // user touched the spinner
                 }
                 return false;
             }
@@ -80,8 +80,8 @@ public class ChartSwitcherActivity extends AbsChartActivity implements
 
                 if (mUserIsInteracting) {
                     Chart chart = (Chart) parent.getAdapter().getItem(position);
-                    initChart(chart, spinnerTouched); // animate only if selected by user
-                    spinnerTouched = false;
+                    initChart(chart, mSpinnerTouched); // animate only if selected by user
+                    mSpinnerTouched = false;
                 }
             }
             @Override
@@ -190,10 +190,10 @@ public class ChartSwitcherActivity extends AbsChartActivity implements
 
     @Override
     public void onTouchUp(ChartView view) {
-        PopupWindow currWindow = this.popupWindow;
+        PopupWindow currWindow = this.mPopupWindow;
         if (currWindow != null) {
             currWindow.dismiss();
-            this.popupWindow = null;
+            this.mPopupWindow = null;
         }
     }
 
@@ -209,12 +209,12 @@ public class ChartSwitcherActivity extends AbsChartActivity implements
                 + 16; // + 16 to make a margin between x axis bar and dialog
         final int locY = location.top;
 
-        final PopupWindow currPopup = this.popupWindow;
+        final PopupWindow currPopup = this.mPopupWindow;
         if (currPopup == null) {
             PopupWindow newWindow = PopupHelper.createPopupWindow(chartView, stampIndex);
             if (newWindow != null) {
                 newWindow.showAtLocation(chartView, Gravity.TOP | Gravity.START, locX, locY);
-                this.popupWindow = newWindow;
+                this.mPopupWindow = newWindow;
             }
         } else {
             final int w = ViewGroup.LayoutParams.WRAP_CONTENT;

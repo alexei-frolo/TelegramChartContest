@@ -5,7 +5,6 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 
 import com.froloapp.telegramchart.widget.Chart;
-import com.froloapp.telegramchart.widget.Line;
 import com.froloapp.telegramchart.widget.Point;
 
 import org.json.JSONArray;
