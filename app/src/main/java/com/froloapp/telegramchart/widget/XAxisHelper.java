@@ -88,17 +88,16 @@ final class XAxisHelper {
             };
 
     // Paint tools
-    private final Paint mPaint;
+    //private final Paint mLinePaint;
+    private final Paint mTextPaint;
 
     XAxisHelper(AbsChartView view) {
         this.mView = view;
 
-        Paint linePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        linePaint.setStyle(Paint.Style.FILL);
-        linePaint.setTextSize(Utils.spToPx(DEFAULT_TEXT_SIZE_IN_SP, view.getContext()));
-        mPaint = linePaint;
-
-        //setXPositions(0.0f, 1.0f, false);
+        Paint textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        textPaint.setStyle(Paint.Style.FILL);
+        textPaint.setTextSize(Utils.spToPx(DEFAULT_TEXT_SIZE_IN_SP, view.getContext()));
+        mTextPaint = textPaint;
     }
 
     private void requestRedraw() {
@@ -120,7 +119,7 @@ final class XAxisHelper {
         pointIndex = (pointIndex / mPointStep) * mPointStep; // normalizing
         float pointXPosition = CommonHelper.calcPointRelativePositionAt(mPoints, pointIndex);
 
-        mPaint.setAlpha(255);
+        mTextPaint.setAlpha(255);
 
         while (pointIndex < pointCount) {
             String text = mPoints.get(pointIndex).text;
@@ -131,7 +130,7 @@ final class XAxisHelper {
                     mStopXPosition,
                     pointXPosition);
 
-            canvas.drawText(text, x, y, mPaint);
+            canvas.drawText(text, x, y, mTextPaint);
             if (pointXPosition > mStopXPosition) {
                 break;
             }
@@ -173,12 +172,12 @@ final class XAxisHelper {
 
             if (pointIndex % bigStep != 0) {
                 // means that's phantom
-                mPaint.setAlpha(alpha);
+                mTextPaint.setAlpha(alpha);
             } else {
-                mPaint.setAlpha(255);
+                mTextPaint.setAlpha(255);
             }
 
-            canvas.drawText(text, x, y, mPaint);
+            canvas.drawText(text, x, y, mTextPaint);
 
             if (pointXPosition > mStopXPosition) {
                 break;
@@ -252,18 +251,22 @@ final class XAxisHelper {
     }
 
     void loadAttributes(Context context, AttributeSet attrs) {
-        int xAxisColor;
+        final int xAxisColor;
+        final int xAxisTextColor;
         if (attrs != null) {
             TypedArray typedArray = context.getTheme()
                     .obtainStyledAttributes(attrs, R.styleable.AbsLineChartView, 0, 0);
             xAxisColor = typedArray.getColor(R.styleable.AbsLineChartView_xAxisColor,
                     Color.GRAY);
+            xAxisTextColor = typedArray.getColor(R.styleable.AbsLineChartView_xAxisTextColor,
+                    Color.GRAY);
             typedArray.recycle();
         } else {
             xAxisColor = Color.GRAY;
+            xAxisTextColor = Color.GRAY;
         }
 
-        mPaint.setColor(xAxisColor);
+        mTextPaint.setColor(xAxisTextColor);
     }
 
     void setPoints(List<Point> points) {
@@ -291,7 +294,7 @@ final class XAxisHelper {
     void measured() {
         final String test = "Mar. 1";
         final Rect buffTextBounds = new Rect(); // here we store bounds for stamp text
-        mPaint.getTextBounds(test, 0, test.length(), buffTextBounds);
+        mTextPaint.getTextBounds(test, 0, test.length(), buffTextBounds);
         int footerHeight = buffTextBounds.height() + 5; // + 5 to make a margin between stamps and the first y bar
         mView.setFooterHeight(footerHeight);
     }

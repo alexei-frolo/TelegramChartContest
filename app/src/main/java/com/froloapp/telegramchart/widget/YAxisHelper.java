@@ -180,18 +180,22 @@ final class YAxisHelper {
 
     void loadAttributes(Context context, AttributeSet attrs) {
         int yAxisColor;
+        int yAxisTextColor;
         if (attrs != null) {
             TypedArray typedArray = context.getTheme()
                     .obtainStyledAttributes(attrs, R.styleable.AbsLineChartView, 0, 0);
             yAxisColor = typedArray.getColor(R.styleable.AbsLineChartView_yAxisColor,
                     Color.GRAY);
+            yAxisTextColor = typedArray.getColor(R.styleable.AbsLineChartView_yAxisTextColor,
+                    Color.GRAY);
             typedArray.recycle();
         } else {
             yAxisColor = Color.GRAY;
+            yAxisTextColor = Color.GRAY;
         }
 
         mLinePaint.setColor(yAxisColor);
-        mTextPaint.setColor(yAxisColor);
+        mTextPaint.setColor(yAxisTextColor);
     }
 
     void draw(Canvas canvas) {
