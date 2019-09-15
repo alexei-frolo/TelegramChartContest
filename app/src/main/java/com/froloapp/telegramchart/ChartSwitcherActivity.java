@@ -8,6 +8,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.widget.TintableCompoundButton;
 import android.support.v7.widget.AppCompatCheckBox;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -30,6 +31,8 @@ public class ChartSwitcherActivity extends AbsChartActivity
         implements ChartSlider.OnScrollListener,
         ChartView.OnStampClickListener {
 
+    private static final String LOG_TAG = "ChartSwitcherActivity";
+
     private Spinner spinnerCharts;
     private ChartView chartView;
     private ChartSlider chartSlider;
@@ -39,6 +42,10 @@ public class ChartSwitcherActivity extends AbsChartActivity
     private boolean spinnerTouched = false;
 
     private PopupWindow popupWindow;
+
+    private void log(String msg) {
+        if (BuildConfig.DEBUG) Log.d(LOG_TAG, msg);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -174,7 +181,7 @@ public class ChartSwitcherActivity extends AbsChartActivity
         if (currPopup == null) {
             PopupWindow newWindow = PopupHelper.createPopupWindow(chartView, stampIndex);
             if (newWindow != null) {
-                newWindow.showAtLocation(chartView, Gravity.TOP | Gravity.END, locX, locY);
+                newWindow.showAtLocation(chartView, Gravity.TOP | Gravity.START, locX, locY);
                 this.popupWindow = newWindow;
             }
         } else {
