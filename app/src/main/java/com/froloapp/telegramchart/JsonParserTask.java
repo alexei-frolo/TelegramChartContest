@@ -122,7 +122,7 @@ public class JsonParserTask extends AsyncTask<InputStream, Void, Object> {
                 for (int j = 1; j < columns.length(); j++) {
                     long stamp = columns.getLong(j);
                     String text = "point";
-                    Point point = new Point(stamp, text);
+                    Point point = Point.create(stamp, text);
                     points.add(point);
                 }
             }
@@ -130,14 +130,16 @@ public class JsonParserTask extends AsyncTask<InputStream, Void, Object> {
 
         String chartName = "OldLine chart #" + index;
 
-        List<Line> lines = new ArrayList<>();
+        Chart.Builder builder = new Chart.Builder(chartName);
+
+        builder.addPoints(points);
 
         for (int i = 0; i < chartCount; i++) {
             JSONArray columns = columnsJson.getJSONArray(i);
             String chartCode = columns.get(0).toString();
             if (chartCode.equals("x")) { // continue
             } else {
-                float[] values = new float[columns.length()];
+                float[] values = new float[columns.length() - 1];
                 for (int j = 1; j < columns.length(); j++) {
                     int value = columns.getInt(j);
                     values[j - 1] = value;
@@ -146,11 +148,9 @@ public class JsonParserTask extends AsyncTask<InputStream, Void, Object> {
                 String name = namesJson.getString(chartCode);
                 String color = colorsJson.getString(chartCode);
 
-                Line line = new Line(values, name, Color.parseColor(color));
-
-                lines.add(line);
+                builder.addLine(values, name, Color.parseColor(color));
             }
         }
-        return Chart.create(points, lines);
+        return builder.build();
     }
 }

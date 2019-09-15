@@ -172,7 +172,7 @@ final class LineHelper {
         float value = mLine.getValueAt(pointIndex);
 
         // preparing paint tool
-        mPaint.setColor(mLine.color);
+        mPaint.setColor(mLine.getColor());
 
         if (mIsAnimating) {
             mPaint.setAlpha((int) (mAlpha * 255));

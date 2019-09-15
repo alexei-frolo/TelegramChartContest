@@ -2,11 +2,11 @@ package com.froloapp.telegramchart.widget;
 
 
 public final class Line {
-    private final float[] mValues;
-    final String name;
-    final int color;
+    private float[] mValues;
+    private String name;
+    private int color;
 
-    public Line(float[] values, String name, int color) {
+    Line(float[] values, String name, int color) {
         this.mValues = values;
         this.name = name;
         this.color = color;

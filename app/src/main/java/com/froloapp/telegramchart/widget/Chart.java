@@ -1,20 +1,48 @@
 package com.froloapp.telegramchart.widget;
 
-
+import java.util.ArrayList;
 import java.util.List;
 
-public class Chart {
 
-    // Do we need some builder?
+public final class Chart {
 
-    public static Chart create(List<Point> points, List<Line> lines) {
-        return new Chart(points, lines);
+    public static class Builder {
+        private String mName;
+        private List<Point> mPoints;
+        private List<Line> mLines = new ArrayList<>();
+
+        public Builder(String name) {
+            this.mName = name;
+        }
+
+        public Builder addPoints(List<Point> points) {
+            this.mPoints = points;
+            this.mLines.clear();
+            return this;
+        }
+
+        public Builder addLine(float[] value, String name, int color) {
+            if (mPoints == null) {
+                throw new IllegalArgumentException("No points added yet");
+            }
+            if (mPoints.size() != value.length) {
+                throw new IllegalArgumentException("Value count doesn't match point count");
+            }
+            mLines.add(new Line(value, name, color));
+            return this;
+        }
+
+        public Chart build() {
+            return new Chart(mName, mPoints, mLines);
+        }
     }
 
-    private final List<Point> mPoints;
-    private final List<Line> mLines;
+    private String mChartName;
+    private List<Point> mPoints;
+    private List<Line> mLines;
 
-    private Chart(List<Point> points, List<Line> lines) {
+    private Chart(String name, List<Point> points, List<Line> lines) {
+        this.mChartName = name;
         this.mPoints = points;
         this.mLines = lines;
     }
@@ -25,6 +53,10 @@ public class Chart {
 
     List<Line> getLines() {
         return mLines;
+    }
+
+    public String getChartName() {
+        return mChartName;
     }
 
     public int getLineCount() {
