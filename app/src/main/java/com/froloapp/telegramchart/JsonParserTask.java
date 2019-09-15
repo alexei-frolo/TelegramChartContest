@@ -128,7 +128,7 @@ public class JsonParserTask extends AsyncTask<InputStream, Void, Object> {
             }
         }
 
-        String chartName = "OldLine chart #" + index;
+        String chartName = "Chart #" + index;
 
         Chart.Builder builder = new Chart.Builder(chartName);
 

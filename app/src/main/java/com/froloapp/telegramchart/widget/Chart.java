@@ -12,7 +12,7 @@ public final class Chart {
         private List<Line> mLines = new ArrayList<>();
 
         public Builder(String name) {
-            this.mName = name;
+            this.mName = name != null ? name : "";
         }
 
         public Builder addPoints(List<Point> points) {
@@ -65,5 +65,10 @@ public final class Chart {
 
     public Line getLineAt(int index) {
         return mLines.get(index);
+    }
+
+    @Override
+    public String toString() {
+        return mChartName;
     }
 }
