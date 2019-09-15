@@ -83,7 +83,7 @@ public class ChartView extends AbsChartView {
         log("Touched: x_coor=" + x + ", x_pos=" + xPosition);
         helper.setSelectedXPosition(xPosition);
 
-        int stampIndex = CommonHelper.findNearestPointIndex(
+        int stampIndex = CommonHelper.getClosestPointIndex(
                 helper.getPoints(),
                 xPosition);
 

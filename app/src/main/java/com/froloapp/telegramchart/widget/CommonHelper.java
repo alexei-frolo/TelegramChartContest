@@ -25,6 +25,38 @@ final class CommonHelper {
         return 0;
     }
 
+    // Finds the nearest timestamp index to the given target X position
+    static int getClosestPointIndex(List<Point> points,
+                                    float toXPosition) {
+        if (points.isEmpty()) {
+            return -1;
+        }
+
+        long minAxis = points.get(0).stamp;
+        long maxAxis = points.get(points.size() - 1).stamp;
+
+        float approximateStamp = (minAxis + ((maxAxis - minAxis) * toXPosition));
+
+        for (int i = 0; i < points.size(); i++) {
+            long stamp = points.get(i).stamp;
+            if (stamp > approximateStamp) {
+                if (i > 0) {
+                    float timestampXPosition = ((float) (stamp - minAxis)) / (maxAxis - minAxis);
+                    long previousTimestamp = points.get(i - 1).stamp;
+                    float previousTimestampXPosition = ((float) (previousTimestamp - minAxis)) / (maxAxis - minAxis);
+                    if (Math.abs(previousTimestampXPosition - toXPosition) < Math.abs(timestampXPosition - toXPosition)) {
+                        return i - 1;
+                    } else {
+                        return i;
+                    }
+                } else {
+                    return i;
+                }
+            }
+        }
+        throw new IllegalArgumentException("Invalid timestamp relative position: " + toXPosition);
+    }
+
     // finds the left closest point to the given target X position
     // then returns its list index.
     static int findVeryLeftPointIndex(List<Point> points,
