@@ -45,7 +45,7 @@ final class XAxisHelper {
     private List<Point> mPoints = Collections.emptyList();
 
     private float mStartXPosition = 0;
-    private float mStopXPosition = 0;
+    private float mStopXPosition = 1f;
 
     private final float mMaxPointCountInRange = 6f;
     private final float mMinPointCountInRange = 3f;
@@ -97,6 +97,8 @@ final class XAxisHelper {
         linePaint.setStyle(Paint.Style.FILL);
         linePaint.setTextSize(Utils.spToPx(DEFAULT_TEXT_SIZE_IN_SP, view.getContext()));
         mPaint = linePaint;
+
+        //setXPositions(0.0f, 1.0f, false);
     }
 
     private void requestRedraw() {
@@ -186,30 +188,7 @@ final class XAxisHelper {
         }
     }
 
-    void loadAttributes(Context context, AttributeSet attrs) {
-        int xAxisColor;
-        if (attrs != null) {
-            TypedArray typedArray = context.getTheme()
-                    .obtainStyledAttributes(attrs, R.styleable.AbsLineChartView, 0, 0);
-            xAxisColor = typedArray.getColor(R.styleable.AbsLineChartView_xAxisColor,
-                    Color.GRAY);
-            typedArray.recycle();
-        } else {
-            xAxisColor = Color.GRAY;
-        }
-
-        mPaint.setColor(xAxisColor);
-    }
-
-    void setPoints(List<Point> points) {
-        this.mPoints = points;
-        requestRedraw();
-    }
-
-    void setXPositions(float start, float stop, boolean animate) {
-        mStartXPosition = start;
-        mStopXPosition = stop;
-
+    private void checkPointStepChanged(boolean animateChanges) {
         boolean changed = false;
         if (mPointStep < 1) {
             mPointStep = 1;
@@ -256,7 +235,7 @@ final class XAxisHelper {
                 mAnim = null;
             }
 
-            if (animate) {
+            if (animateChanges) {
                 PropertyValuesHolder holder = PropertyValuesHolder.ofFloat(X_AXIS_ALPHA, 0.1f, 1f);
                 ObjectAnimator newAnim = ObjectAnimator.ofPropertyValuesHolder(this, holder);
                 newAnim.setDuration(X_AXIS_ANIM_DURATION);
@@ -270,6 +249,32 @@ final class XAxisHelper {
                 requestRedraw();
             }
         }
+    }
+
+    void loadAttributes(Context context, AttributeSet attrs) {
+        int xAxisColor;
+        if (attrs != null) {
+            TypedArray typedArray = context.getTheme()
+                    .obtainStyledAttributes(attrs, R.styleable.AbsLineChartView, 0, 0);
+            xAxisColor = typedArray.getColor(R.styleable.AbsLineChartView_xAxisColor,
+                    Color.GRAY);
+            typedArray.recycle();
+        } else {
+            xAxisColor = Color.GRAY;
+        }
+
+        mPaint.setColor(xAxisColor);
+    }
+
+    void setPoints(List<Point> points) {
+        this.mPoints = points;
+        checkPointStepChanged(false);
+    }
+
+    void setXPositions(float start, float stop, boolean animate) {
+        mStartXPosition = start;
+        mStopXPosition = stop;
+        checkPointStepChanged(animate);
     }
 
     void draw(Canvas canvas) {

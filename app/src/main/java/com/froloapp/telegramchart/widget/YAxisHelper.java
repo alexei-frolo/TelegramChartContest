@@ -29,7 +29,7 @@ final class YAxisHelper {
     private static final Interpolator Y_AXIS_INTERPOLATOR =
             new AccelerateDecelerateInterpolator();
 
-    private static final float DEFAULT_LINE_STROKE_WIDTH_IN_DP = 1.4f;
+    private static final float DEFAULT_LINE_STROKE_WIDTH_IN_DP = 1.0f;
     private static final float DEFAULT_TEXT_SIZE_IN_SP = 16f;
 
     private final static Property<YAxisHelper, Float> MIN_Y_VALUE =
