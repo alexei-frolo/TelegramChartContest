@@ -13,11 +13,17 @@ abstract class AbsChartView extends View {
     private static final int DEFAULT_WIDTH_IN_DP = 200;
     private static final int DEFAULT_HEIGHT_IN_DP = 100;
 
+    public interface OnLineVisibilityChangedListener {
+        void onLineVisibilityChanged(Line line, boolean isVisible);
+    }
+
     private final ChartHelper mChartHelper = new ChartHelper(this);
 
     private int mFooterHeight; // for X axis
 
     private Chart mChart;
+
+    private OnLineVisibilityChangedListener mOnLineVisibilityChangedListener;
 
     public AbsChartView(Context context) {
         this(context, null);
@@ -39,6 +45,16 @@ abstract class AbsChartView extends View {
 
     protected final ChartHelper getChartHelper() {
         return mChartHelper;
+    }
+
+    public void setOnLineVisibilityChangedListener(OnLineVisibilityChangedListener l) {
+        this.mOnLineVisibilityChangedListener = l;
+    }
+
+    private void dispatchLineVisibilityChanged(Line line, boolean isVisible) {
+        if (mOnLineVisibilityChangedListener != null) {
+            mOnLineVisibilityChangedListener.onLineVisibilityChanged(line, isVisible);
+        }
     }
 
     @Override
@@ -109,10 +125,12 @@ abstract class AbsChartView extends View {
 
     public void show(Line line, boolean animate) {
         mChartHelper.show(line, animate);
+        dispatchLineVisibilityChanged(line, true);
     }
 
     public void hide(Line line, boolean animate) {
         mChartHelper.hide(line, animate);
+        dispatchLineVisibilityChanged(line, false);
     }
 
     /* package */ int getFooterHeight() {
@@ -122,6 +140,7 @@ abstract class AbsChartView extends View {
     static class SavedState extends BaseSavedState {
         private float mStartXPosition;
         private float mStopXPosition;
+        private int[] mLineVisibilities;
 
         SavedState(Parcelable superState) {
             super(superState);
@@ -131,6 +150,7 @@ abstract class AbsChartView extends View {
             super(in);
             mStartXPosition = in.readFloat();
             mStopXPosition = in.readFloat();
+            mLineVisibilities = in.createIntArray();
         }
 
         @Override
@@ -138,6 +158,7 @@ abstract class AbsChartView extends View {
             super.writeToParcel(out, flags);
             out.writeFloat(mStartXPosition);
             out.writeFloat(mStopXPosition);
+            out.writeIntArray(mLineVisibilities);
         }
 
         public static final Parcelable.Creator<SavedState> CREATOR
@@ -163,6 +184,16 @@ abstract class AbsChartView extends View {
         ss.mStartXPosition = mChartHelper.getStartXPosition();
         ss.mStopXPosition = mChartHelper.getStopXPosition();
 
+        int[] lineVisibilities = new int[mChartHelper.getLineCount()];
+
+        for (int i = 0; i < lineVisibilities.length; i++) {
+            Line line = mChartHelper.getLineAt(i);
+            boolean isVisible = mChartHelper.isLineVisible(line);
+            lineVisibilities[i] = isVisible ? 1 : 0;
+        }
+
+        ss.mLineVisibilities = lineVisibilities;
+
         return ss;
     }
 
@@ -174,8 +205,23 @@ abstract class AbsChartView extends View {
 
         float startXPercentage = ss.mStartXPosition;
         float stopXPercentage = ss.mStopXPosition;
+        int[] lineVisibilities = ss.mLineVisibilities;
 
         mChartHelper.setXPositions(startXPercentage, stopXPercentage, false);
+
+        if (lineVisibilities.length == mChartHelper.getLineCount()) {
+            for (int i = 0; i < lineVisibilities.length; i++) {
+                boolean isVisible = lineVisibilities[i] > 0;
+                Line line = mChartHelper.getLineAt(i);
+                if (isVisible) {
+                    mChartHelper.show(line, false);
+                } else {
+                    mChartHelper.hide(line, false);
+                }
+
+                dispatchLineVisibilityChanged(line, isVisible);
+            }
+        }
 
     }
 }

@@ -289,6 +289,14 @@ final class ChartHelper {
         mView.invalidate();
     }
 
+    int getLineCount() {
+        return mLineHelpers.size();
+    }
+
+    Line getLineAt(int index) {
+        return mLineHelpers.get(index).getLine();
+    }
+
     boolean isLineVisible(Line line) {
         for (LineHelper helper : mLineHelpers) {
             if (helper.getLine().equals(line)) {

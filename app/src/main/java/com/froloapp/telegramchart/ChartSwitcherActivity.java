@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
@@ -27,8 +28,9 @@ import com.froloapp.telegramchart.widget.Misc;
 import com.froloapp.telegramchart.widget.ChartSlider;
 
 
-public class ChartSwitcherActivity extends AbsChartActivity
-        implements ChartSlider.OnScrollListener,
+public class ChartSwitcherActivity extends AbsChartActivity implements
+        ChartView.OnLineVisibilityChangedListener,
+        ChartSlider.OnScrollListener,
         ChartView.OnStampClickListener {
 
     private static final String LOG_TAG = "ChartSwitcherActivity";
@@ -37,6 +39,8 @@ public class ChartSwitcherActivity extends AbsChartActivity
     private ChartView chartView;
     private ChartSlider chartSlider;
     private LinearLayout layoutCheckboxes;
+
+    private boolean mUserIsInteracting = false;
 
     // I need to know when spinner callback triggered due a user input or programmatically
     private boolean spinnerTouched = false;
@@ -67,23 +71,39 @@ public class ChartSwitcherActivity extends AbsChartActivity
         });
         // set callback after set selection
         spinnerCharts.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Chart chart = (Chart) parent.getAdapter().getItem(position);
-                initChart(chart, spinnerTouched); // animate only if selected by user
-                spinnerTouched = false;
+            @Override
+            public void onItemSelected(
+                    AdapterView<?> parent,
+                    View view,
+                    int position,
+                    long id) {
+
+                if (mUserIsInteracting) {
+                    Chart chart = (Chart) parent.getAdapter().getItem(position);
+                    initChart(chart, spinnerTouched); // animate only if selected by user
+                    spinnerTouched = false;
+                }
             }
-            @Override public void onNothingSelected(AdapterView<?> parent) { }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) { }
         });
 
         final float startXPosition = 0.0f;
         final float stopXPosition = 0.3f;
 
+        chartView.setOnLineVisibilityChangedListener(this);
         chartView.setOnStampClickListener(this);
         chartView.setXPositions(startXPosition, stopXPosition, false);
         chartSlider.setXPositions(startXPosition, stopXPosition, false);
         chartSlider.setOnScrollListener(this);
 
         load();
+    }
+
+    @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        mUserIsInteracting = true;
     }
 
     @Override
@@ -108,13 +128,14 @@ public class ChartSwitcherActivity extends AbsChartActivity
         initCheckboxes(chart);
     }
 
-    private void initCheckboxes(final Chart adapter) {
+    private void initCheckboxes(final Chart chart) {
         layoutCheckboxes.removeAllViews();
         // adding checkboxes dynamic
-        for (int i = 0; i < adapter.getLineCount(); i++) {
-            final Line line = adapter.getLineAt(i);
+        for (int i = 0; i < chart.getLineCount(); i++) {
+            final Line line = chart.getLineAt(i);
             final int color = line.getColor();
             AppCompatCheckBox checkBox = new AppCompatCheckBox(this);
+            checkBox.setTag(line);
             if (Build.VERSION.SDK_INT >= 21) {
                 checkBox.setButtonTintList(ColorStateList.valueOf(color));
             } else {
@@ -143,6 +164,17 @@ public class ChartSwitcherActivity extends AbsChartActivity
             lp.bottomMargin = m;
             checkBox.setMinimumWidth((int) Misc.dpToPx(70f, this));
             layoutCheckboxes.addView(checkBox, lp);
+        }
+    }
+
+    @Override
+    public void onLineVisibilityChanged(Line line, boolean isVisible) {
+        for (int i = 0; i < layoutCheckboxes.getChildCount(); i++) {
+            CheckBox checkBox = (CheckBox) layoutCheckboxes.getChildAt(i);
+            Object tag = checkBox.getTag();
+            if (tag != null && tag.equals(line)) {
+                checkBox.setChecked(isVisible);
+            }
         }
     }
 
