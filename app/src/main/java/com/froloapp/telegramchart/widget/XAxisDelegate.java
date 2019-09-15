@@ -21,8 +21,8 @@ import java.util.Collections;
 import java.util.List;
 
 
-// This helper is responsible for animating and drawing X axis
-final class XAxisHelper {
+// This delegate is responsible for animating and drawing X axis
+final class XAxisDelegate {
     private static final long X_AXIS_ANIM_DURATION = Config.X_AXIS_ANIM_DURATION;
 
     private static final Interpolator X_AXIS_INTERPOLATOR =
@@ -31,12 +31,12 @@ final class XAxisHelper {
     private static final float DEFAULT_TEXT_SIZE_IN_SP =
             Config.TEXT_SIZE_IN_SP;
 
-    private final static Property<XAxisHelper, Float> X_AXIS_ALPHA =
-            new Property<XAxisHelper, Float>(float.class, "mAlpha") {
-        @Override public Float get(XAxisHelper object) {
+    private final static Property<XAxisDelegate, Float> X_AXIS_ALPHA =
+            new Property<XAxisDelegate, Float>(float.class, "mAlpha") {
+        @Override public Float get(XAxisDelegate object) {
             return object.mAlpha;
         }
-        @Override public void set(XAxisHelper object, Float value) {
+        @Override public void set(XAxisDelegate object, Float value) {
             object.mAlpha = value;
             object.requestRedraw();
         }
@@ -92,7 +92,7 @@ final class XAxisHelper {
     //private final Paint mLinePaint;
     private final Paint mTextPaint;
 
-    XAxisHelper(AbsChartView view) {
+    XAxisDelegate(AbsChartView view) {
         this.mView = view;
 
         Paint textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);

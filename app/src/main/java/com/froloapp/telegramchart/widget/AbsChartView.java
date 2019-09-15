@@ -17,7 +17,7 @@ abstract class AbsChartView extends View {
         void onLineVisibilityChanged(Line line, boolean isVisible);
     }
 
-    private final ChartHelper mChartHelper = new ChartHelper(this);
+    private final ChartDelegate mChartDelegate = new ChartDelegate(this);
 
     private int mFooterHeight; // for X axis
 
@@ -39,12 +39,12 @@ abstract class AbsChartView extends View {
     }
 
     private void init(Context context, AttributeSet attrs) {
-        mChartHelper.loadAttributes(context, attrs);
-        mChartHelper.setXPositions(0.0f, 0.3f, false);
+        mChartDelegate.loadAttributes(context, attrs);
+        mChartDelegate.setXPositions(0.0f, 0.3f, false);
     }
 
-    protected final ChartHelper getChartHelper() {
-        return mChartHelper;
+    protected final ChartDelegate getChartDelegate() {
+        return mChartDelegate;
     }
 
     public void setOnLineVisibilityChangedListener(OnLineVisibilityChangedListener l) {
@@ -60,7 +60,7 @@ abstract class AbsChartView extends View {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        mChartHelper.attach();
+        mChartDelegate.attach();
     }
 
     @Override
@@ -72,28 +72,28 @@ abstract class AbsChartView extends View {
         setMeasuredDimension(measuredWidth, measuredHeight);
 
         // dispatch measured
-        mChartHelper.measured();
+        mChartDelegate.measured();
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        mChartHelper.draw(canvas);
+        mChartDelegate.draw(canvas);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         // Reset the helper here
-        mChartHelper.detach();
+        mChartDelegate.detach();
     }
 
     protected final void setWillDrawXAxis(boolean willDraw) {
-        mChartHelper.setWillDrawXAxis(willDraw);
+        mChartDelegate.setWillDrawXAxis(willDraw);
     }
 
     protected final void setWillDrawYAxis(boolean willDraw) {
-        mChartHelper.setWillDrawYAxis(willDraw);
+        mChartDelegate.setWillDrawYAxis(willDraw);
     }
 
     void setFooterHeight(int height) {
@@ -108,28 +108,28 @@ abstract class AbsChartView extends View {
 
     public void setChart(Chart chart, boolean animate) {
         mChart = chart;
-        mChartHelper.setChart(chart.getPoints(), chart.getLines(), animate);
+        mChartDelegate.setChart(chart.getPoints(), chart.getLines(), animate);
     }
 
     public void setXPositions(float startXPosition, float stopXPosition, boolean animate) {
-        mChartHelper.setXPositions(startXPosition, stopXPosition, animate);
+        mChartDelegate.setXPositions(startXPosition, stopXPosition, animate);
     }
 
     public boolean isLineVisible(Line line) {
-        return mChartHelper.isLineVisible(line);
+        return mChartDelegate.isLineVisible(line);
     }
 
     public int getVisibleLineCount() {
-        return mChartHelper.getVisibleLineCount();
+        return mChartDelegate.getVisibleLineCount();
     }
 
     public void show(Line line, boolean animate) {
-        mChartHelper.show(line, animate);
+        mChartDelegate.show(line, animate);
         dispatchLineVisibilityChanged(line, true);
     }
 
     public void hide(Line line, boolean animate) {
-        mChartHelper.hide(line, animate);
+        mChartDelegate.hide(line, animate);
         dispatchLineVisibilityChanged(line, false);
     }
 
@@ -181,14 +181,14 @@ abstract class AbsChartView extends View {
 
         SavedState ss = new SavedState(superState);
 
-        ss.mStartXPosition = mChartHelper.getStartXPosition();
-        ss.mStopXPosition = mChartHelper.getStopXPosition();
+        ss.mStartXPosition = mChartDelegate.getStartXPosition();
+        ss.mStopXPosition = mChartDelegate.getStopXPosition();
 
-        int[] lineVisibilities = new int[mChartHelper.getLineCount()];
+        int[] lineVisibilities = new int[mChartDelegate.getLineCount()];
 
         for (int i = 0; i < lineVisibilities.length; i++) {
-            Line line = mChartHelper.getLineAt(i);
-            boolean isVisible = mChartHelper.isLineVisible(line);
+            Line line = mChartDelegate.getLineAt(i);
+            boolean isVisible = mChartDelegate.isLineVisible(line);
             lineVisibilities[i] = isVisible ? 1 : 0;
         }
 
@@ -207,16 +207,16 @@ abstract class AbsChartView extends View {
         float stopXPercentage = ss.mStopXPosition;
         int[] lineVisibilities = ss.mLineVisibilities;
 
-        mChartHelper.setXPositions(startXPercentage, stopXPercentage, false);
+        mChartDelegate.setXPositions(startXPercentage, stopXPercentage, false);
 
-        if (lineVisibilities.length == mChartHelper.getLineCount()) {
+        if (lineVisibilities.length == mChartDelegate.getLineCount()) {
             for (int i = 0; i < lineVisibilities.length; i++) {
                 boolean isVisible = lineVisibilities[i] > 0;
-                Line line = mChartHelper.getLineAt(i);
+                Line line = mChartDelegate.getLineAt(i);
                 if (isVisible) {
-                    mChartHelper.show(line, false);
+                    mChartDelegate.show(line, false);
                 } else {
-                    mChartHelper.hide(line, false);
+                    mChartDelegate.hide(line, false);
                 }
 
                 dispatchLineVisibilityChanged(line, isVisible);

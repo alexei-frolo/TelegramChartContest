@@ -19,7 +19,7 @@ import java.util.List;
  * Handles start and stop X positions;
  * Animates appearing or disappearing of chart lines;
  */
-final class ChartHelper {
+final class ChartDelegate {
 
     private static final float DEFAULT_LINE_STROKE_WIDTH_IN_DP = 1.0f;
     private static final float DEFAULT_SELECTED_LINE_DOT_RADIUS_IN_DP = 4.0f;
@@ -32,9 +32,9 @@ final class ChartHelper {
     private final AbsChartView mView;
 
     // Delegate helpers
-    private final YAxisHelper mYAxisHelper;
-    private final XAxisHelper mXAxisHelper;
-    private final List<LineHelper> mLineHelpers = new ArrayList<>();
+    private final YAxisDelegate mYAxisDelegate;
+    private final XAxisDelegate mXAxisDelegate;
+    private final List<LineDelegate> mLineDelegates = new ArrayList<>();
 
     private boolean mWillDrawXAxis = true;
     private boolean mWillDrawYAxis = true;
@@ -60,10 +60,10 @@ final class ChartHelper {
     private final Paint mDotPaint;
     private final float mSelectedXPositionDotRadius;
 
-    ChartHelper(AbsChartView view) {
+    ChartDelegate(AbsChartView view) {
         this.mView = view;
-        this.mXAxisHelper = new XAxisHelper(view);
-        this.mYAxisHelper = new YAxisHelper(view);
+        this.mXAxisDelegate = new XAxisDelegate(view);
+        this.mYAxisDelegate = new YAxisDelegate(view);
 
         Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setStyle(Paint.Style.FILL);
@@ -85,7 +85,7 @@ final class ChartHelper {
         boolean atLeastOneLineVisible = false;
         float min = Float.MAX_VALUE;
 
-        for (LineHelper helper : mLineHelpers) {
+        for (LineDelegate helper : mLineDelegates) {
             if (!helper.isVisible()) {
                 // the line is invisible => skip it
                 continue;
@@ -109,7 +109,7 @@ final class ChartHelper {
         boolean atLeastOneLineVisible = false;
         float max = Float.MIN_VALUE;
 
-        for (LineHelper helper : mLineHelpers) {
+        for (LineDelegate helper : mLineDelegates) {
             if (!helper.isVisible()) {
                 // the line is invisible => skip it
                 continue;
@@ -206,7 +206,7 @@ final class ChartHelper {
 
     private void dispatchMinAndMaxInRange(boolean animate) {
         findLocalMinMax(mMinMax, mStartXPosition, mStopXPosition);
-        mYAxisHelper.setMaxAndMin(mMinMax.min, mMinMax.max, animate);
+        mYAxisDelegate.setMaxAndMin(mMinMax.min, mMinMax.max, animate);
     }
 
     void loadAttributes(Context context, AttributeSet attrs) {
@@ -222,8 +222,8 @@ final class ChartHelper {
         }
         mPaint.setColor(xSelectedStampLineColor);
 
-        mXAxisHelper.loadAttributes(context, attrs);
-        mYAxisHelper.loadAttributes(context, attrs);
+        mXAxisDelegate.loadAttributes(context, attrs);
+        mYAxisDelegate.loadAttributes(context, attrs);
     }
 
     boolean willDrawXAxis() {
@@ -246,12 +246,12 @@ final class ChartHelper {
 
     void setChart(List<Point> points, List<Line> lines, boolean animate) {
         mPoints = points;
-        mXAxisHelper.setPoints(points);
-        mLineHelpers.clear();
+        mXAxisDelegate.setPoints(points);
+        mLineDelegates.clear();
         for (Line line : lines) {
-            LineHelper helper = new LineHelper(mView, points, line);
+            LineDelegate helper = new LineDelegate(mView, points, line);
             helper.setXPosition(mStartXPosition, mStopXPosition);
-            mLineHelpers.add(helper);
+            mLineDelegates.add(helper);
         }
         calcLocalMinAndMAx();
         dispatchMinAndMaxInRange(animate);
@@ -272,8 +272,8 @@ final class ChartHelper {
     void setXPositions(float startXPosition, float stopXPosition, boolean animate) {
         this.mStartXPosition = startXPosition;
         this.mStopXPosition = stopXPosition;
-        mXAxisHelper.setXPositions(startXPosition, stopXPosition, animate);
-        for (LineHelper helper : mLineHelpers) {
+        mXAxisDelegate.setXPositions(startXPosition, stopXPosition, animate);
+        for (LineDelegate helper : mLineDelegates) {
             helper.setXPosition(startXPosition, stopXPosition);
         }
         dispatchMinAndMaxInRange(animate);
@@ -290,15 +290,15 @@ final class ChartHelper {
     }
 
     int getLineCount() {
-        return mLineHelpers.size();
+        return mLineDelegates.size();
     }
 
     Line getLineAt(int index) {
-        return mLineHelpers.get(index).getLine();
+        return mLineDelegates.get(index).getLine();
     }
 
     boolean isLineVisible(Line line) {
-        for (LineHelper helper : mLineHelpers) {
+        for (LineDelegate helper : mLineDelegates) {
             if (helper.getLine().equals(line)) {
                 return helper.isVisible();
             }
@@ -308,7 +308,7 @@ final class ChartHelper {
 
     int getVisibleLineCount() {
         int count = 0;
-        for (LineHelper helper : mLineHelpers) {
+        for (LineDelegate helper : mLineDelegates) {
             if (helper.isVisible()) {
                 count++;
             }
@@ -326,7 +326,7 @@ final class ChartHelper {
 
     private void setLineVisibility(Line targetLine, boolean isVisible, boolean animate) {
         if (isVisible && getVisibleLineCount() == 0) {
-            for (LineHelper helper : mLineHelpers) {
+            for (LineDelegate helper : mLineDelegates) {
                 Line line = helper.getLine();
                 if (line.equals(targetLine)) {
                     helper.show(animate);
@@ -337,8 +337,8 @@ final class ChartHelper {
             dispatchMinAndMaxInRange(animate);
         } else {
             // optimized way (recalculation just for local timestamps if needed)
-            for (int i = 0; i < mLineHelpers.size(); i++) {
-                LineHelper helper = mLineHelpers.get(i);
+            for (int i = 0; i < mLineDelegates.size(); i++) {
+                LineDelegate helper = mLineDelegates.get(i);
                 Line line = helper.getLine();
                 if (line.equals(targetLine)) {
 
@@ -432,7 +432,7 @@ final class ChartHelper {
                     mStopXPosition,
                     correctXPosition);
 
-            for (LineHelper helper : mLineHelpers) {
+            for (LineDelegate helper : mLineDelegates) {
                 if (helper.isVisible()) {
 
                     Line line = helper.getLine();
@@ -440,8 +440,8 @@ final class ChartHelper {
                     // draw only if it's visible
                     float yCoordinate = CommonHelper.findYCoordinate(
                             mView,
-                            mYAxisHelper.getCurrentMinValue(),
-                            mYAxisHelper.getCurrentMaxValue(),
+                            mYAxisDelegate.getCurrentMinValue(),
+                            mYAxisDelegate.getCurrentMaxValue(),
                             line.getValueAt(index));
 
                     mDotPaint.setColor(line.getColor());
@@ -461,16 +461,16 @@ final class ChartHelper {
         drawSelectedXPositionLine(canvas);
 
         if (mWillDrawXAxis) {
-            mXAxisHelper.draw(canvas);
+            mXAxisDelegate.draw(canvas);
         }
         if (mWillDrawYAxis) {
-            mYAxisHelper.draw(canvas);
+            mYAxisDelegate.draw(canvas);
         }
-        for (LineHelper helper : mLineHelpers) {
+        for (LineDelegate helper : mLineDelegates) {
             helper.draw(
                     canvas,
-                    mYAxisHelper.getCurrentMinValue(),
-                    mYAxisHelper.getCurrentMaxValue());
+                    mYAxisDelegate.getCurrentMinValue(),
+                    mYAxisDelegate.getCurrentMaxValue());
         }
 
         // draw selected X position dots at last
@@ -478,25 +478,25 @@ final class ChartHelper {
     }
 
     void attach() {
-        mXAxisHelper.attach();
-        mYAxisHelper.attach();
-        for (LineHelper helper : mLineHelpers) {
+        mXAxisDelegate.attach();
+        mYAxisDelegate.attach();
+        for (LineDelegate helper : mLineDelegates) {
             helper.attach();
         }
     }
 
     void measured() {
-        mXAxisHelper.measured();
-        mYAxisHelper.measured();
-        for (LineHelper helper : mLineHelpers) {
+        mXAxisDelegate.measured();
+        mYAxisDelegate.measured();
+        for (LineDelegate helper : mLineDelegates) {
             helper.measured();
         }
     }
 
     void detach() {
-        mXAxisHelper.detach();
-        mYAxisHelper.detach();
-        for (LineHelper helper : mLineHelpers) {
+        mXAxisDelegate.detach();
+        mYAxisDelegate.detach();
+        for (LineDelegate helper : mLineDelegates) {
             helper.detach();
         }
     }

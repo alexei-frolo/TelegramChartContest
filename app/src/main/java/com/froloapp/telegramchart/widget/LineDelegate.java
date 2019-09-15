@@ -10,8 +10,8 @@ import android.view.animation.Interpolator;
 import java.util.List;
 
 
-// This helper is responsible for animating and drawing one chart line
-final class LineHelper {
+// This delegate is responsible for animating and drawing one chart line
+final class LineDelegate {
     private static final long FADE_ANIM_DURATION = Config.Y_AXIS_ANIM_DURATION;
 
     private static final Interpolator FADE_INTERPOLATOR =
@@ -68,7 +68,7 @@ final class LineHelper {
     // buffering line (collecting (x; y) coors of a chart line to draw)
     private float[] mBufferLinePoints;
 
-    LineHelper(AbsChartView view, List<Point> points, Line line) {
+    LineDelegate(AbsChartView view, List<Point> points, Line line) {
         this.mView = view;
         this.mPoints = points;
         this.mLine = line;

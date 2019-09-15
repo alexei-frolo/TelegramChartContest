@@ -19,10 +19,10 @@ import com.froloapp.telegramchart.BuildConfig;
 import com.froloapp.telegramchart.R;
 
 
-// This helper is responsible for animating and drawing Y axis
-final class YAxisHelper {
+// This delegate is responsible for animating and drawing Y axis
+final class YAxisDelegate {
 
-    private static final String LOG_TAG = "YAxisHelper";
+    private static final String LOG_TAG = "YAxisDelegate";
 
     private static final long Y_AXIS_ANIM_DURATION = Config.Y_AXIS_ANIM_DURATION;
 
@@ -33,34 +33,34 @@ final class YAxisHelper {
     private static final float DEFAULT_TEXT_SIZE_IN_SP =
             Config.TEXT_SIZE_IN_SP;
 
-    private final static Property<YAxisHelper, Float> MIN_Y_VALUE =
-            new Property<YAxisHelper, Float>(float.class, "mMinYValue") {
-        @Override public Float get(YAxisHelper object) {
+    private final static Property<YAxisDelegate, Float> MIN_Y_VALUE =
+            new Property<YAxisDelegate, Float>(float.class, "mMinYValue") {
+        @Override public Float get(YAxisDelegate object) {
             return object.mMinYValue;
         }
-        @Override public void set(YAxisHelper object, Float value) {
+        @Override public void set(YAxisDelegate object, Float value) {
             object.mMinYValue = value;
             object.requestRedraw();
         }
     };
 
-    private final static Property<YAxisHelper, Float> MAX_Y_VALUE =
-            new Property<YAxisHelper, Float>(float.class, "mMaxYValue") {
-        @Override public Float get(YAxisHelper object) {
+    private final static Property<YAxisDelegate, Float> MAX_Y_VALUE =
+            new Property<YAxisDelegate, Float>(float.class, "mMaxYValue") {
+        @Override public Float get(YAxisDelegate object) {
             return object.mMaxYValue;
         }
-        @Override public void set(YAxisHelper object, Float value) {
+        @Override public void set(YAxisDelegate object, Float value) {
             object.mMaxYValue = value;
             object.requestRedraw();
         }
     };
 
-    private final static Property<YAxisHelper, Float> Y_AXIS_ALPHA =
-            new Property<YAxisHelper, Float>(float.class, "mAlpha") {
-        @Override public Float get(YAxisHelper object) {
+    private final static Property<YAxisDelegate, Float> Y_AXIS_ALPHA =
+            new Property<YAxisDelegate, Float>(float.class, "mAlpha") {
+        @Override public Float get(YAxisDelegate object) {
             return object.mAlpha;
         }
-        @Override public void set(YAxisHelper object, Float value) {
+        @Override public void set(YAxisDelegate object, Float value) {
             object.mAlpha = value;
             object.requestRedraw();
         }
@@ -118,7 +118,7 @@ final class YAxisHelper {
     private final Paint mLinePaint;
     private final Paint mTextPaint;
 
-    YAxisHelper(AbsChartView view) {
+    YAxisDelegate(AbsChartView view) {
         this.mView = view;
 
         Paint linePaint = new Paint(Paint.ANTI_ALIAS_FLAG);

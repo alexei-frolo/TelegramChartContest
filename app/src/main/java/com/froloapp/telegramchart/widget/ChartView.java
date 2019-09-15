@@ -65,7 +65,7 @@ public class ChartView extends AbsChartView {
             }
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL: {
-                getChartHelper().clearSelectedXPosition();
+                getChartDelegate().clearSelectedXPosition();
                 getParent().requestDisallowInterceptTouchEvent(false);
                 dispatchTouchUp();
                 break;
@@ -75,7 +75,7 @@ public class ChartView extends AbsChartView {
     }
 
     private void handleTouch(float x) {
-        ChartHelper helper = getChartHelper();
+        ChartDelegate helper = getChartDelegate();
         float xPosition = CommonHelper.calcCoordinateRelativePosition(
                 this,
                 helper.getStartXPosition(),
