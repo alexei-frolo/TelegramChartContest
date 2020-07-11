@@ -1,4 +1,4 @@
-package com.froloapp.chart;
+package com.froloapp.chart.example;
 
 
 import android.graphics.Color;

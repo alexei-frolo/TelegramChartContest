@@ -2,7 +2,7 @@
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.froloapp.chart">
+    package="com.froloapp.chart.example">
 
     <application
         android:allowBackup="true"
@@ -15,7 +15,7 @@
 
         <activity
             android:label="@string/statistics"
-            android:name="com.froloapp.chart.ChartSwitcherActivity">
+            android:name="com.froloapp.chart.example.ChartSwitcherActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
