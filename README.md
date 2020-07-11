@@ -1,6 +1,12 @@
 # TelegramChartContest
 Project for March Telegram contest, the participants of which should create a library of charts from scratch
 
-![Dark theme](https://github.com/alexei-frolo/TelegramChartContest/blob/master/media/src/src_dark.png)
+#### Light and Dark themes
 
-![Light theme](https://github.com/alexei-frolo/TelegramChartContest/blob/master/media/src/src_light.png)
+<span>
+  <img src = "https://github.com/alexei-frolo/TelegramChartContest/blob/master/media/src/src_dark.png" width ="200" />
+</span>
+
+<span>
+  <img src = "https://github.com/alexei-frolo/TelegramChartContest/blob/master/media/src/src_light.png" width ="200" />
+</span>
